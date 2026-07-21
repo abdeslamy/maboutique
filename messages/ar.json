@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "titreSite": "متجري",
+    "description": "متجر إلكتروني — منتجات بجودة عالية مع التوصيل إلى كامل الجزائر"
+  },
+  "navigation": {
+    "accueil": "الرئيسية",
+    "produits": "المنتجات",
+    "panier": "السلة",
+    "compte": "حسابي",
+    "connexion": "تسجيل الدخول",
+    "deconnexion": "تسجيل الخروج",
+    "retour": "رجوع",
+    "parametres": "إعدادات الحساب",
+    "mesCommandes": "طلباتي"
+  },
+  "langue": {
+    "label": "اللغة",
+    "fr": "Français",
+    "ar": "العربية",
+    "basculerVers": "التبديل إلى {langue}"
+  },
+  "accueil": {
+    "titre": "مرحبًا بكم في متجري",
+    "sousTitre": "منتجات مختارة بعناية، مع التوصيل إلى جميع ولايات الجزائر.",
+    "voirProduits": "تصفّح المنتجات",
+    "coupsDeCoeur": "أبرز اختياراتنا",
+    "toutVoir": "عرض الكل"
+  },
+  "footer": {
+    "droits": "جميع الحقوق محفوظة.",
+    "mention": "موقع تجريبي — مشروع تعليمي."
+  },
+  "catalogue": {
+    "titre": "منتجاتنا",
+    "sousTitre": "تشكيلة من المنتجات مع التوصيل إلى جميع ولايات الجزائر.",
+    "placeholderRecherche": "ابحث عن منتج…",
+    "aucunResultat": "لا يوجد منتج يطابق بحثك."
+  },
+  "categories": {
+    "tout": "الكل",
+    "mode": "موضة",
+    "electronique": "إلكترونيات",
+    "maison": "منزل ودكور"
+  },
+  "produit": {
+    "voirDetail": "عرض التفاصيل",
+    "ajouterAuPanier": "أضف إلى السلة",
+    "ajoute": "تمّت الإضافة",
+    "quantite": "الكمية",
+    "diminuer": "إنقاص الكمية",
+    "augmenter": "زيادة الكمية",
+    "description": "الوصف",
+    "enStock": "✓ متوفّر — التوصيل خلال 3 إلى 5 أيام",
+    "piece": "للقطعة",
+    "imagePrecedente": "الصورة السابقة",
+    "imageSuivante": "الصورة التالية"
+  },
+  "panier": {
+    "titre": "سلّتي",
+    "chargement": "جارٍ تحميل السلّة…",
+    "vide": "سلّتك فارغة",
+    "videSousTitre": "تصفّح المتجر وأضف منتجاتك المفضّلة.",
+    "voirProduits": "تصفّح المنتجات",
+    "supprimer": "حذف",
+    "sousTotal": "المجموع الفرعي",
+    "livraison": "التوصيل",
+    "total": "الإجمالي",
+    "viderPanier": "إفراغ السلّة",
+    "passerCommande": "إتمام الطلب"
+  },
+  "notFound": {
+    "titre": "الصفحة غير موجودة",
+    "message": "الصفحة أو المنتج الذي تبحث عنه غير موجود.",
+    "retourAccueil": "العودة إلى الرئيسية"
+  },
+  "parametres": {
+    "titre": "إعدادات الحساب",
+    "infosTitre": "معلوماتي الشخصية",
+    "nom": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "emailNonModifiable": "لا يمكن تعديل البريد الإلكتروني.",
+    "changerPhoto": "تغيير الصورة",
+    "supprimerPhoto": "حذف الصورة",
+    "enregistrer": "حفظ التعديلات",
+    "enregistrement": "جارٍ الحفظ…",
+    "infosEnregistrees": "تمّ حفظ المعلومات.",
+    "mdpTitre": "تغيير كلمة المرور",
+    "mdpAide": "لأسباب أمنيّة، يجب إدخال كلمة المرور الحالية.",
+    "mdpActuel": "كلمة المرور الحالية",
+    "mdpNouveau": "كلمة المرور الجديدة",
+    "mdpConfirme": "تأكيد كلمة المرور الجديدة",
+    "changerMdp": "تغيير كلمة المرور",
+    "mdpModifie": "تمّ تغيير كلمة المرور.",
+    "erreurs": {
+      "nom_court": "يجب أن يحتوي الاسم على حرفين على الأقل.",
+      "image_invalide": "الملف ليس صورة صالحة.",
+      "image_trop_grande": "الصورة كبيرة جدًا، اختر صورة أصغر حجمًا.",
+      "mot_de_passe_court": "يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل.",
+      "confirmation_differente": "كلمتا المرور غير متطابقتين.",
+      "mot_de_passe_actuel_incorrect": "كلمة المرور الحالية غير صحيحة.",
+      "champs_manquants": "يرجى ملء جميع الحقول.",
+      "aucun_changement": "لا توجد تعديلات لحفظها.",
+      "erreur_serveur": "حدث خطأ، يرجى المحاولة مرّة أخرى.",
+      "json_invalide": "بيانات غير صالحة.",
+      "non_connecte": "يجب تسجيل الدخول.",
+      "utilisateur_introuvable": "المستخدم غير موجود."
+    }
+  },
+  "compte": {
+    "titre": "حسابي",
+    "bonjour": "مرحبًا {nom} 👋",
+    "informations": "المعلومات الشخصية",
+    "nom": "الاسم",
+    "email": "البريد الإلكتروني",
+    "mesCommandes": "طلباتي",
+    "aucuneCommande": "لم تقم بأي طلب بعد.",
+    "articles": "مادة/مواد",
+    "voirDetail": "عرض التفاصيل"
+  },
+  "commande": {
+    "titre": "إتمام الطلب",
+    "livraison": "عنوان التوصيل",
+    "nom": "الاسم الكامل",
+    "telephone": "رقم الهاتف",
+    "telephoneAide": "رقم هاتف جزائري من 9 أو 10 أرقام",
+    "adresse": "العنوان الكامل",
+    "wilaya": "الولاية",
+    "choisirWilaya": "— اختر الولاية —",
+    "recap": "ملخّص الطلب",
+    "commander": "تأكيد الطلب",
+    "envoi": "جارٍ الإرسال…",
+    "erreurs": {
+      "panier_vide": "سلّتك فارغة.",
+      "nom_court": "يجب أن يحتوي الاسم على حرفين على الأقل.",
+      "telephone_court": "رقم الهاتف يبدو قصيرًا.",
+      "adresse_courte": "يرجى إدخال عنوان كامل.",
+      "wilaya_invalide": "يرجى اختيار الولاية.",
+      "quantite_invalide": "الكمية غير صالحة.",
+      "produit_introuvable": "أحد المنتجات لم يعد متوفّرًا.",
+      "erreur_serveur": "حدث خطأ، يرجى المحاولة مرّة أخرى.",
+      "json_invalide": "بيانات غير صالحة."
+    }
+  },
+  "confirmation": {
+    "titre": "تمّ تأكيد طلبك!",
+    "message": "شكرًا لك على طلبك. سنتواصل معك قريبًا لتنسيق التوصيل.",
+    "numero": "رقم الطلب",
+    "commandeIntrouvable": "تمّ تسجيل طلبك بنجاح، لكن لم نتمكّن من عرض تفاصيله هنا.",
+    "retourAccueil": "العودة إلى الرئيسية",
+    "continuerShopping": "متابعة التسوّق"
+  },
+  "connexion": {
+    "titre": "تسجيل الدخول",
+    "sousTitre": "ادخل إلى حسابك لمتابعة طلباتك.",
+    "email": "البريد الإلكتروني",
+    "motDePasse": "كلمة المرور",
+    "seConnecter": "دخول",
+    "connexionEnCours": "جارٍ تسجيل الدخول…",
+    "pasDeCompte": "ليس لديك حساب؟",
+    "creerCompte": "أنشئ حسابًا",
+    "erreurs": {
+      "champs_manquants": "يرجى إدخال البريد الإلكتروني وكلمة المرور.",
+      "identifiants_invalides": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+      "json_invalide": "بيانات غير صالحة.",
+      "erreur_serveur": "حدث خطأ، يرجى المحاولة مرّة أخرى."
+    }
+  },
+  "inscription": {
+    "titre": "إنشاء حساب",
+    "sousTitre": "سجّل لمتابعة طلباتك بسهولة.",
+    "nom": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "motDePasse": "كلمة المرور",
+    "motDePasseAide": "8 أحرف على الأقل",
+    "confirmation": "تأكيد كلمة المرور",
+    "creerCompte": "إنشاء حسابي",
+    "creation": "جارٍ الإنشاء…",
+    "dejaInscrit": "لديك حساب بالفعل؟",
+    "seConnecter": "تسجيل الدخول",
+    "succesTitre": "تمّ إنشاء الحساب!",
+    "succesMessage": "يمكنك الآن تسجيل الدخول باستعمال بريدك الإلكتروني وكلمة المرور.",
+    "erreurs": {
+      "nom_court": "يجب أن يحتوي الاسم على حرفين على الأقل.",
+      "email_invalide": "البريد الإلكتروني غير صالح.",
+      "mot_de_passe_court": "يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل.",
+      "confirmation_differente": "كلمتا المرور غير متطابقتين.",
+      "email_existe": "يوجد حساب مسجّل بالفعل بهذا البريد الإلكتروني.",
+      "erreur_serveur": "حدث خطأ، يرجى المحاولة مرّة أخرى.",
+      "json_invalide": "بيانات غير صالحة."
+    }
+  }
+}

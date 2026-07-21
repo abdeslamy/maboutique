@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "titreSite": "Ma Boutique",
+    "description": "Boutique en ligne — produits de qualité livrés en Algérie"
+  },
+  "navigation": {
+    "accueil": "Accueil",
+    "produits": "Produits",
+    "panier": "Panier",
+    "compte": "Mon compte",
+    "connexion": "Se connecter",
+    "deconnexion": "Se déconnecter",
+    "retour": "Retour",
+    "parametres": "Paramètres du profil",
+    "mesCommandes": "Mes commandes"
+  },
+  "langue": {
+    "label": "Langue",
+    "fr": "Français",
+    "ar": "العربية",
+    "basculerVers": "Basculer vers {langue}"
+  },
+  "accueil": {
+    "titre": "Bienvenue sur Ma Boutique",
+    "sousTitre": "Des produits soigneusement choisis, livrés partout en Algérie.",
+    "voirProduits": "Voir les produits",
+    "coupsDeCoeur": "Nos coups de cœur",
+    "toutVoir": "Tout voir"
+  },
+  "footer": {
+    "droits": "Tous droits réservés.",
+    "mention": "Site de démonstration — projet d'apprentissage."
+  },
+  "catalogue": {
+    "titre": "Nos produits",
+    "sousTitre": "Sélection de produits livrés partout en Algérie.",
+    "placeholderRecherche": "Rechercher un produit…",
+    "aucunResultat": "Aucun produit ne correspond à votre recherche."
+  },
+  "categories": {
+    "tout": "Tout",
+    "mode": "Mode",
+    "electronique": "Électronique",
+    "maison": "Maison & déco"
+  },
+  "produit": {
+    "voirDetail": "Voir le détail",
+    "ajouterAuPanier": "Ajouter au panier",
+    "ajoute": "Ajouté",
+    "quantite": "Quantité",
+    "diminuer": "Diminuer la quantité",
+    "augmenter": "Augmenter la quantité",
+    "description": "Description",
+    "enStock": "✓ En stock — livraison sous 3 à 5 jours",
+    "piece": "pièce",
+    "imagePrecedente": "Image précédente",
+    "imageSuivante": "Image suivante"
+  },
+  "panier": {
+    "titre": "Mon panier",
+    "chargement": "Chargement du panier…",
+    "vide": "Votre panier est vide",
+    "videSousTitre": "Parcourez le catalogue et ajoutez vos produits préférés.",
+    "voirProduits": "Voir les produits",
+    "supprimer": "Supprimer",
+    "sousTotal": "Sous-total",
+    "livraison": "Livraison",
+    "total": "Total",
+    "viderPanier": "Vider le panier",
+    "passerCommande": "Passer commande"
+  },
+  "notFound": {
+    "titre": "Page introuvable",
+    "message": "La page ou le produit que vous cherchez n'existe pas.",
+    "retourAccueil": "Retour à l'accueil"
+  },
+  "parametres": {
+    "titre": "Paramètres du profil",
+    "infosTitre": "Mes informations",
+    "nom": "Nom complet",
+    "email": "Email",
+    "emailNonModifiable": "L'email ne peut pas être modifié.",
+    "changerPhoto": "Changer la photo",
+    "supprimerPhoto": "Supprimer la photo",
+    "enregistrer": "Enregistrer les modifications",
+    "enregistrement": "Enregistrement…",
+    "infosEnregistrees": "Informations enregistrées.",
+    "mdpTitre": "Changer mon mot de passe",
+    "mdpAide": "Pour des raisons de sécurité, votre mot de passe actuel est requis.",
+    "mdpActuel": "Mot de passe actuel",
+    "mdpNouveau": "Nouveau mot de passe",
+    "mdpConfirme": "Confirmer le nouveau mot de passe",
+    "changerMdp": "Changer le mot de passe",
+    "mdpModifie": "Mot de passe modifié.",
+    "erreurs": {
+      "nom_court": "Le nom doit contenir au moins 2 caractères.",
+      "image_invalide": "Le fichier n'est pas une image valide.",
+      "image_trop_grande": "L'image est trop grande, choisissez-en une plus petite.",
+      "mot_de_passe_court": "Le mot de passe doit contenir au moins 8 caractères.",
+      "confirmation_differente": "Les deux mots de passe ne correspondent pas.",
+      "mot_de_passe_actuel_incorrect": "Le mot de passe actuel est incorrect.",
+      "champs_manquants": "Veuillez remplir tous les champs.",
+      "aucun_changement": "Aucune modification à enregistrer.",
+      "erreur_serveur": "Une erreur est survenue. Réessayez dans un instant.",
+      "json_invalide": "Données invalides.",
+      "non_connecte": "Vous devez être connecté.",
+      "utilisateur_introuvable": "Utilisateur introuvable."
+    }
+  },
+  "compte": {
+    "titre": "Mon compte",
+    "bonjour": "Bonjour {nom} 👋",
+    "informations": "Informations personnelles",
+    "nom": "Nom",
+    "email": "Email",
+    "mesCommandes": "Mes commandes",
+    "aucuneCommande": "Vous n'avez encore passé aucune commande.",
+    "articles": "article(s)",
+    "voirDetail": "Voir détail"
+  },
+  "commande": {
+    "titre": "Finaliser ma commande",
+    "livraison": "Adresse de livraison",
+    "nom": "Nom complet",
+    "telephone": "Téléphone",
+    "telephoneAide": "Numéro algérien à 9 ou 10 chiffres",
+    "adresse": "Adresse complète",
+    "wilaya": "Wilaya",
+    "choisirWilaya": "— Choisir une wilaya —",
+    "recap": "Récapitulatif",
+    "commander": "Commander",
+    "envoi": "Envoi en cours…",
+    "erreurs": {
+      "panier_vide": "Votre panier est vide.",
+      "nom_court": "Le nom doit contenir au moins 2 caractères.",
+      "telephone_court": "Le numéro de téléphone semble trop court.",
+      "adresse_courte": "Veuillez saisir une adresse complète.",
+      "wilaya_invalide": "Veuillez choisir une wilaya.",
+      "quantite_invalide": "Une quantité est invalide.",
+      "produit_introuvable": "Un des produits n'existe plus dans le catalogue.",
+      "erreur_serveur": "Une erreur est survenue. Réessayez dans un instant.",
+      "json_invalide": "Données invalides."
+    }
+  },
+  "confirmation": {
+    "titre": "Commande confirmée !",
+    "message": "Merci pour votre commande. Nous vous contacterons bientôt pour la livraison.",
+    "numero": "Numéro de commande",
+    "commandeIntrouvable": "Votre commande a bien été enregistrée, mais nous n'avons pas pu en récupérer les détails ici.",
+    "retourAccueil": "Retour à l'accueil",
+    "continuerShopping": "Continuer mes achats"
+  },
+  "connexion": {
+    "titre": "Se connecter",
+    "sousTitre": "Retrouvez votre compte et vos commandes.",
+    "email": "Adresse email",
+    "motDePasse": "Mot de passe",
+    "seConnecter": "Me connecter",
+    "connexionEnCours": "Connexion…",
+    "pasDeCompte": "Pas encore de compte ?",
+    "creerCompte": "Créer un compte",
+    "erreurs": {
+      "champs_manquants": "Veuillez saisir votre email et votre mot de passe.",
+      "identifiants_invalides": "Email ou mot de passe incorrect.",
+      "json_invalide": "Données invalides.",
+      "erreur_serveur": "Une erreur est survenue. Réessayez dans un instant."
+    }
+  },
+  "inscription": {
+    "titre": "Créer un compte",
+    "sousTitre": "Inscrivez-vous pour suivre vos commandes.",
+    "nom": "Nom complet",
+    "email": "Adresse email",
+    "motDePasse": "Mot de passe",
+    "motDePasseAide": "8 caractères minimum",
+    "confirmation": "Confirmer le mot de passe",
+    "creerCompte": "Créer mon compte",
+    "creation": "Création en cours…",
+    "dejaInscrit": "Déjà inscrit ?",
+    "seConnecter": "Se connecter",
+    "succesTitre": "Compte créé !",
+    "succesMessage": "Vous pouvez maintenant vous connecter avec votre email et votre mot de passe.",
+    "erreurs": {
+      "nom_court": "Le nom doit contenir au moins 2 caractères.",
+      "email_invalide": "L'adresse email n'est pas valide.",
+      "mot_de_passe_court": "Le mot de passe doit contenir au moins 8 caractères.",
+      "confirmation_differente": "Les deux mots de passe ne correspondent pas.",
+      "email_existe": "Un compte existe déjà avec cette adresse email.",
+      "erreur_serveur": "Une erreur est survenue. Réessayez dans un instant.",
+      "json_invalide": "Données invalides."
+    }
+  }
+}

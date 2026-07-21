@@ -1,0 +1,131 @@
+// ==========================================================================
+// Schéma Prisma — Ma Boutique
+// ==========================================================================
+// Ce fichier décrit toutes les tables de la base.
+// Chaque fois qu'on modifie ce fichier, on crée une nouvelle migration :
+//    npx prisma migrate dev --name description-du-changement
+// ==========================================================================
+
+// ── Générateur : où et comment est produit le client TypeScript ─────────
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+// ── Datasource : quel type de base et où elle est ─────────────────────
+datasource db {
+  provider = "postgresql"
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// Utilisateur
+// ══════════════════════════════════════════════════════════════════════
+// Notes :
+//  - id : identifiant opaque, généré automatiquement par Prisma (cuid).
+//  - email : @unique → PostgreSQL empêche deux utilisateurs avec le même mail.
+//  - motDePasse : c'est le HASH bcrypt, pas le mot de passe en clair.
+//  - image : photo de profil (base64 pour l'instant, URL plus tard).
+//  - role : "user" par défaut ; "admin" pour toi et les admins futurs.
+//  - commandes : relation "1 utilisateur → N commandes".
+model Utilisateur {
+  id         String     @id @default(cuid())
+  nom        String
+  email      String     @unique
+  motDePasse String
+  image      String?
+  role       String     @default("user")
+  createdAt  DateTime   @default(now())
+
+  commandes  Commande[]
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// Produit
+// ══════════════════════════════════════════════════════════════════════
+// Notes :
+//  - id : on garde la CONVENTION ACTUELLE (slug lisible comme "tshirt-coton-blanc")
+//    pour que les URLs /produits/[id] et le panier localStorage continuent
+//    de fonctionner. Prisma ne génère PAS ce champ automatiquement (pas de
+//    @default) — on le fournit à la création (seed ou admin).
+//  - Les textes sont dans les 2 langues (nomFr, nomAr, descFr, descAr).
+//  - prix : entier, en DA (dinar algérien, monnaie entière).
+//  - categorie : String pour rester simple. On pourrait passer en enum plus tard.
+//  - images : String[] = TABLEAU de chaînes. PostgreSQL supporte les arrays
+//    nativement. Pour l'instant on y met des classes Tailwind (placeholder).
+//    Plus tard, on mettra des URLs vers Cloudinary/UploadThing.
+//  - videoUrl : URL de la vidéo produit, optionnelle. Le champ EXISTE dès
+//    maintenant pour éviter une 2e migration quand on ajoutera l'upload vidéo.
+//  - emoji : petit décorateur pour les placeholders actuels.
+model Produit {
+  id             String          @id
+  nomFr          String
+  nomAr          String
+  descriptionFr  String
+  descriptionAr  String
+  prix           Int
+  categorie      String
+  images         String[]
+  videoUrl       String?
+  emoji          String
+  createdAt      DateTime        @default(now())
+
+  lignesCommande LigneCommande[]
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// Commande
+// ══════════════════════════════════════════════════════════════════════
+// Notes :
+//  - utilisateurId : optionnel (?) → une commande peut exister SANS compte
+//    utilisateur (achat en tant qu'invité). Si l'utilisateur est connecté,
+//    la commande est rattachée à son id.
+//  - statut : cycle de vie d'une commande. Le champ EXISTE dès maintenant
+//    pour préparer ton admin. Valeurs prévues :
+//      "en_attente"     → juste créée
+//      "confirmee"      → tu as validé la commande
+//      "en_livraison"   → colis en route
+//      "livree"         → livrée au client
+//      "annulee"        → annulée
+//  - onDelete: SetNull : si un utilisateur est supprimé, ses commandes
+//    ne sont PAS supprimées (comptabilité !). Juste dé-rattachées.
+model Commande {
+  id            String          @id @default(cuid())
+  nomClient     String
+  telephone     String
+  adresse       String
+  wilaya        String
+  sousTotal     Int
+  livraison     Int
+  total         Int
+  statut        String          @default("en_attente")
+  createdAt     DateTime        @default(now())
+
+  utilisateurId String?
+  utilisateur   Utilisateur?    @relation(fields: [utilisateurId], references: [id], onDelete: SetNull)
+
+  lignes        LigneCommande[]
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// LigneCommande — SNAPSHOT d'un article au moment de la commande
+// ══════════════════════════════════════════════════════════════════════
+// Notes :
+//  - nomProduit et prixUnitaire sont COPIÉS ici, pas juste référencés.
+//    Voir explication du "snapshot" dans le message pédagogique.
+//  - onDelete: Cascade sur commandeId : si une commande est supprimée,
+//    ses lignes le sont aussi (elles n'ont pas de sens seules).
+//  - onDelete: SetNull sur produitId : si un produit est supprimé, la
+//    ligne existe toujours (elle a son propre snapshot du nom et du prix).
+model LigneCommande {
+  id           String    @id @default(cuid())
+  nomProduit   String
+  prixUnitaire Int
+  quantite     Int
+  sousTotal    Int
+
+  commandeId   String
+  commande     Commande  @relation(fields: [commandeId], references: [id], onDelete: Cascade)
+
+  produitId    String?
+  produit      Produit?  @relation(fields: [produitId], references: [id], onDelete: SetNull)
+}
