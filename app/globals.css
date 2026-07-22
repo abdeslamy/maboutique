@@ -54,3 +54,60 @@ select:disabled,
 [aria-disabled="true"] {
   cursor: not-allowed;
 }
+
+/* ──────────────────────────────────────────────────────────────────────
+   Animations de la page de confirmation de commande
+   Pures CSS (aucun JavaScript) — fonctionnent dans un composant serveur.
+   ────────────────────────────────────────────────────────────────────── */
+
+/* Le cercle de succès qui "pop" avec un petit rebond. */
+@keyframes confirm-pop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Le trait du checkmark qui se dessine (via stroke-dashoffset). */
+@keyframes confirm-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Un halo qui s'étend puis disparaît autour du cercle. */
+@keyframes confirm-ring {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* Contenu qui monte doucement en apparaissant. */
+@keyframes confirm-fade-up {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.confirm-cercle {
+  animation: confirm-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.confirm-halo {
+  animation: confirm-ring 0.9s ease-out 0.2s both;
+}
+.confirm-check {
+  stroke-dasharray: 30;
+  stroke-dashoffset: 30;
+  animation: confirm-draw 0.4s ease-out 0.45s forwards;
+}
+.confirm-apparition {
+  animation: confirm-fade-up 0.5s ease-out both;
+}
+
+/* Respect de la préférence système "réduire les animations". */
+@media (prefers-reduced-motion: reduce) {
+  .confirm-cercle,
+  .confirm-halo,
+  .confirm-check,
+  .confirm-apparition {
+    animation: none;
+  }
+  .confirm-check {
+    stroke-dashoffset: 0;
+  }
+}

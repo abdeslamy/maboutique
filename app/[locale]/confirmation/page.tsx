@@ -1,19 +1,16 @@
 import { getTranslations } from "next-intl/server";
+import { PhoneCall, Package, Truck, MapPin, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getCommandeParId } from "@/lib/orders";
+import { getSession } from "@/lib/session";
 import { formatPrix } from "@/lib/format";
 import { WILAYAS } from "@/lib/wilayas";
 import type { Locale } from "@/i18n/routing";
 
 /**
  * Page /confirmation?id=XXX
- * Composant SERVEUR : lit directement la commande depuis le fichier.
- *
- * Pourquoi l'id est dans l'URL ?
- *  - Permet à l'utilisateur de revenir sur la page (bookmark, partage, etc.).
- *  - L'id est un UUID v4, donc "non devinable" en pratique.
- *
- * Si l'id n'est pas trouvé → on affiche un message générique de succès.
+ * Composant SERVEUR : lit directement la commande depuis la base.
+ * Design refait : hero animé, timeline "prochaines étapes", récap épuré.
  */
 export default async function PageConfirmation({
   params,
@@ -31,43 +28,110 @@ export default async function PageConfirmation({
   const tCommande = await getTranslations("commande");
 
   const commande = id ? await getCommandeParId(id) : null;
+  const session = await getSession();
+  const wilaya = commande
+    ? WILAYAS.find((w) => w.code === commande.client.wilaya)
+    : undefined;
 
   return (
-    <section className="mx-auto max-w-3xl px-4 py-16">
-      {/* Bandeau succès vert */}
-      <div className="mb-8 flex flex-col items-center gap-3 rounded-2xl bg-green-50 px-6 py-10 text-center">
-        <p className="text-6xl" aria-hidden="true">
-          ✅
+    <section className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
+      {/* ─── Hero succès animé ──────────────────────────────────────── */}
+      <div className="flex flex-col items-center text-center">
+        <div className="relative mb-6 flex h-24 w-24 items-center justify-center">
+          {/* Halo qui s'étend */}
+          <span className="confirm-halo absolute inset-0 rounded-full bg-green-400" />
+          {/* Cercle vert */}
+          <span className="confirm-cercle relative flex h-24 w-24 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/30">
+            {/* Checkmark SVG qui se dessine */}
+            <svg
+              viewBox="0 0 52 52"
+              className="h-12 w-12"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                className="confirm-check"
+                d="M14 27 l8 8 l16 -18"
+                stroke="white"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+        </div>
+
+        <h1 className="confirm-apparition text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+          {t("titre")}
+        </h1>
+        <p
+          className="confirm-apparition mt-3 max-w-md text-gray-600"
+          style={{ animationDelay: "0.1s" }}
+        >
+          {t("message")}
         </p>
-        <h1 className="text-3xl font-semibold text-green-800">{t("titre")}</h1>
-        <p className="text-green-700">{t("message")}</p>
+
+        {/* Numéro de commande en pastille */}
+        {commande && (
+          <div
+            className="confirm-apparition mt-5 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2"
+            style={{ animationDelay: "0.15s" }}
+          >
+            <span className="text-xs uppercase tracking-wide text-gray-500">
+              {t("numero")}
+            </span>
+            <span className="font-mono text-sm font-semibold text-gray-900">
+              #{commande.id.slice(0, 8).toUpperCase()}
+            </span>
+          </div>
+        )}
       </div>
 
       {commande ? (
-        <>
-          {/* Numéro de commande */}
-          <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
-            <p className="text-xs uppercase tracking-wide text-gray-500">
-              {t("numero")}
-            </p>
-            <p className="mt-1 break-all font-mono text-sm text-gray-900">
-              {commande.id}
-            </p>
+        <div
+          className="confirm-apparition mt-10 flex flex-col gap-4"
+          style={{ animationDelay: "0.2s" }}
+        >
+          {/* ─── Prochaines étapes (timeline) ───────────────────────── */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-5 text-sm font-medium uppercase tracking-wide text-gray-500">
+              {t("prochainesEtapes")}
+            </h2>
+            <ol className="flex flex-col gap-5">
+              <EtapeTimeline
+                icon={<PhoneCall className="h-4 w-4" />}
+                titre={t("etapes.confirmation.titre")}
+                description={t("etapes.confirmation.description")}
+                actif
+                premier
+              />
+              <EtapeTimeline
+                icon={<Package className="h-4 w-4" />}
+                titre={t("etapes.preparation.titre")}
+                description={t("etapes.preparation.description")}
+              />
+              <EtapeTimeline
+                icon={<Truck className="h-4 w-4" />}
+                titre={t("etapes.livraison.titre")}
+                description={t("etapes.livraison.description")}
+                dernier
+              />
+            </ol>
           </div>
 
-          {/* Récap articles */}
-          <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
+          {/* ─── Récap articles + totaux ────────────────────────────── */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-6">
             <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-gray-500">
               {tCommande("recap")}
             </h2>
             <ul className="flex flex-col gap-2">
-              {commande.articles.map((a) => (
+              {commande.articles.map((a, i) => (
                 <li
-                  key={a.produitId}
+                  key={`${a.produitId}-${i}`}
                   className="flex items-center justify-between text-sm"
                 >
                   <span className="text-gray-700">
-                    {a.nom} × {a.quantite}
+                    {a.nom} <span className="text-gray-400">× {a.quantite}</span>
                   </span>
                   <span className="font-medium text-gray-900">
                     {formatPrix(a.prixUnitaire * a.quantite, localeTypee)}
@@ -75,7 +139,7 @@ export default async function PageConfirmation({
                 </li>
               ))}
             </ul>
-            <hr className="my-3 border-gray-200" />
+            <hr className="my-3 border-gray-100" />
             <Ligne
               libelle={tPanier("sousTotal")}
               montant={formatPrix(commande.sousTotal, localeTypee)}
@@ -84,7 +148,7 @@ export default async function PageConfirmation({
               libelle={tPanier("livraison")}
               montant={formatPrix(commande.livraison, localeTypee)}
             />
-            <hr className="my-3 border-gray-200" />
+            <hr className="my-3 border-gray-100" />
             <Ligne
               libelle={tPanier("total")}
               montant={formatPrix(commande.total, localeTypee)}
@@ -92,42 +156,97 @@ export default async function PageConfirmation({
             />
           </div>
 
-          {/* Adresse de livraison */}
-          <div className="mb-8 rounded-2xl border border-gray-200 bg-white p-6">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-gray-500">
+          {/* ─── Livraison ──────────────────────────────────────────── */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-3 flex items-center gap-2 text-sm font-medium uppercase tracking-wide text-gray-500">
+              <MapPin className="h-4 w-4" />
               {tCommande("livraison")}
             </h2>
-            <p className="text-gray-900">{commande.client.nom}</p>
-            <p className="text-gray-700">{commande.client.telephone}</p>
-            <p className="text-gray-700">{commande.client.adresse}</p>
-            <p className="text-gray-700">
-              {WILAYAS.find((w) => w.code === commande.client.wilaya)?.nom[
-                localeTypee
-              ] ?? commande.client.wilaya}
+            <p className="font-medium text-gray-900">{commande.client.nom}</p>
+            <p className="text-sm text-gray-600">{commande.client.telephone}</p>
+            <p className="mt-1 text-sm text-gray-600">
+              {commande.client.adresse}
+            </p>
+            <p className="text-sm text-gray-600">
+              {wilaya ? `${wilaya.code} — ${wilaya.nom[localeTypee]}` : commande.client.wilaya}
             </p>
           </div>
-        </>
+        </div>
       ) : (
-        <p className="mb-8 text-center text-gray-600">
+        <p className="mt-10 text-center text-gray-600">
           {t("commandeIntrouvable")}
         </p>
       )}
 
-      <div className="flex justify-center gap-4">
-        <Link
-          href="/"
-          className="rounded-full border border-gray-300 px-6 py-3 text-sm text-gray-700 transition hover:border-black hover:text-black"
-        >
-          {t("retourAccueil")}
-        </Link>
+      {/* ─── CTA ────────────────────────────────────────────────────── */}
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
         <Link
           href="/produits"
-          className="rounded-full bg-black px-6 py-3 text-sm font-medium text-white transition hover:bg-gray-800"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-6 py-3 text-sm font-medium text-white transition hover:bg-gray-800"
         >
           {t("continuerShopping")}
+          <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
         </Link>
+        {session && (
+          <Link
+            href="/compte"
+            className="inline-flex items-center justify-center rounded-full border border-gray-300 px-6 py-3 text-sm font-medium text-gray-700 transition hover:border-black hover:text-black"
+          >
+            {t("suivreCommande")}
+          </Link>
+        )}
       </div>
     </section>
+  );
+}
+
+// ── Étape de la timeline "prochaines étapes" ───────────────────────────
+function EtapeTimeline({
+  icon,
+  titre,
+  description,
+  actif = false,
+  premier = false,
+  dernier = false,
+}: {
+  icon: React.ReactNode;
+  titre: string;
+  description: string;
+  actif?: boolean;
+  premier?: boolean;
+  dernier?: boolean;
+}) {
+  return (
+    <li className="relative flex gap-4">
+      {/* Ligne verticale reliant les étapes */}
+      {!dernier && (
+        <span
+          className="absolute start-4 top-9 h-[calc(100%-4px)] w-px bg-gray-200"
+          aria-hidden="true"
+        />
+      )}
+      {/* Pastille icône */}
+      <span
+        className={`relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+          actif
+            ? "bg-green-500 text-white"
+            : "border border-gray-300 bg-white text-gray-400"
+        }`}
+      >
+        {icon}
+      </span>
+      {/* Texte */}
+      <div className={premier ? "" : "pt-0.5"}>
+        <p
+          className={`text-sm font-medium ${
+            actif ? "text-gray-900" : "text-gray-700"
+          }`}
+        >
+          {titre}
+        </p>
+        <p className="mt-0.5 text-sm text-gray-500">{description}</p>
+      </div>
+    </li>
   );
 }
 

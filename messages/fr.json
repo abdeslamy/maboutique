@@ -272,8 +272,24 @@
   },
   "confirmation": {
     "titre": "Commande confirmée !",
-    "message": "Merci pour votre commande. Nous vous contacterons bientôt pour la livraison.",
-    "numero": "Numéro de commande",
+    "message": "Merci pour votre confiance. Votre commande a bien été enregistrée, nous la préparons avec soin.",
+    "numero": "Commande",
+    "prochainesEtapes": "Prochaines étapes",
+    "etapes": {
+      "confirmation": {
+        "titre": "Confirmation par téléphone",
+        "description": "Un conseiller vous appellera pour confirmer votre commande et l'adresse de livraison."
+      },
+      "preparation": {
+        "titre": "Préparation du colis",
+        "description": "Vos articles sont emballés soigneusement dès la confirmation."
+      },
+      "livraison": {
+        "titre": "Livraison à domicile",
+        "description": "Le livreur vous contacte à son arrivée. Paiement à la livraison."
+      }
+    },
+    "suivreCommande": "Suivre ma commande",
     "commandeIntrouvable": "Votre commande a bien été enregistrée, mais nous n'avons pas pu en récupérer les détails ici.",
     "retourAccueil": "Retour à l'accueil",
     "continuerShopping": "Continuer mes achats"
