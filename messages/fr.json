@@ -33,6 +33,63 @@
         "titre": "Gérer les commandes",
         "description": "Voir les commandes reçues et changer leur statut."
       }
+    },
+    "produits": {
+      "titre": "Produits",
+      "total": "{count, plural, one {# produit} other {# produits}} au catalogue",
+      "nouveau": "Nouveau produit",
+      "rechercher": "Rechercher par nom ou identifiant…",
+      "aucunProduit": "Aucun produit dans le catalogue. Clique sur « Nouveau produit » pour commencer.",
+      "aucunResultat": "Aucun produit ne correspond à ta recherche.",
+      "modifier": "Modifier",
+      "supprimer": "Supprimer",
+      "confirmSupprimer": "Supprimer « {nom} » ? Cette action est irréversible.",
+      "erreurs": {
+        "suppression": "La suppression a échoué. Réessaie."
+      }
+    },
+    "formulaireProduit": {
+      "titreCreation": "Nouveau produit",
+      "titreEdition": "Modifier le produit",
+      "photos": "Photos",
+      "ajouterPhotos": "Ajouter des photos",
+      "ajouterAutres": "Ajouter d'autres photos",
+      "photosAide": "PNG, JPG ou WebP — 5 MB max par image, 8 max.",
+      "retirerImage": "Retirer cette image",
+      "bilingue": "Contenu bilingue",
+      "nomFr": "Nom (français)",
+      "nomAr": "Nom (arabe)",
+      "descFr": "Description (français)",
+      "descAr": "Description (arabe)",
+      "details": "Détails",
+      "prix": "Prix",
+      "categorie": "Catégorie",
+      "emoji": "Emoji",
+      "emojiAide": "Utilisé comme décoration si aucune photo (fallback).",
+      "videoUrl": "URL vidéo",
+      "optionnel": "optionnel",
+      "slug": "Identifiant URL",
+      "slugAide": "auto-généré, éditable",
+      "creer": "Créer le produit",
+      "enregistrer": "Enregistrer les modifications",
+      "enregistrement": "Enregistrement…",
+      "annuler": "Annuler",
+      "erreurs": {
+        "nom_fr_court": "Le nom en français doit contenir au moins 2 caractères.",
+        "nom_ar_court": "Le nom en arabe doit contenir au moins 2 caractères.",
+        "description_fr_courte": "La description française doit contenir au moins 5 caractères.",
+        "description_ar_courte": "La description arabe doit contenir au moins 5 caractères.",
+        "prix_invalide": "Le prix doit être un entier supérieur à 0.",
+        "categorie_invalide": "Catégorie invalide.",
+        "images_manquantes": "Ajoute au moins une photo au produit.",
+        "id_existe": "Un produit avec cet identifiant existe déjà.",
+        "id_invalide": "L'identifiant est invalide.",
+        "produit_introuvable": "Produit introuvable.",
+        "erreur_serveur": "Une erreur est survenue. Réessaie.",
+        "json_invalide": "Données invalides.",
+        "non_connecte": "Tu dois être connecté.",
+        "acces_refuse": "Accès refusé."
+      }
     }
   },
   "langue": {

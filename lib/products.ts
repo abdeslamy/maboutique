@@ -54,3 +54,102 @@ export async function getProduitsParIds(ids: string[]): Promise<Produit[]> {
   // On retourne dans l'ordre des ids reçus, en filtrant ceux introuvables.
   return ids.map((id) => map.get(id)).filter((p): p is Produit => p !== undefined);
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// ADMIN — Écriture (create / update / delete)
+// ══════════════════════════════════════════════════════════════════════
+
+// slugifier vit dans lib/slug.ts (pas d'import Prisma → utilisable côté client).
+export { slugifier } from "./slug";
+
+// Données attendues pour créer/modifier un produit.
+export type EntreeProduit = {
+  id: string;
+  nomFr: string;
+  nomAr: string;
+  descriptionFr: string;
+  descriptionAr: string;
+  prix: number;
+  categorie: Categorie;
+  images: string[];
+  emoji: string;
+  videoUrl?: string;
+};
+
+export type ResultatEcriture =
+  | { ok: true; produit: Produit }
+  | { ok: false; erreur: string };
+
+/**
+ * Crée un nouveau produit dans la base.
+ * Retourne { ok: false, erreur: "id_existe" } si le slug est déjà pris.
+ */
+export async function creerProduit(
+  input: EntreeProduit
+): Promise<ResultatEcriture> {
+  // On vérifie que l'id (slug) n'existe pas déjà.
+  const existant = await prisma.produit.findUnique({
+    where: { id: input.id },
+    select: { id: true },
+  });
+  if (existant) return { ok: false, erreur: "id_existe" };
+
+  try {
+    const row = await prisma.produit.create({
+      data: {
+        id: input.id,
+        nomFr: input.nomFr.trim(),
+        nomAr: input.nomAr.trim(),
+        descriptionFr: input.descriptionFr.trim(),
+        descriptionAr: input.descriptionAr.trim(),
+        prix: input.prix,
+        categorie: input.categorie,
+        images: input.images,
+        emoji: input.emoji,
+        videoUrl: input.videoUrl || null,
+      },
+    });
+    return { ok: true, produit: dbToProduit(row) };
+  } catch {
+    return { ok: false, erreur: "erreur_serveur" };
+  }
+}
+
+/**
+ * Met à jour un produit existant.
+ * L'id (slug) N'est PAS modifiable ici — il est stable pour préserver les URLs.
+ */
+export async function mettreAJourProduit(
+  id: string,
+  input: Omit<EntreeProduit, "id">
+): Promise<ResultatEcriture> {
+  try {
+    const row = await prisma.produit.update({
+      where: { id },
+      data: {
+        nomFr: input.nomFr.trim(),
+        nomAr: input.nomAr.trim(),
+        descriptionFr: input.descriptionFr.trim(),
+        descriptionAr: input.descriptionAr.trim(),
+        prix: input.prix,
+        categorie: input.categorie,
+        images: input.images,
+        emoji: input.emoji,
+        videoUrl: input.videoUrl || null,
+      },
+    });
+    return { ok: true, produit: dbToProduit(row) };
+  } catch {
+    return { ok: false, erreur: "produit_introuvable" };
+  }
+}
+
+/** Supprime un produit. Les LigneCommande référentes voient produitId → NULL (voir schema). */
+export async function supprimerProduit(id: string): Promise<boolean> {
+  try {
+    await prisma.produit.delete({ where: { id } });
+    return true;
+  } catch {
+    return false;
+  }
+}

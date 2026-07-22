@@ -33,6 +33,63 @@
         "titre": "إدارة الطلبات",
         "description": "استعرض الطلبات الواردة وغيّر حالتها."
       }
+    },
+    "produits": {
+      "titre": "المنتجات",
+      "total": "{count, plural, one {منتج واحد} other {# منتجات}} في المتجر",
+      "nouveau": "منتج جديد",
+      "rechercher": "ابحث بالاسم أو المعرّف…",
+      "aucunProduit": "لا يوجد أي منتج بعد. اضغط على « منتج جديد » للبدء.",
+      "aucunResultat": "لا يوجد منتج يطابق بحثك.",
+      "modifier": "تعديل",
+      "supprimer": "حذف",
+      "confirmSupprimer": "هل تريد حذف « {nom} »؟ لا يمكن التراجع.",
+      "erreurs": {
+        "suppression": "فشل الحذف، حاول مجدّدًا."
+      }
+    },
+    "formulaireProduit": {
+      "titreCreation": "منتج جديد",
+      "titreEdition": "تعديل المنتج",
+      "photos": "الصور",
+      "ajouterPhotos": "إضافة صور",
+      "ajouterAutres": "إضافة صور أخرى",
+      "photosAide": "PNG أو JPG أو WebP — 5 ميغا كحد أقصى للصورة، 8 صور كحد أقصى.",
+      "retirerImage": "إزالة الصورة",
+      "bilingue": "المحتوى بالفرنسية والعربية",
+      "nomFr": "الاسم (بالفرنسية)",
+      "nomAr": "الاسم (بالعربية)",
+      "descFr": "الوصف (بالفرنسية)",
+      "descAr": "الوصف (بالعربية)",
+      "details": "التفاصيل",
+      "prix": "السعر",
+      "categorie": "الفئة",
+      "emoji": "إيموجي",
+      "emojiAide": "يُستخدم كزخرفة عند غياب الصور.",
+      "videoUrl": "رابط الفيديو",
+      "optionnel": "اختياري",
+      "slug": "معرّف الرابط",
+      "slugAide": "يتمّ توليده تلقائيًا، وقابل للتعديل",
+      "creer": "إنشاء المنتج",
+      "enregistrer": "حفظ التعديلات",
+      "enregistrement": "جارٍ الحفظ…",
+      "annuler": "إلغاء",
+      "erreurs": {
+        "nom_fr_court": "يجب أن يحتوي الاسم بالفرنسية على حرفين على الأقل.",
+        "nom_ar_court": "يجب أن يحتوي الاسم بالعربية على حرفين على الأقل.",
+        "description_fr_courte": "يجب أن يحتوي الوصف بالفرنسية على 5 أحرف على الأقل.",
+        "description_ar_courte": "يجب أن يحتوي الوصف بالعربية على 5 أحرف على الأقل.",
+        "prix_invalide": "السعر يجب أن يكون عددًا صحيحًا أكبر من 0.",
+        "categorie_invalide": "الفئة غير صالحة.",
+        "images_manquantes": "أضف صورة واحدة على الأقل.",
+        "id_existe": "يوجد منتج بنفس المعرّف.",
+        "id_invalide": "المعرّف غير صالح.",
+        "produit_introuvable": "المنتج غير موجود.",
+        "erreur_serveur": "حدث خطأ، حاول مجدّدًا.",
+        "json_invalide": "بيانات غير صالحة.",
+        "non_connecte": "يجب تسجيل الدخول.",
+        "acces_refuse": "الوصول مرفوض."
+      }
     }
   },
   "langue": {
