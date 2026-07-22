@@ -76,6 +76,71 @@ export async function getCommandesParUtilisateurId(
   return rows.map(dbToCommande);
 }
 
+/** Récupère TOUTES les commandes (usage admin). */
+export async function getAllCommandes(): Promise<Commande[]> {
+  const rows = await prisma.commande.findMany({
+    include: { lignes: true },
+    orderBy: { createdAt: "desc" },
+  });
+  return rows.map(dbToCommande);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Machine à états — transitions autorisées
+// ──────────────────────────────────────────────────────────────────────
+//
+//   en_attente ─→ confirmee ─→ en_livraison ─→ livree
+//        │            │              │
+//        └────────────┴──────────────┴────→ annulee
+//
+const TRANSITIONS: Record<StatutCommande, StatutCommande[]> = {
+  en_attente: ["confirmee", "annulee"],
+  confirmee: ["en_livraison", "annulee"],
+  en_livraison: ["livree", "annulee"],
+  livree: [], // terminal
+  annulee: [], // terminal
+};
+
+export function transitionsAutorisees(
+  actuel: StatutCommande
+): StatutCommande[] {
+  return TRANSITIONS[actuel] ?? [];
+}
+
+/**
+ * Change le statut d'une commande. Vérifie que la transition est autorisée
+ * par la machine à états.
+ */
+export async function mettreAJourStatutCommande(
+  id: string,
+  nouveauStatut: StatutCommande
+): Promise<
+  | { ok: true; commande: Commande }
+  | { ok: false; erreur: string }
+> {
+  const existante = await prisma.commande.findUnique({
+    where: { id },
+    select: { statut: true },
+  });
+  if (!existante) return { ok: false, erreur: "commande_introuvable" };
+
+  const actuel = existante.statut as StatutCommande;
+  if (!transitionsAutorisees(actuel).includes(nouveauStatut)) {
+    return { ok: false, erreur: "transition_interdite" };
+  }
+
+  try {
+    const row = await prisma.commande.update({
+      where: { id },
+      data: { statut: nouveauStatut },
+      include: { lignes: true },
+    });
+    return { ok: true, commande: dbToCommande(row) };
+  } catch {
+    return { ok: false, erreur: "erreur_serveur" };
+  }
+}
+
 // ──────────────────────────────────────────────────────────────────────
 // Création
 // ──────────────────────────────────────────────────────────────────────

@@ -48,6 +48,55 @@
         "suppression": "فشل الحذف، حاول مجدّدًا."
       }
     },
+    "commandes": {
+      "titre": "الطلبات",
+      "total": "{count, plural, one {طلب واحد} other {# طلبات}} إجمالًا",
+      "rechercher": "ابحث بالمعرّف أو اسم الزبون…",
+      "aucuneCommande": "لا توجد طلبات لعرضها.",
+      "articles": "منتجات",
+      "commande": "طلب",
+      "client": "الزبون",
+      "nom": "الاسم",
+      "telephone": "الهاتف",
+      "adresse": "العنوان",
+      "sousTotal": "المجموع الفرعي",
+      "livraison": "التوصيل",
+      "total_montant": "الإجمالي",
+      "changerStatut": "تغيير الحالة",
+      "statutFinal": "هذا الطلب في حالة نهائية — لا يمكن تغييرها.",
+      "statutMisAJour": "تمّ تحديث الحالة بنجاح.",
+      "filtres": {
+        "tout": "الكل",
+        "en_attente": "قيد الانتظار",
+        "confirmee": "مؤكّدة",
+        "en_livraison": "قيد التوصيل",
+        "livree": "تمّ التوصيل",
+        "annulee": "ملغاة"
+      },
+      "statuts": {
+        "en_attente": "قيد الانتظار",
+        "confirmee": "مؤكّدة",
+        "en_livraison": "قيد التوصيل",
+        "livree": "تمّ التوصيل",
+        "annulee": "ملغاة"
+      },
+      "actions": {
+        "en_attente": "إعادة إلى الانتظار",
+        "confirmee": "تأكيد الطلب",
+        "en_livraison": "تحويل إلى التوصيل",
+        "livree": "وضع كـ مُسلَّم",
+        "annulee": "إلغاء الطلب"
+      },
+      "erreurs": {
+        "non_connecte": "يجب تسجيل الدخول.",
+        "acces_refuse": "الوصول مرفوض.",
+        "commande_introuvable": "الطلب غير موجود.",
+        "statut_invalide": "الحالة غير صالحة.",
+        "transition_interdite": "هذا الانتقال بين الحالات غير مسموح.",
+        "json_invalide": "بيانات غير صالحة.",
+        "erreur_serveur": "حدث خطأ، حاول مجدّدًا."
+      }
+    },
     "formulaireProduit": {
       "titreCreation": "منتج جديد",
       "titreEdition": "تعديل المنتج",

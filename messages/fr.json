@@ -48,6 +48,55 @@
         "suppression": "La suppression a échoué. Réessaie."
       }
     },
+    "commandes": {
+      "titre": "Commandes",
+      "total": "{count, plural, one {# commande} other {# commandes}} au total",
+      "rechercher": "Rechercher par id ou nom client…",
+      "aucuneCommande": "Aucune commande à afficher.",
+      "articles": "articles",
+      "commande": "Commande",
+      "client": "Client",
+      "nom": "Nom",
+      "telephone": "Téléphone",
+      "adresse": "Adresse",
+      "sousTotal": "Sous-total",
+      "livraison": "Livraison",
+      "total_montant": "Total",
+      "changerStatut": "Changer le statut",
+      "statutFinal": "Cette commande est dans un statut final — plus de changement possible.",
+      "statutMisAJour": "Statut mis à jour avec succès.",
+      "filtres": {
+        "tout": "Toutes",
+        "en_attente": "En attente",
+        "confirmee": "Confirmées",
+        "en_livraison": "En livraison",
+        "livree": "Livrées",
+        "annulee": "Annulées"
+      },
+      "statuts": {
+        "en_attente": "En attente",
+        "confirmee": "Confirmée",
+        "en_livraison": "En livraison",
+        "livree": "Livrée",
+        "annulee": "Annulée"
+      },
+      "actions": {
+        "en_attente": "Remettre en attente",
+        "confirmee": "Confirmer",
+        "en_livraison": "Passer en livraison",
+        "livree": "Marquer livrée",
+        "annulee": "Annuler la commande"
+      },
+      "erreurs": {
+        "non_connecte": "Tu dois être connecté.",
+        "acces_refuse": "Accès refusé.",
+        "commande_introuvable": "Commande introuvable.",
+        "statut_invalide": "Statut invalide.",
+        "transition_interdite": "Cette transition de statut n'est pas autorisée.",
+        "json_invalide": "Données invalides.",
+        "erreur_serveur": "Une erreur est survenue. Réessaie."
+      }
+    },
     "formulaireProduit": {
       "titreCreation": "Nouveau produit",
       "titreEdition": "Modifier le produit",
