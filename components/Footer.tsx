@@ -9,11 +9,10 @@ export default async function Footer() {
 
   return (
     <footer className="mt-auto border-t border-gray-200 bg-white">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-6 text-sm text-gray-600 sm:flex-row">
+      <div className="mx-auto flex max-w-6xl items-center justify-center px-4 py-6 text-sm text-gray-600">
         <p>
           © {annee} {tMeta("titreSite")} — {t("droits")}
         </p>
-        <p className="text-xs text-gray-400">{t("mention")}</p>
       </div>
     </footer>
   );

@@ -33,7 +33,21 @@ export default function FormulaireCommande() {
   const [wilaya, setWilaya] = useState("");
 
   const [cleErreur, setCleErreur] = useState<string | null>(null);
+  const [erreurTelephone, setErreurTelephone] = useState<string | null>(null);
   const [envoi, setEnvoi] = useState(false);
+
+  // Regex téléphone algérien : exactement 10 chiffres, commence par 0.
+  const TEL_DZ_REGEX = /^0\d{9}$/;
+
+  function changerTelephone(valeur: string) {
+    // On garde uniquement les chiffres et on limite à 10 caractères.
+    const nettoye = valeur.replace(/\D/g, "").slice(0, 10);
+    setTelephone(nettoye);
+    // On efface l'erreur inline si le format devient valide.
+    if (erreurTelephone && TEL_DZ_REGEX.test(nettoye)) {
+      setErreurTelephone(null);
+    }
+  }
 
   // ── Pendant chargement initial du panier ─────────────────────────────
   if (!estCharge) {
@@ -68,7 +82,10 @@ export default function FormulaireCommande() {
 
     // Validation côté client (UX). Le serveur revalide tout.
     if (nom.trim().length < 2) return setCleErreur("nom_court");
-    if (telephone.trim().length < 8) return setCleErreur("telephone_court");
+    if (!TEL_DZ_REGEX.test(telephone)) {
+      setErreurTelephone("telephone_format_dz");
+      return;
+    }
     if (adresse.trim().length < 5) return setCleErreur("adresse_courte");
     if (!wilaya) return setCleErreur("wilaya_invalide");
 
@@ -111,25 +128,32 @@ export default function FormulaireCommande() {
           </h2>
 
           <Champ label={t("nom")} value={nom} onChange={setNom} autoComplete="name" />
-          <Champ
-            label={t("telephone")}
-            value={telephone}
-            onChange={setTelephone}
-            type="tel"
-            autoComplete="tel"
-            aide={t("telephoneAide")}
-          />
 
           <label className="flex flex-col gap-1 text-sm">
-            <span className="font-medium text-gray-700">{t("adresse")}</span>
-            <textarea
-              value={adresse}
-              onChange={(e) => setAdresse(e.target.value)}
-              autoComplete="street-address"
+            <span className="font-medium text-gray-700">{t("telephone")}</span>
+            <input
+              type="tel"
+              inputMode="numeric"
+              value={telephone}
+              onChange={(e) => changerTelephone(e.target.value)}
+              autoComplete="tel"
               required
-              rows={3}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-base focus:border-black focus:outline-none"
+              placeholder="0550123456"
+              maxLength={10}
+              aria-invalid={erreurTelephone ? true : undefined}
+              className={`rounded-lg border bg-white px-3 py-2 text-base focus:outline-none ${
+                erreurTelephone
+                  ? "border-red-400 focus:border-red-500"
+                  : "border-gray-300 focus:border-black"
+              }`}
             />
+            {erreurTelephone ? (
+              <span role="alert" className="text-xs text-red-600">
+                {t(`erreurs.${erreurTelephone}`)}
+              </span>
+            ) : (
+              <span className="text-xs text-gray-500">{t("telephoneAide")}</span>
+            )}
           </label>
 
           <label className="flex flex-col gap-1 text-sm">
@@ -147,6 +171,18 @@ export default function FormulaireCommande() {
                 </option>
               ))}
             </select>
+          </label>
+
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium text-gray-700">{t("adresse")}</span>
+            <textarea
+              value={adresse}
+              onChange={(e) => setAdresse(e.target.value)}
+              autoComplete="street-address"
+              required
+              rows={3}
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-base focus:border-black focus:outline-none"
+            />
           </label>
 
           {cleErreur && (

@@ -34,3 +34,23 @@ html[dir="rtl"] {
 html[dir="ltr"] {
   --font-active: var(--font-latin);
 }
+
+/* Curseur "main" sur tous les éléments interactifs.
+   Tailwind v4 (comme le CSS moderne) ne met plus cursor:pointer par défaut
+   sur les <button> — on rétablit le comportement attendu par les utilisateurs.
+   On exclut les éléments désactivés (ils gardent le curseur "interdit"). */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+a[href],
+label,
+select:not(:disabled),
+summary {
+  cursor: pointer;
+}
+
+/* Les éléments désactivés affichent un curseur "non autorisé". */
+button:disabled,
+select:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}

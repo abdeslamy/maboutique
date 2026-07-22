@@ -179,8 +179,9 @@ export async function creerCommande(input: {
   // ── Validations client ────────────────────────────────────────────
   const { nom, telephone, adresse, wilaya } = input.client;
   if (!nom || nom.trim().length < 2) return { ok: false, erreur: "nom_court" };
-  if (!telephone || telephone.trim().length < 8)
-    return { ok: false, erreur: "telephone_court" };
+  // Téléphone algérien : exactement 10 chiffres, commence par 0.
+  if (!telephone || !/^0\d{9}$/.test(telephone.trim()))
+    return { ok: false, erreur: "telephone_format_dz" };
   if (!adresse || adresse.trim().length < 5)
     return { ok: false, erreur: "adresse_courte" };
   if (!wilaya || !estWilayaValide(wilaya))

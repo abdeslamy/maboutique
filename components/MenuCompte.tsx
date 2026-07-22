@@ -68,7 +68,7 @@ export default function MenuCompte() {
     return (
       <Link
         href="/connexion"
-        className="hidden rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-black sm:inline-block"
+        className="inline-block rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-black"
       >
         {t("connexion")}
       </Link>

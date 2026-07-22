@@ -261,6 +261,7 @@
       "panier_vide": "Votre panier est vide.",
       "nom_court": "Le nom doit contenir au moins 2 caractères.",
       "telephone_court": "Le numéro de téléphone semble trop court.",
+      "telephone_format_dz": "Le numéro doit contenir 10 chiffres et commencer par 0 (ex : 0550123456).",
       "adresse_courte": "Veuillez saisir une adresse complète.",
       "wilaya_invalide": "Veuillez choisir une wilaya.",
       "quantite_invalide": "Une quantité est invalide.",
