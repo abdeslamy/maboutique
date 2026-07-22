@@ -90,6 +90,7 @@ export default async function LocaleLayout({
         email: u.email,
         nom: u.nom,
         image: u.image, // peut être undefined
+        role: u.role, // "user" ou "admin"
       };
     }
   }

@@ -12,7 +12,28 @@
     "deconnexion": "تسجيل الخروج",
     "retour": "رجوع",
     "parametres": "إعدادات الحساب",
-    "mesCommandes": "طلباتي"
+    "mesCommandes": "طلباتي",
+    "admin": "لوحة الإدارة"
+  },
+  "admin": {
+    "badge": "لوحة الإدارة",
+    "bonjour": "مرحبًا، {nom}",
+    "intro": "أدر منتجاتك وتابع طلباتك من هنا.",
+    "kpi": {
+      "produits": "المنتجات",
+      "commandes": "الطلبات",
+      "commandesEnAttente": "قيد الانتظار"
+    },
+    "actions": {
+      "produits": {
+        "titre": "إدارة المنتجات",
+        "description": "أضف، عدّل أو احذف منتجات المتجر."
+      },
+      "commandes": {
+        "titre": "إدارة الطلبات",
+        "description": "استعرض الطلبات الواردة وغيّر حالتها."
+      }
+    }
   },
   "langue": {
     "label": "اللغة",

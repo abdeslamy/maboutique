@@ -12,7 +12,28 @@
     "deconnexion": "Se déconnecter",
     "retour": "Retour",
     "parametres": "Paramètres du profil",
-    "mesCommandes": "Mes commandes"
+    "mesCommandes": "Mes commandes",
+    "admin": "Espace admin"
+  },
+  "admin": {
+    "badge": "Espace administrateur",
+    "bonjour": "Bienvenue, {nom}",
+    "intro": "Gère ton catalogue et suis tes commandes depuis cette interface.",
+    "kpi": {
+      "produits": "Produits",
+      "commandes": "Commandes",
+      "commandesEnAttente": "En attente"
+    },
+    "actions": {
+      "produits": {
+        "titre": "Gérer les produits",
+        "description": "Ajouter, modifier ou supprimer les articles du catalogue."
+      },
+      "commandes": {
+        "titre": "Gérer les commandes",
+        "description": "Voir les commandes reçues et changer leur statut."
+      }
+    }
   },
   "langue": {
     "label": "Langue",

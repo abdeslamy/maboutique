@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { LogOut, Package, Settings, UserIcon } from "lucide-react";
+import { LogOut, Package, Settings, Shield, UserIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -124,6 +124,15 @@ export default function MenuCompte() {
               label={t("mesCommandes")}
               onClick={() => setOuvert(false)}
             />
+            {/* Lien Admin visible UNIQUEMENT pour les admins */}
+            {utilisateur.role === "admin" && (
+              <ElementMenu
+                href="/admin"
+                icon={<Shield className="h-4 w-4" />}
+                label={t("admin")}
+                onClick={() => setOuvert(false)}
+              />
+            )}
           </ul>
 
           {/* Déconnexion en rouge */}

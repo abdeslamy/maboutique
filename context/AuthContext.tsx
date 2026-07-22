@@ -14,6 +14,12 @@ export type UtilisateurPublic = {
   nom: string;
   /** Photo de profil en base64 (data URL), facultative. Alias "image" comme en base. */
   image?: string;
+  /**
+   * Rôle : "user" | "admin". Utilisé UNIQUEMENT pour afficher/masquer des
+   * éléments d'UI (ex : lien "Admin" dans le menu compte). La VRAIE garde
+   * de sécurité est côté serveur (voir lib/admin.ts).
+   */
+  role: "user" | "admin";
 };
 
 type ResultatConnexion =
