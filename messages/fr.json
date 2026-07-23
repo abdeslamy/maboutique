@@ -18,7 +18,29 @@
   "admin": {
     "badge": "Espace administrateur",
     "bonjour": "Bienvenue, {nom}",
-    "intro": "Gère ton catalogue et suis tes commandes depuis cette interface.",
+    "intro": "Suivi de ton activité, gestion du catalogue et des commandes.",
+    "dashboard": {
+      "kpi": {
+        "caLivre": "CA réalisé",
+        "caLivreSous": "Commandes livrées",
+        "commandes": "Commandes",
+        "commandesSous": "Toutes périodes",
+        "panierMoyen": "Panier moyen",
+        "panierMoyenSous": "Sur commandes livrées",
+        "enAttente": "À traiter",
+        "enAttenteSous": "Commandes en attente"
+      },
+      "evolutionCA": "Évolution du CA",
+      "evolutionCASousTitre": "7 derniers jours — {total} au total",
+      "ca": "CA",
+      "tauxCles": "Taux clés",
+      "tauxConfirmation": "Confirmation à l'appel",
+      "tauxLivraison": "Livraison réussie",
+      "topProduits": "Top produits",
+      "topProduitsSousTitre": "Les 5 meilleures ventes",
+      "aucuneVente": "Aucune vente pour l'instant.",
+      "vendus": "vendus"
+    },
     "kpi": {
       "produits": "Produits",
       "commandes": "Commandes",

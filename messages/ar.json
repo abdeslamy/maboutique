@@ -18,7 +18,29 @@
   "admin": {
     "badge": "لوحة الإدارة",
     "bonjour": "مرحبًا، {nom}",
-    "intro": "أدر منتجاتك وتابع طلباتك من هنا.",
+    "intro": "متابعة نشاطك، وإدارة المنتجات والطلبات.",
+    "dashboard": {
+      "kpi": {
+        "caLivre": "الإيرادات المحقّقة",
+        "caLivreSous": "الطلبات المسلّمة",
+        "commandes": "الطلبات",
+        "commandesSous": "جميع الفترات",
+        "panierMoyen": "متوسّط قيمة الطلب",
+        "panierMoyenSous": "على الطلبات المسلّمة",
+        "enAttente": "بحاجة للمعالجة",
+        "enAttenteSous": "طلبات قيد الانتظار"
+      },
+      "evolutionCA": "تطوّر الإيرادات",
+      "evolutionCASousTitre": "آخر 7 أيّام — {total} إجمالًا",
+      "ca": "الإيرادات",
+      "tauxCles": "المؤشّرات الرئيسية",
+      "tauxConfirmation": "التأكيد عبر الهاتف",
+      "tauxLivraison": "التوصيل الناجح",
+      "topProduits": "أفضل المنتجات",
+      "topProduitsSousTitre": "أفضل 5 مبيعات",
+      "aucuneVente": "لا توجد مبيعات بعد.",
+      "vendus": "مبيع/مبيعات"
+    },
     "kpi": {
       "produits": "المنتجات",
       "commandes": "الطلبات",

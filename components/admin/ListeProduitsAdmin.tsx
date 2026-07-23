@@ -98,66 +98,69 @@ export default function ListeProduitsAdmin({
           {produitsFiltres.map((p) => (
             <li
               key={p.id}
-              className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-3 sm:flex-row sm:items-center"
+              className="rounded-2xl border border-gray-200 bg-white p-3 transition hover:border-gray-400 hover:shadow-sm"
             >
-              {/* Vignette */}
-              {p.images[0]?.startsWith("http") ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={p.images[0]}
-                  alt=""
-                  className="h-20 w-20 shrink-0 rounded-xl object-cover"
-                />
-              ) : (
-                <div
-                  className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-xl text-3xl ${
-                    p.images[0] ?? "bg-gray-100"
-                  }`}
-                  aria-hidden="true"
-                >
-                  <span>{p.emoji}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-3 sm:gap-4">
+                {/* Vignette */}
+                {p.images[0]?.startsWith("http") ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={p.images[0]}
+                    alt=""
+                    className="h-16 w-16 shrink-0 rounded-xl object-cover sm:h-20 sm:w-20"
+                  />
+                ) : (
+                  <div
+                    className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl text-2xl sm:h-20 sm:w-20 sm:text-3xl ${
+                      p.images[0] ?? "bg-gray-100"
+                    }`}
+                    aria-hidden="true"
+                  >
+                    <span>{p.emoji}</span>
+                  </div>
+                )}
 
-              {/* Nom / id / catégorie */}
-              <div className="flex-1 min-w-0">
-                <p className="truncate font-medium text-gray-900">
-                  {p.nom[locale]}
-                </p>
-                <p className="mt-0.5 truncate font-mono text-xs text-gray-500">
-                  {p.id}
-                </p>
-                <span className="mt-1 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
-                  {tCat(p.categorie)}
-                </span>
+                {/* Nom + catégorie */}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-base font-medium text-gray-900">
+                    {p.nom[locale]}
+                  </p>
+                  <span className="mt-1 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
+                    {tCat(p.categorie)}
+                  </span>
+                  {/* Prix desktop uniquement (mobile a le prix en bas) */}
+                  <p className="mt-1 hidden text-sm font-semibold text-black sm:block">
+                    {formatPrix(p.prix, locale)}
+                  </p>
+                </div>
+
+                {/* Actions (toujours à droite) */}
+                <div className="flex shrink-0 items-center gap-1">
+                  <Link
+                    href={`/admin/produits/${p.id}/edit`}
+                    className="rounded-full p-2 text-gray-600 transition hover:bg-gray-100 hover:text-black"
+                    aria-label={t("modifier")}
+                    title={t("modifier")}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => supprimer(p)}
+                    disabled={enSuppression}
+                    className="rounded-full p-2 text-red-600 transition hover:bg-red-50 disabled:opacity-40"
+                    aria-label={t("supprimer")}
+                    title={t("supprimer")}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
-              {/* Prix */}
-              <p className="w-28 shrink-0 text-end font-semibold text-black">
+              {/* Prix mobile uniquement — sur ligne séparée pour maximiser l'espace */}
+              <p className="mt-3 border-t border-gray-100 pt-3 text-end text-base font-semibold text-black sm:hidden">
                 {formatPrix(p.prix, locale)}
               </p>
-
-              {/* Actions */}
-              <div className="flex shrink-0 items-center gap-1">
-                <Link
-                  href={`/admin/produits/${p.id}/edit`}
-                  className="rounded-full p-2 text-gray-600 transition hover:bg-gray-100 hover:text-black"
-                  aria-label={t("modifier")}
-                  title={t("modifier")}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => supprimer(p)}
-                  disabled={enSuppression}
-                  className="rounded-full p-2 text-red-600 transition hover:bg-red-50 disabled:opacity-40"
-                  aria-label={t("supprimer")}
-                  title={t("supprimer")}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
             </li>
           ))}
         </ul>

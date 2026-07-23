@@ -93,6 +93,176 @@ export async function getAllCommandes(): Promise<Commande[]> {
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// Statistiques agrégées pour le dashboard admin
+// ──────────────────────────────────────────────────────────────────────
+
+export type PointEvolution = {
+  /** Étiquette courte pour l'axe X (ex "lun 15"). */
+  jour: string;
+  /** Date ISO du début de la journée (pour tri stable). */
+  dateIso: string;
+  /** CA du jour (uniquement commandes livrées). */
+  ca: number;
+  /** Nombre total de commandes créées ce jour-là. */
+  nb: number;
+};
+
+export type StatistiquesAdmin = {
+  caLivre: number; // CA réalisé (livrée)
+  caPotentiel: number; // total confirmée + en_livraison (encore à toucher)
+  nbCommandesTotal: number;
+  nbCommandesEnAttente: number;
+  panierMoyen: number;
+  commandesParStatut: Record<StatutCommande, number>;
+  evolution7Jours: PointEvolution[];
+  tauxConfirmationAppel: number; // 0..1
+  tauxLivraisonReussie: number; // 0..1
+  topProduits: {
+    id: string;
+    nom: string;
+    quantite: number;
+    ca: number;
+  }[];
+};
+
+export async function getStatistiquesAdmin(
+  locale: Locale = "fr"
+): Promise<StatistiquesAdmin> {
+  // Récupère toutes les commandes en une fois (petit volume — ok pour un petit shop).
+  const commandes = await prisma.commande.findMany({
+    select: {
+      id: true,
+      createdAt: true,
+      total: true,
+      statut: true,
+      etatAppel: true,
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  // ── Répartition par statut ────────────────────────────────────────
+  const parStatut: Record<StatutCommande, number> = {
+    en_attente: 0,
+    confirmee: 0,
+    en_livraison: 0,
+    livree: 0,
+    annulee: 0,
+  };
+  for (const c of commandes) {
+    parStatut[c.statut as StatutCommande]++;
+  }
+
+  // ── Chiffre d'affaires ────────────────────────────────────────────
+  let caLivre = 0;
+  let caPotentiel = 0;
+  for (const c of commandes) {
+    if (c.statut === "livree") caLivre += c.total;
+    if (c.statut === "confirmee" || c.statut === "en_livraison") {
+      caPotentiel += c.total;
+    }
+  }
+
+  // ── Panier moyen (sur commandes livrées) ─────────────────────────
+  const panierMoyen =
+    parStatut.livree > 0 ? Math.round(caLivre / parStatut.livree) : 0;
+
+  // ── Évolution 7 derniers jours ───────────────────────────────────
+  const evolution = construireBucketsSeptJours(commandes, locale);
+
+  // ── Taux clés ─────────────────────────────────────────────────────
+  const appelees = commandes.filter(
+    (c) => c.etatAppel && c.etatAppel !== "non_appele"
+  ).length;
+  const confirmees = commandes.filter(
+    (c) => c.etatAppel === "confirme"
+  ).length;
+  const tauxConfirmationAppel = appelees > 0 ? confirmees / appelees : 0;
+
+  const denom = parStatut.livree + parStatut.annulee;
+  const tauxLivraisonReussie = denom > 0 ? parStatut.livree / denom : 0;
+
+  // ── Top 5 produits (par quantité vendue) ─────────────────────────
+  const topAgg = await prisma.ligneCommande.groupBy({
+    by: ["produitId"],
+    _sum: { quantite: true, sousTotal: true },
+    where: { produitId: { not: null } },
+    orderBy: { _sum: { quantite: "desc" } },
+    take: 5,
+  });
+  const produitsIds = topAgg
+    .map((t) => t.produitId)
+    .filter((id): id is string => !!id);
+  const produits =
+    produitsIds.length > 0
+      ? await prisma.produit.findMany({
+          where: { id: { in: produitsIds } },
+          select: { id: true, nomFr: true, nomAr: true },
+        })
+      : [];
+  const mapNoms = new Map(
+    produits.map((p) => [p.id, locale === "ar" ? p.nomAr : p.nomFr])
+  );
+  const topProduits = topAgg.map((t) => ({
+    id: t.produitId!,
+    nom: mapNoms.get(t.produitId!) ?? t.produitId!,
+    quantite: t._sum.quantite ?? 0,
+    ca: t._sum.sousTotal ?? 0,
+  }));
+
+  return {
+    caLivre,
+    caPotentiel,
+    nbCommandesTotal: commandes.length,
+    nbCommandesEnAttente: parStatut.en_attente,
+    panierMoyen,
+    commandesParStatut: parStatut,
+    evolution7Jours: evolution,
+    tauxConfirmationAppel,
+    tauxLivraisonReussie,
+    topProduits,
+  };
+}
+
+/**
+ * Découpe les commandes des 7 derniers jours (aujourd'hui inclus) en buckets
+ * jour par jour, pour tracer l'évolution.
+ */
+function construireBucketsSeptJours(
+  commandes: { createdAt: Date; total: number; statut: string }[],
+  locale: Locale
+): PointEvolution[] {
+  const buckets: PointEvolution[] = [];
+  const aujourdHui = new Date();
+  aujourdHui.setHours(0, 0, 0, 0);
+
+  for (let i = 6; i >= 0; i--) {
+    const jour = new Date(aujourdHui);
+    jour.setDate(aujourdHui.getDate() - i);
+    const jourFin = new Date(jour);
+    jourFin.setDate(jour.getDate() + 1);
+
+    let ca = 0;
+    let nb = 0;
+    for (const c of commandes) {
+      if (c.createdAt >= jour && c.createdAt < jourFin) {
+        nb++;
+        if (c.statut === "livree") ca += c.total;
+      }
+    }
+    buckets.push({
+      jour: jour.toLocaleDateString(locale === "ar" ? "ar-DZ" : "fr-DZ", {
+        weekday: "short",
+        day: "numeric",
+      }),
+      dateIso: jour.toISOString(),
+      ca,
+      nb,
+    });
+  }
+  return buckets;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // Mise à jour admin — statut / état d'appel / notes
 // ──────────────────────────────────────────────────────────────────────
 //
