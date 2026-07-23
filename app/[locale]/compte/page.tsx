@@ -5,6 +5,7 @@ import { getSession } from "@/lib/session";
 import { getCommandesParUtilisateurId } from "@/lib/orders";
 import { formatPrix } from "@/lib/format";
 import type { Locale } from "@/i18n/routing";
+import TimelineCommande from "@/components/TimelineCommande";
 
 /**
  * Page /compte — protégée.
@@ -71,40 +72,40 @@ export default async function PageCompte({
               return (
                 <li
                   key={c.id}
-                  className="flex flex-col gap-2 rounded-xl border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between"
+                  className="rounded-xl border border-gray-200 p-4"
                 >
-                  <div className="flex flex-col">
-                    <Link
-                      href={{ pathname: "/confirmation", query: { id: c.id } }}
-                      className="font-mono text-xs text-gray-700 hover:text-black"
-                    >
-                      #{c.id.slice(0, 8)}
-                    </Link>
-                    <span className="text-sm text-gray-500">
-                      {date.toLocaleDateString(
-                        localeTypee === "ar" ? "ar-DZ" : "fr-DZ",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
-                      )}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {c.articles.reduce((s, a) => s + a.quantite, 0)}{" "}
-                      {t("articles")}
-                    </span>
+                  {/* Ligne du haut : date/articles + total + CTA */}
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm text-gray-600">
+                        {date.toLocaleDateString(
+                          localeTypee === "ar" ? "ar-DZ" : "fr-DZ",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
+                        {" · "}
+                        {c.articles.reduce((s, a) => s + a.quantite, 0)}{" "}
+                        {t("articles")}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold text-black">
+                        {formatPrix(c.total, localeTypee)}
+                      </span>
+                      <Link
+                        href={{ pathname: "/confirmation", query: { id: c.id } }}
+                        className="shrink-0 rounded-full border border-gray-300 px-3 py-1 text-xs text-gray-700 transition hover:border-black hover:text-black"
+                      >
+                        {t("voirDetail")}
+                      </Link>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="font-semibold text-black">
-                      {formatPrix(c.total, localeTypee)}
-                    </span>
-                    <Link
-                      href={{ pathname: "/confirmation", query: { id: c.id } }}
-                      className="rounded-full border border-gray-300 px-3 py-1 text-xs text-gray-700 transition hover:border-black hover:text-black"
-                    >
-                      {t("voirDetail")}
-                    </Link>
+                  {/* Timeline compacte (synchronisée avec l'admin) */}
+                  <div className="mt-4 border-t border-gray-100 pt-3">
+                    <TimelineCommande commande={c} mode="compact" />
                   </div>
                 </li>
               );

@@ -35,6 +35,10 @@ export default function FormulaireCommande() {
   const [cleErreur, setCleErreur] = useState<string | null>(null);
   const [erreurTelephone, setErreurTelephone] = useState<string | null>(null);
   const [envoi, setEnvoi] = useState(false);
+  // Flag qui indique que la commande vient d'être créée avec succès. Sert à
+  // éviter le flash "Panier vide" pendant le laps de temps entre vider()
+  // et l'arrivée sur /confirmation.
+  const [commandeEnvoyee, setCommandeEnvoyee] = useState(false);
 
   // Regex téléphone algérien : exactement 10 chiffres, commence par 0.
   const TEL_DZ_REGEX = /^0\d{9}$/;
@@ -54,6 +58,16 @@ export default function FormulaireCommande() {
     return (
       <section className="mx-auto max-w-4xl px-4 py-16">
         <p className="text-center text-gray-500">{tPanier("chargement")}</p>
+      </section>
+    );
+  }
+
+  // ── Commande envoyée : on ne re-montre PAS le panier vide pendant la
+  //    navigation vers /confirmation. Petit loader discret à la place.
+  if (commandeEnvoyee) {
+    return (
+      <section className="mx-auto max-w-4xl px-4 py-16">
+        <p className="text-center text-gray-500">{t("envoi")}</p>
       </section>
     );
   }
@@ -106,7 +120,9 @@ export default function FormulaireCommande() {
         return;
       }
 
-      // Succès : on vide le panier puis on navigue vers la confirmation.
+      // Succès : on marque comme "envoyée" AVANT de vider (empêche le flash
+      // "Panier vide"), puis on vide et on navigue.
+      setCommandeEnvoyee(true);
       vider();
       router.push(`/confirmation?id=${data.commandeId}`);
     } catch {

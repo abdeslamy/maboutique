@@ -1,11 +1,12 @@
 import { getTranslations } from "next-intl/server";
-import { PhoneCall, Package, Truck, MapPin, ArrowRight } from "lucide-react";
+import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getCommandeParId } from "@/lib/orders";
 import { getSession } from "@/lib/session";
 import { formatPrix } from "@/lib/format";
 import { WILAYAS } from "@/lib/wilayas";
 import type { Locale } from "@/i18n/routing";
+import TimelineCommande from "@/components/TimelineCommande";
 
 /**
  * Page /confirmation?id=XXX
@@ -92,31 +93,12 @@ export default async function PageConfirmation({
           className="confirm-apparition mt-10 flex flex-col gap-4"
           style={{ animationDelay: "0.2s" }}
         >
-          {/* ─── Prochaines étapes (timeline) ───────────────────────── */}
+          {/* ─── Timeline de suivi (synchronisée avec l'admin) ─────── */}
           <div className="rounded-2xl border border-gray-200 bg-white p-6">
             <h2 className="mb-5 text-sm font-medium uppercase tracking-wide text-gray-500">
               {t("prochainesEtapes")}
             </h2>
-            <ol className="flex flex-col gap-5">
-              <EtapeTimeline
-                icon={<PhoneCall className="h-4 w-4" />}
-                titre={t("etapes.confirmation.titre")}
-                description={t("etapes.confirmation.description")}
-                actif
-                premier
-              />
-              <EtapeTimeline
-                icon={<Package className="h-4 w-4" />}
-                titre={t("etapes.preparation.titre")}
-                description={t("etapes.preparation.description")}
-              />
-              <EtapeTimeline
-                icon={<Truck className="h-4 w-4" />}
-                titre={t("etapes.livraison.titre")}
-                description={t("etapes.livraison.description")}
-                dernier
-              />
-            </ol>
+            <TimelineCommande commande={commande} mode="complete" />
           </div>
 
           {/* ─── Récap articles + totaux ────────────────────────────── */}
@@ -197,56 +179,6 @@ export default async function PageConfirmation({
         )}
       </div>
     </section>
-  );
-}
-
-// ── Étape de la timeline "prochaines étapes" ───────────────────────────
-function EtapeTimeline({
-  icon,
-  titre,
-  description,
-  actif = false,
-  premier = false,
-  dernier = false,
-}: {
-  icon: React.ReactNode;
-  titre: string;
-  description: string;
-  actif?: boolean;
-  premier?: boolean;
-  dernier?: boolean;
-}) {
-  return (
-    <li className="relative flex gap-4">
-      {/* Ligne verticale reliant les étapes */}
-      {!dernier && (
-        <span
-          className="absolute start-4 top-9 h-[calc(100%-4px)] w-px bg-gray-200"
-          aria-hidden="true"
-        />
-      )}
-      {/* Pastille icône */}
-      <span
-        className={`relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-          actif
-            ? "bg-green-500 text-white"
-            : "border border-gray-300 bg-white text-gray-400"
-        }`}
-      >
-        {icon}
-      </span>
-      {/* Texte */}
-      <div className={premier ? "" : "pt-0.5"}>
-        <p
-          className={`text-sm font-medium ${
-            actif ? "text-gray-900" : "text-gray-700"
-          }`}
-        >
-          {titre}
-        </p>
-        <p className="mt-0.5 text-sm text-gray-500">{description}</p>
-      </div>
-    </li>
   );
 }
 

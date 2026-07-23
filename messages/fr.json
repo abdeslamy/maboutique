@@ -15,6 +15,28 @@
     "mesCommandes": "Mes commandes",
     "admin": "Espace admin"
   },
+  "timeline": {
+    "commandeAnnulee": "Commande annulée",
+    "commandeAnnuleeDescription": "Cette commande a été annulée. Contactez-nous si besoin.",
+    "etapes": {
+      "creee": {
+        "titre": "Commande passée",
+        "description": "Vous avez validé votre commande."
+      },
+      "confirmee": {
+        "titre": "Confirmation par téléphone",
+        "description": "Un conseiller vous appelle pour confirmer l'adresse et le contenu."
+      },
+      "en_livraison": {
+        "titre": "Préparation & livraison",
+        "description": "Le colis est confié au livreur, en route vers vous."
+      },
+      "livree": {
+        "titre": "Livrée",
+        "description": "Colis remis en main propre. Merci de votre confiance !"
+      }
+    }
+  },
   "admin": {
     "badge": "Espace administrateur",
     "bonjour": "Bienvenue, {nom}",

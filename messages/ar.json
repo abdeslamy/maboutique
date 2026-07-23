@@ -15,6 +15,28 @@
     "mesCommandes": "طلباتي",
     "admin": "لوحة الإدارة"
   },
+  "timeline": {
+    "commandeAnnulee": "تمّ إلغاء الطلب",
+    "commandeAnnuleeDescription": "تمّ إلغاء هذا الطلب. تواصل معنا إن كنت بحاجة لذلك.",
+    "etapes": {
+      "creee": {
+        "titre": "تمّ تسجيل الطلب",
+        "description": "لقد أكّدت طلبك."
+      },
+      "confirmee": {
+        "titre": "التأكيد عبر الهاتف",
+        "description": "سيتّصل بك مستشار لتأكيد العنوان ومحتوى الطلب."
+      },
+      "en_livraison": {
+        "titre": "التحضير والتوصيل",
+        "description": "الطرد في طريقه إليك."
+      },
+      "livree": {
+        "titre": "تمّ التوصيل",
+        "description": "تمّ تسليم الطرد. شكرًا لثقتك بنا!"
+      }
+    }
+  },
   "admin": {
     "badge": "لوحة الإدارة",
     "bonjour": "مرحبًا، {nom}",

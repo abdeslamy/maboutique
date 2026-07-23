@@ -108,6 +108,15 @@ export type Commande = {
   etatAppel?: EtatAppel;
   /** Notes libres de l'équipe. undefined = aucune note. */
   notes?: string;
+  /**
+   * Horodatages des étapes franchies (ISO 8601).
+   * Utilisés par la Timeline côté client (page confirmation, compte).
+   * undefined = étape pas encore franchie.
+   */
+  confirmedAt?: string;
+  enLivraisonAt?: string;
+  livreeAt?: string;
+  annuleeAt?: string;
   client: {
     nom: string;
     telephone: string;

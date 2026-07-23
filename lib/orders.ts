@@ -38,6 +38,10 @@ function dbToCommande(c: CommandeAvecLignes): Commande {
     statut: c.statut as StatutCommande,
     etatAppel: (c.etatAppel as EtatAppel | null) ?? undefined,
     notes: c.notes ?? undefined,
+    confirmedAt: c.confirmedAt?.toISOString(),
+    enLivraisonAt: c.enLivraisonAt?.toISOString(),
+    livreeAt: c.livreeAt?.toISOString(),
+    annuleeAt: c.annuleeAt?.toISOString(),
     sousTotal: c.sousTotal,
     livraison: c.livraison,
     total: c.total,
@@ -316,6 +320,40 @@ export async function mettreAJourCommandeAdmin(
     return { ok: false, erreur: "etat_appel_invalide" };
   }
 
+  // Si on change le statut, on lit la commande actuelle pour ne remplir
+  // le timestamp que la PREMIÈRE fois qu'un statut est atteint (pas d'écrasement).
+  let horodatages: {
+    confirmedAt?: Date;
+    enLivraisonAt?: Date;
+    livreeAt?: Date;
+    annuleeAt?: Date;
+  } = {};
+
+  if (modifs.statut) {
+    const existante = await prisma.commande.findUnique({
+      where: { id },
+      select: {
+        confirmedAt: true,
+        enLivraisonAt: true,
+        livreeAt: true,
+        annuleeAt: true,
+      },
+    });
+    if (!existante) {
+      return { ok: false, erreur: "commande_introuvable" };
+    }
+    const now = new Date();
+    if (modifs.statut === "confirmee" && !existante.confirmedAt) {
+      horodatages.confirmedAt = now;
+    } else if (modifs.statut === "en_livraison" && !existante.enLivraisonAt) {
+      horodatages.enLivraisonAt = now;
+    } else if (modifs.statut === "livree" && !existante.livreeAt) {
+      horodatages.livreeAt = now;
+    } else if (modifs.statut === "annulee" && !existante.annuleeAt) {
+      horodatages.annuleeAt = now;
+    }
+  }
+
   try {
     const row = await prisma.commande.update({
       where: { id },
@@ -329,6 +367,7 @@ export async function mettreAJourCommandeAdmin(
             : modifs.notes.trim() === ""
             ? null
             : modifs.notes.trim(),
+        ...horodatages,
       },
       include: { lignes: true },
     });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { LogOut, Package, Settings, Shield, UserIcon } from "lucide-react";
+import { LogIn, LogOut, Package, Settings, Shield, UserIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -68,9 +68,12 @@ export default function MenuCompte() {
     return (
       <Link
         href="/connexion"
-        className="inline-block rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-black"
+        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-black sm:px-3"
+        aria-label={t("connexion")}
       >
-        {t("connexion")}
+        {/* Icône sur mobile, texte sur desktop */}
+        <LogIn className="h-4 w-4 sm:hidden" aria-hidden="true" />
+        <span className="hidden sm:inline">{t("connexion")}</span>
       </Link>
     );
   }

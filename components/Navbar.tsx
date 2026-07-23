@@ -15,11 +15,11 @@ export default async function Navbar({ locale }: { locale: Locale }) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/90 backdrop-blur">
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-4">
-        {/* ── Logo (côté "start") ─────────────────────────────────────── */}
+      <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:h-16 sm:gap-6 sm:px-4">
+        {/* ── Logo (côté "start"). whitespace-nowrap = pas de retour à la ligne ── */}
         <Link
           href="/"
-          className="text-lg font-semibold tracking-tight text-black"
+          className="shrink-0 whitespace-nowrap text-base font-semibold tracking-tight text-black sm:text-lg"
         >
           {tMeta("titreSite")}
         </Link>
@@ -39,11 +39,11 @@ export default async function Navbar({ locale }: { locale: Locale }) {
         </ul>
 
         {/* ── Zone "end" : panier, connexion, langue ───────────────── */}
-        <div className="flex items-center gap-3 text-sm">
-          {/* Panier — placeholder pour l'étape 5 */}
+        <div className="flex shrink-0 items-center gap-1 text-sm sm:gap-3">
+          {/* Panier */}
           <Link
             href="/panier"
-            className="rounded-md px-2 py-1 text-gray-700 hover:bg-gray-100 hover:text-black"
+            className="rounded-md px-1.5 py-1 text-gray-700 hover:bg-gray-100 hover:text-black sm:px-2"
             aria-label={t("panier")}
           >
             <span className="inline-flex items-center gap-1">

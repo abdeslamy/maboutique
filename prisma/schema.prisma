@@ -104,6 +104,13 @@ model Commande {
   // Notes libres de l'équipe (instructions livraison, historique d'échanges...).
   notes         String?
   createdAt     DateTime        @default(now())
+  // Horodatages franchissement de chaque étape — remplis automatiquement
+  // par mettreAJourCommandeAdmin quand le statut passe à la valeur cible.
+  // Utilisés par la Timeline visible côté client (page confirmation + compte).
+  confirmedAt   DateTime?
+  enLivraisonAt DateTime?
+  livreeAt      DateTime?
+  annuleeAt     DateTime?
 
   utilisateurId String?
   utilisateur   Utilisateur?    @relation(fields: [utilisateurId], references: [id], onDelete: SetNull)
