@@ -1,71 +1,83 @@
 "use client";
 
 import { useState } from "react";
-import { Phone, MapPin, User, Check } from "lucide-react";
+import { Phone, MapPin, User, Check, Save } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { formatPrix } from "@/lib/format";
 import { WILAYAS } from "@/lib/wilayas";
-import type { Commande, StatutCommande } from "@/lib/types";
+import { ETATS_APPEL } from "@/lib/types";
+import type { Commande, EtatAppel, StatutCommande } from "@/lib/types";
 import type { Locale } from "@/i18n/routing";
 import BoutonRetour from "@/components/BoutonRetour";
 import PastilleStatut from "./PastilleStatut";
 
+const STATUTS: StatutCommande[] = [
+  "en_attente",
+  "confirmee",
+  "en_livraison",
+  "livree",
+  "annulee",
+];
+
 /**
  * Détail d'une commande côté admin :
- *  - Infos client (avec téléphone cliquable pour appeler)
- *  - Articles avec snapshot des prix
- *  - Totaux
- *  - Zone de changement de statut (boutons pour les transitions autorisées)
+ *  - Infos client (téléphone cliquable)
+ *  - Articles + totaux
+ *  - Section "Gestion" : statut LIBRE, état d'appel, notes → 1 bouton Enregistrer
  */
 export default function DetailCommandeAdmin({
   commande: commandeInitiale,
-  transitionsAutorisees: transitionsInitiales,
 }: {
   commande: Commande;
-  transitionsAutorisees: StatutCommande[];
 }) {
   const t = useTranslations("admin.commandes");
   const locale = useLocale() as Locale;
   const router = useRouter();
 
   const [commande, setCommande] = useState<Commande>(commandeInitiale);
-  const [transitions, setTransitions] =
-    useState<StatutCommande[]>(transitionsInitiales);
-  const [enChangement, setEnChangement] = useState(false);
+
+  // États du formulaire de gestion
+  const [statut, setStatut] = useState<StatutCommande>(commandeInitiale.statut);
+  const [etatAppel, setEtatAppel] = useState<EtatAppel>(
+    commandeInitiale.etatAppel ?? "non_appele"
+  );
+  const [notes, setNotes] = useState(commandeInitiale.notes ?? "");
+
+  const [enregistrement, setEnregistrement] = useState(false);
   const [succes, setSucces] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
   const wilaya = WILAYAS.find((w) => w.code === commande.client.wilaya);
 
-  async function changerStatut(nouveau: StatutCommande) {
-    setEnChangement(true);
+  // Y a-t-il des changements non enregistrés ?
+  const modifie =
+    statut !== commande.statut ||
+    etatAppel !== (commande.etatAppel ?? "non_appele") ||
+    notes !== (commande.notes ?? "");
+
+  async function enregistrer() {
+    setEnregistrement(true);
     setErreur(null);
     setSucces(false);
     try {
-      const res = await fetch(
-        `/api/admin/commandes/${commande.id}/statut`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ statut: nouveau }),
-        }
-      );
+      const res = await fetch(`/api/admin/commandes/${commande.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ statut, etatAppel, notes }),
+      });
       const data = await res.json();
       if (!res.ok) {
         setErreur(data.erreur ?? "erreur_serveur");
         return;
       }
       setCommande(data.commande);
-      // Recalcule les transitions autorisées côté client
-      setTransitions(calculerTransitions(data.commande.statut));
       setSucces(true);
-      // Rafraîchit aussi la page côté serveur (pour d'éventuels autres composants)
       router.refresh();
     } catch {
       setErreur("erreur_serveur");
     } finally {
-      setEnChangement(false);
+      setEnregistrement(false);
     }
   }
 
@@ -98,53 +110,91 @@ export default function DetailCommandeAdmin({
         <PastilleStatut statut={commande.statut} taille="md" />
       </header>
 
-      {/* Feedback */}
-      {succes && (
-        <p
-          role="status"
-          className="mb-4 inline-flex items-center gap-2 rounded-lg bg-green-50 px-4 py-2 text-sm text-green-700"
-        >
-          <Check className="h-4 w-4" />
-          {t("statutMisAJour")}
-        </p>
-      )}
-      {erreur && (
-        <p
-          role="alert"
-          className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700"
-        >
-          {t.has(`erreurs.${erreur}`)
-            ? t(`erreurs.${erreur}`)
-            : t("erreurs.erreur_serveur")}
-        </p>
-      )}
-
-      {/* Actions de statut */}
+      {/* ─── Section Gestion (statut + état d'appel + notes) ──────────── */}
       <section className="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
-        <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-gray-500">
-          {t("changerStatut")}
+        <h2 className="mb-5 text-sm font-medium uppercase tracking-wide text-gray-500">
+          {t("gestion")}
         </h2>
-        {transitions.length === 0 ? (
-          <p className="text-sm text-gray-500">{t("statutFinal")}</p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {transitions.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => changerStatut(s)}
-                disabled={enChangement}
-                className={`rounded-full border px-4 py-2 text-sm font-medium transition disabled:opacity-40 ${
-                  s === "annulee"
-                    ? "border-red-300 text-red-700 hover:bg-red-50"
-                    : "border-black bg-black text-white hover:bg-gray-800"
-                }`}
-              >
-                {t(`actions.${s}`)}
-              </button>
-            ))}
-          </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* Statut logistique */}
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium text-gray-700">{t("statut")}</span>
+            <select
+              value={statut}
+              onChange={(e) => setStatut(e.target.value as StatutCommande)}
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none"
+            >
+              {STATUTS.map((s) => (
+                <option key={s} value={s}>
+                  {t(`statuts.${s}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {/* État d'appel */}
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium text-gray-700">{t("etatAppel")}</span>
+            <select
+              value={etatAppel}
+              onChange={(e) => setEtatAppel(e.target.value as EtatAppel)}
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none"
+            >
+              {ETATS_APPEL.map((e) => (
+                <option key={e} value={e}>
+                  {t(`etatsAppel.${e}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        {/* Notes */}
+        <label className="mt-4 flex flex-col gap-1 text-sm">
+          <span className="font-medium text-gray-700">{t("notes")}</span>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={3}
+            placeholder={t("notesPlaceholder")}
+            className="rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none"
+          />
+        </label>
+
+        {/* Feedback */}
+        {succes && (
+          <p
+            role="status"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-green-50 px-4 py-2 text-sm text-green-700"
+          >
+            <Check className="h-4 w-4" />
+            {t("enregistre")}
+          </p>
         )}
+        {erreur && (
+          <p
+            role="alert"
+            className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700"
+          >
+            {t.has(`erreurs.${erreur}`)
+              ? t(`erreurs.${erreur}`)
+              : t("erreurs.erreur_serveur")}
+          </p>
+        )}
+
+        {/* Bouton enregistrer */}
+        <div className="mt-5">
+          <button
+            type="button"
+            onClick={enregistrer}
+            disabled={enregistrement || !modifie}
+            className="inline-flex items-center gap-2 rounded-full bg-black px-6 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800 disabled:opacity-40"
+          >
+            <Save className="h-4 w-4" />
+            {enregistrement ? t("enregistrement") : t("enregistrer")}
+          </button>
+        </div>
       </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -250,17 +300,4 @@ function Ligne({
       <span>{montant}</span>
     </div>
   );
-}
-
-// Duplication locale de la machine à états (client-side)
-// Pour éviter d'importer lib/orders qui utilise Prisma.
-function calculerTransitions(actuel: StatutCommande): StatutCommande[] {
-  const T: Record<StatutCommande, StatutCommande[]> = {
-    en_attente: ["confirmee", "annulee"],
-    confirmee: ["en_livraison", "annulee"],
-    en_livraison: ["livree", "annulee"],
-    livree: [],
-    annulee: [],
-  };
-  return T[actuel] ?? [];
 }

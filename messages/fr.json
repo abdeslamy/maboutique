@@ -62,9 +62,15 @@
       "sousTotal": "Sous-total",
       "livraison": "Livraison",
       "total_montant": "Total",
-      "changerStatut": "Changer le statut",
-      "statutFinal": "Cette commande est dans un statut final — plus de changement possible.",
-      "statutMisAJour": "Statut mis à jour avec succès.",
+      "gestion": "Gestion de la commande",
+      "statut": "Statut",
+      "etatAppel": "État d'appel",
+      "notes": "Observations / Notes",
+      "notesPlaceholder": "Demandes du client, instructions de livraison, points d'attention…",
+      "aNotes": "Cette commande contient des notes",
+      "enregistrer": "Enregistrer",
+      "enregistrement": "Enregistrement…",
+      "enregistre": "Modifications enregistrées.",
       "filtres": {
         "tout": "Toutes",
         "en_attente": "En attente",
@@ -80,19 +86,27 @@
         "livree": "Livrée",
         "annulee": "Annulée"
       },
-      "actions": {
-        "en_attente": "Remettre en attente",
-        "confirmee": "Confirmer",
-        "en_livraison": "Passer en livraison",
-        "livree": "Marquer livrée",
-        "annulee": "Annuler la commande"
+      "etatsAppel": {
+        "non_appele": "Pas encore appelé",
+        "confirme": "Confirmé par le client",
+        "ne_repond_pas": "Ne répond pas",
+        "telephone_eteint": "Téléphone éteint",
+        "injoignable": "Injoignable (plusieurs tentatives)",
+        "faux_numero": "Faux numéro",
+        "annule_client": "Annulé par le client",
+        "report_livraison": "Report de livraison demandé",
+        "demande_modification": "Modification demandée",
+        "absent_livraison": "Absent à la livraison",
+        "colis_refuse": "Colis refusé",
+        "attente_rappel": "En attente de rappel",
+        "doublon": "Doublon de commande"
       },
       "erreurs": {
         "non_connecte": "Tu dois être connecté.",
         "acces_refuse": "Accès refusé.",
         "commande_introuvable": "Commande introuvable.",
         "statut_invalide": "Statut invalide.",
-        "transition_interdite": "Cette transition de statut n'est pas autorisée.",
+        "etat_appel_invalide": "État d'appel invalide.",
         "json_invalide": "Données invalides.",
         "erreur_serveur": "Une erreur est survenue. Réessaie."
       }

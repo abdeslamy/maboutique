@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, StickyNote } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { formatPrix } from "@/lib/format";
@@ -153,14 +153,25 @@ export default function ListeCommandesAdmin({
                     </p>
                   </div>
 
-                  {/* Colonne 2 : client + wilaya */}
+                  {/* Colonne 2 : client + wilaya + état d'appel + note */}
                   <div className="flex-1 min-w-0">
-                    <p className="truncate font-medium text-gray-900">
+                    <p className="flex items-center gap-1.5 truncate font-medium text-gray-900">
                       {c.client.nom}
+                      {c.notes && (
+                        <StickyNote
+                          className="h-3.5 w-3.5 shrink-0 text-amber-500"
+                          aria-label={t("aNotes")}
+                        />
+                      )}
                     </p>
                     <p className="mt-0.5 text-xs text-gray-500">
                       {wilaya?.nom[locale] ?? c.client.wilaya} · {c.client.telephone}
                     </p>
+                    {c.etatAppel && c.etatAppel !== "non_appele" && (
+                      <p className="mt-1 text-xs font-medium text-gray-600">
+                        📞 {t(`etatsAppel.${c.etatAppel}`)}
+                      </p>
+                    )}
                   </div>
 
                   {/* Colonne 3 : nb articles */}

@@ -15,7 +15,12 @@ import { prisma } from "@/lib/prisma";
 import { getProduitParId } from "./products";
 import { FRAIS_LIVRAISON } from "./format";
 import { estWilayaValide } from "./wilayas";
-import type { Commande, LigneCommande, StatutCommande } from "./types";
+import type {
+  Commande,
+  EtatAppel,
+  LigneCommande,
+  StatutCommande,
+} from "./types";
 import type { CommandeModel, LigneCommandeModel } from "@/lib/generated/prisma/models";
 import type { Locale } from "@/i18n/routing";
 
@@ -31,6 +36,8 @@ function dbToCommande(c: CommandeAvecLignes): Commande {
     date: c.createdAt.toISOString(),
     utilisateurId: c.utilisateurId ?? undefined,
     statut: c.statut as StatutCommande,
+    etatAppel: (c.etatAppel as EtatAppel | null) ?? undefined,
+    notes: c.notes ?? undefined,
     sousTotal: c.sousTotal,
     livraison: c.livraison,
     total: c.total,
@@ -86,58 +93,78 @@ export async function getAllCommandes(): Promise<Commande[]> {
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Machine à états — transitions autorisées
+// Mise à jour admin — statut / état d'appel / notes
 // ──────────────────────────────────────────────────────────────────────
 //
-//   en_attente ─→ confirmee ─→ en_livraison ─→ livree
-//        │            │              │
-//        └────────────┴──────────────┴────→ annulee
-//
-const TRANSITIONS: Record<StatutCommande, StatutCommande[]> = {
-  en_attente: ["confirmee", "annulee"],
-  confirmee: ["en_livraison", "annulee"],
-  en_livraison: ["livree", "annulee"],
-  livree: [], // terminal
-  annulee: [], // terminal
-};
+// Choix produit : le statut logistique est désormais LIBRE (l'admin peut
+// revenir en arrière ou sauter des étapes). Pas de machine à états stricte.
+// On valide seulement que les valeurs envoyées font partie des valeurs connues.
 
-export function transitionsAutorisees(
-  actuel: StatutCommande
-): StatutCommande[] {
-  return TRANSITIONS[actuel] ?? [];
-}
+const STATUTS_VALIDES: StatutCommande[] = [
+  "en_attente",
+  "confirmee",
+  "en_livraison",
+  "livree",
+  "annulee",
+];
+
+const ETATS_APPEL_VALIDES: EtatAppel[] = [
+  "non_appele",
+  "confirme",
+  "ne_repond_pas",
+  "telephone_eteint",
+  "injoignable",
+  "faux_numero",
+  "annule_client",
+  "report_livraison",
+  "demande_modification",
+  "absent_livraison",
+  "colis_refuse",
+  "attente_rappel",
+  "doublon",
+];
 
 /**
- * Change le statut d'une commande. Vérifie que la transition est autorisée
- * par la machine à états.
+ * Met à jour les champs de gestion d'une commande (côté admin).
+ * Chaque champ est optionnel : on ne modifie que ce qui est fourni.
  */
-export async function mettreAJourStatutCommande(
+export async function mettreAJourCommandeAdmin(
   id: string,
-  nouveauStatut: StatutCommande
+  modifs: {
+    statut?: StatutCommande;
+    etatAppel?: EtatAppel;
+    notes?: string;
+  }
 ): Promise<
-  | { ok: true; commande: Commande }
-  | { ok: false; erreur: string }
+  { ok: true; commande: Commande } | { ok: false; erreur: string }
 > {
-  const existante = await prisma.commande.findUnique({
-    where: { id },
-    select: { statut: true },
-  });
-  if (!existante) return { ok: false, erreur: "commande_introuvable" };
-
-  const actuel = existante.statut as StatutCommande;
-  if (!transitionsAutorisees(actuel).includes(nouveauStatut)) {
-    return { ok: false, erreur: "transition_interdite" };
+  // Validation des valeurs connues
+  if (modifs.statut && !STATUTS_VALIDES.includes(modifs.statut)) {
+    return { ok: false, erreur: "statut_invalide" };
+  }
+  if (modifs.etatAppel && !ETATS_APPEL_VALIDES.includes(modifs.etatAppel)) {
+    return { ok: false, erreur: "etat_appel_invalide" };
   }
 
   try {
     const row = await prisma.commande.update({
       where: { id },
-      data: { statut: nouveauStatut },
+      data: {
+        statut: modifs.statut,
+        etatAppel: modifs.etatAppel,
+        // notes : chaîne vide → on efface (null). Sinon on enregistre.
+        notes:
+          modifs.notes === undefined
+            ? undefined
+            : modifs.notes.trim() === ""
+            ? null
+            : modifs.notes.trim(),
+      },
       include: { lignes: true },
     });
     return { ok: true, commande: dbToCommande(row) };
   } catch {
-    return { ok: false, erreur: "erreur_serveur" };
+    return { ok: false, erreur: "commande_introuvable" };
   }
 }
 

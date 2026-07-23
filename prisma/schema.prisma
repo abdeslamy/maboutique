@@ -98,6 +98,11 @@ model Commande {
   livraison     Int
   total         Int
   statut        String          @default("en_attente")
+  // État du contact client (call center COD). Optionnel car les commandes
+  // existantes n'en ont pas → null par défaut. Voir EtatAppel dans lib/types.ts.
+  etatAppel     String?
+  // Notes libres de l'équipe (instructions livraison, historique d'échanges...).
+  notes         String?
   createdAt     DateTime        @default(now())
 
   utilisateurId String?

@@ -62,9 +62,15 @@
       "sousTotal": "المجموع الفرعي",
       "livraison": "التوصيل",
       "total_montant": "الإجمالي",
-      "changerStatut": "تغيير الحالة",
-      "statutFinal": "هذا الطلب في حالة نهائية — لا يمكن تغييرها.",
-      "statutMisAJour": "تمّ تحديث الحالة بنجاح.",
+      "gestion": "إدارة الطلب",
+      "statut": "الحالة",
+      "etatAppel": "حالة الاتصال",
+      "notes": "ملاحظات",
+      "notesPlaceholder": "طلبات الزبون، تعليمات التوصيل، نقاط للانتباه…",
+      "aNotes": "يحتوي هذا الطلب على ملاحظات",
+      "enregistrer": "حفظ",
+      "enregistrement": "جارٍ الحفظ…",
+      "enregistre": "تمّ حفظ التعديلات.",
       "filtres": {
         "tout": "الكل",
         "en_attente": "قيد الانتظار",
@@ -80,19 +86,27 @@
         "livree": "تمّ التوصيل",
         "annulee": "ملغاة"
       },
-      "actions": {
-        "en_attente": "إعادة إلى الانتظار",
-        "confirmee": "تأكيد الطلب",
-        "en_livraison": "تحويل إلى التوصيل",
-        "livree": "وضع كـ مُسلَّم",
-        "annulee": "إلغاء الطلب"
+      "etatsAppel": {
+        "non_appele": "لم يُتّصل به بعد",
+        "confirme": "أكّد الزبون الطلب",
+        "ne_repond_pas": "لا يردّ",
+        "telephone_eteint": "الهاتف مغلق",
+        "injoignable": "يتعذّر الوصول إليه (عدّة محاولات)",
+        "faux_numero": "رقم خاطئ",
+        "annule_client": "ألغاه الزبون",
+        "report_livraison": "طلب تأجيل التوصيل",
+        "demande_modification": "طلب تعديلًا",
+        "absent_livraison": "غائب عند التوصيل",
+        "colis_refuse": "رفض الطرد",
+        "attente_rappel": "في انتظار معاودة الاتصال",
+        "doublon": "طلب مكرّر"
       },
       "erreurs": {
         "non_connecte": "يجب تسجيل الدخول.",
         "acces_refuse": "الوصول مرفوض.",
         "commande_introuvable": "الطلب غير موجود.",
         "statut_invalide": "الحالة غير صالحة.",
-        "transition_interdite": "هذا الانتقال بين الحالات غير مسموح.",
+        "etat_appel_invalide": "حالة الاتصال غير صالحة.",
         "json_invalide": "بيانات غير صالحة.",
         "erreur_serveur": "حدث خطأ، حاول مجدّدًا."
       }
