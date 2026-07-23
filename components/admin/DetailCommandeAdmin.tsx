@@ -90,8 +90,7 @@ export default function DetailCommandeAdmin({
       {/* En-tête */}
       <header className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="font-mono text-sm text-gray-500">#{commande.id}</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-semibold tracking-tight">
             {t("commande")} — {commande.client.nom}
           </h1>
           <p className="mt-1 text-sm text-gray-600">
@@ -271,7 +270,7 @@ export default function DetailCommandeAdmin({
           />
           <hr className="my-3 border-gray-200" />
           <Ligne
-            libelle={t("total")}
+            libelle={t("total_montant")}
             montant={formatPrix(commande.total, locale)}
             enGras
           />

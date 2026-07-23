@@ -9,6 +9,7 @@ import { WILAYAS } from "@/lib/wilayas";
 import type { Commande, StatutCommande } from "@/lib/types";
 import type { Locale } from "@/i18n/routing";
 import PastilleStatut from "./PastilleStatut";
+import IconeEtatAppel from "./IconeEtatAppel";
 
 type FiltreStatut = StatutCommande | "tout";
 
@@ -133,14 +134,12 @@ export default function ListeCommandesAdmin({
                 <Link
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   href={`/admin/commandes/${c.id}` as any}
-                  className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center"
+                  className="block p-4 sm:flex sm:items-center sm:gap-4"
                 >
-                  {/* Colonne 1 : id + date */}
-                  <div className="w-40 shrink-0">
-                    <p className="font-mono text-xs text-gray-500">
-                      #{c.id.slice(0, 8)}
-                    </p>
-                    <p className="mt-0.5 text-xs text-gray-500">
+                  {/* ─── Zone info client (mobile : haut / desktop : gauche) ── */}
+                  <div className="min-w-0 flex-1">
+                    {/* Date + wilaya en méta */}
+                    <p className="text-xs text-gray-500">
                       {new Date(c.date).toLocaleDateString(
                         locale === "ar" ? "ar-DZ" : "fr-DZ",
                         {
@@ -150,12 +149,12 @@ export default function ListeCommandesAdmin({
                           minute: "2-digit",
                         }
                       )}
+                      <span className="mx-1.5">·</span>
+                      {wilaya?.nom[locale] ?? c.client.wilaya}
                     </p>
-                  </div>
 
-                  {/* Colonne 2 : client + wilaya + état d'appel + note */}
-                  <div className="flex-1 min-w-0">
-                    <p className="flex items-center gap-1.5 truncate font-medium text-gray-900">
+                    {/* Nom du client + éventuelle icône notes */}
+                    <p className="mt-1 flex items-center gap-1.5 truncate text-base font-medium text-gray-900">
                       {c.client.nom}
                       {c.notes && (
                         <StickyNote
@@ -164,29 +163,38 @@ export default function ListeCommandesAdmin({
                         />
                       )}
                     </p>
-                    <p className="mt-0.5 text-xs text-gray-500">
-                      {wilaya?.nom[locale] ?? c.client.wilaya} · {c.client.telephone}
-                    </p>
-                    {c.etatAppel && c.etatAppel !== "non_appele" && (
-                      <p className="mt-1 text-xs font-medium text-gray-600">
-                        📞 {t(`etatsAppel.${c.etatAppel}`)}
-                      </p>
-                    )}
+
+                    {/* Téléphone + état d'appel s'il est défini */}
+                    <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+                      <span>{c.client.telephone}</span>
+                      {c.etatAppel && c.etatAppel !== "non_appele" && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5">
+                          <IconeEtatAppel
+                            etat={c.etatAppel}
+                            className="h-3.5 w-3.5"
+                          />
+                          <span className="font-medium text-gray-700">
+                            {t(`etatsAppel.${c.etatAppel}`)}
+                          </span>
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Colonne 3 : nb articles */}
-                  <p className="w-24 shrink-0 text-sm text-gray-600">
-                    {nbArticles} {t("articles")}
-                  </p>
-
-                  {/* Colonne 4 : total */}
-                  <p className="w-28 shrink-0 text-end font-semibold text-black">
-                    {formatPrix(c.total, locale)}
-                  </p>
-
-                  {/* Colonne 5 : statut */}
-                  <div className="w-32 shrink-0 text-end">
-                    <PastilleStatut statut={c.statut} />
+                  {/* ─── Zone récap (mobile : bas, séparée / desktop : droite) ── */}
+                  <div className="mt-3 flex items-center justify-between gap-3 border-t border-gray-100 pt-3 sm:mt-0 sm:border-none sm:pt-0">
+                    <p className="text-xs text-gray-500 sm:hidden">
+                      {nbArticles} {t("articles")}
+                    </p>
+                    <div className="flex items-center gap-3 sm:flex-col sm:items-end sm:gap-1">
+                      <PastilleStatut statut={c.statut} />
+                      <span className="text-base font-semibold text-black">
+                        {formatPrix(c.total, locale)}
+                      </span>
+                      <span className="hidden text-xs text-gray-500 sm:inline">
+                        {nbArticles} {t("articles")}
+                      </span>
+                    </div>
                   </div>
                 </Link>
               </li>
