@@ -25,6 +25,8 @@ export default function ProductCard({ produit }: { produit: Produit }) {
   const nom = produit.nom[locale];
   // Première "image" du tableau pour la vignette (multi-images : voir amélioration 3).
   const imageVignette = produit.images[0];
+  // Distinction : URL Cloudinary (photo réelle) vs ancienne classe Tailwind (fallback emoji).
+  const estUrl = !!imageVignette && /^https?:\/\//.test(imageVignette);
 
   return (
     <Link
@@ -34,14 +36,25 @@ export default function ProductCard({ produit }: { produit: Produit }) {
       aria-label={nom}
     >
       {/* Image / placeholder : un léger zoom au survol pour faire "vivant". */}
-      <div
-        className={`flex h-44 items-center justify-center overflow-hidden text-6xl transition ${imageVignette}`}
-        aria-hidden="true"
-      >
-        <span className="transition duration-300 group-hover:scale-110">
-          {produit.emoji}
-        </span>
-      </div>
+      {estUrl ? (
+        <div className="h-44 overflow-hidden bg-gray-50">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imageVignette}
+            alt={nom}
+            className="h-full w-full object-cover transition duration-300 group-hover:scale-110"
+          />
+        </div>
+      ) : (
+        <div
+          className={`flex h-44 items-center justify-center overflow-hidden text-6xl transition ${imageVignette ?? "bg-gray-100"}`}
+          aria-hidden="true"
+        >
+          <span className="transition duration-300 group-hover:scale-110">
+            {produit.emoji}
+          </span>
+        </div>
+      )}
 
       {/* Contenu */}
       <div className="flex flex-1 flex-col gap-3 p-4">

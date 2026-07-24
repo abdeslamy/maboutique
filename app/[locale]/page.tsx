@@ -1,22 +1,14 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import ProductCard from "@/components/ProductCard";
-import { getProduitsParIds } from "@/lib/products";
-
-// IDs des produits "coups de cœur" affichés en page d'accueil (1 par catégorie + 1 bonus).
-// Choix figé ici plutôt qu'aléatoire pour avoir un rendu stable.
-const PRODUITS_VEDETTES_IDS = [
-  "tshirt-coton-blanc",
-  "ecouteurs-bluetooth",
-  "tapis-berbere",
-  "montre-connectee",
-];
+import { getAllProduits } from "@/lib/products";
 
 export default async function Accueil() {
   const t = await getTranslations("accueil");
 
-  // Récupération des 4 produits vedettes depuis la base, dans l'ordre demandé.
-  const vedettes = await getProduitsParIds(PRODUITS_VEDETTES_IDS);
+  // Coups de cœur = les 4 produits les plus récemment ajoutés en base
+  // (getAllProduits trie déjà par createdAt desc).
+  const vedettes = (await getAllProduits()).slice(0, 4);
 
   return (
     <>

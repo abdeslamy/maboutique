@@ -42,17 +42,36 @@ export default function GalerieProduit({
     setIndex((i) => (i + 1) % images.length);
   }
 
+  // Détecte si `val` est une vraie URL d'image (Cloudinary) ou une ancienne classe bg-*.
+  const estUrl = (val: string) => /^https?:\/\//.test(val);
+  const imageCourante = images[index];
+
   return (
     <div className="flex flex-col gap-3">
       {/* ─ Image principale ─────────────────────────────────────────── */}
       <div className="relative">
-        <div
-          className={`flex aspect-square items-center justify-center rounded-3xl text-9xl transition-colors duration-300 ${images[index]}`}
-          aria-label={`${altPrefix} — image ${index + 1} / ${images.length}`}
-          role="img"
-        >
-          <span>{emoji}</span>
-        </div>
+        {estUrl(imageCourante) ? (
+          <div
+            className="aspect-square overflow-hidden rounded-3xl bg-gray-50"
+            aria-label={`${altPrefix} — image ${index + 1} / ${images.length}`}
+            role="img"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imageCourante}
+              alt={`${altPrefix} — ${index + 1}`}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        ) : (
+          <div
+            className={`flex aspect-square items-center justify-center rounded-3xl text-9xl transition-colors duration-300 ${imageCourante}`}
+            aria-label={`${altPrefix} — image ${index + 1} / ${images.length}`}
+            role="img"
+          >
+            <span>{emoji}</span>
+          </div>
+        )}
 
         {/* Flèche "précédent" — collée au "start" (left en LTR, right en RTL) */}
         <button
@@ -84,6 +103,11 @@ export default function GalerieProduit({
       <div className="flex gap-2 overflow-x-auto pb-1">
         {images.map((img, i) => {
           const actif = i === index;
+          const cadre = `flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl transition focus:outline-none ${
+            actif
+              ? "ring-2 ring-black ring-offset-2"
+              : "opacity-80 hover:opacity-100"
+          }`;
           return (
             <button
               key={i}
@@ -91,13 +115,18 @@ export default function GalerieProduit({
               onClick={() => setIndex(i)}
               aria-label={`${altPrefix} — image ${i + 1}`}
               aria-current={actif ? "true" : undefined}
-              className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl text-2xl transition focus:outline-none ${img} ${
-                actif
-                  ? "ring-2 ring-black ring-offset-2"
-                  : "opacity-80 hover:opacity-100"
-              }`}
+              className={estUrl(img) ? `${cadre} bg-gray-50` : `${cadre} text-2xl ${img}`}
             >
-              <span aria-hidden="true">{emoji}</span>
+              {estUrl(img) ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={img}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span aria-hidden="true">{emoji}</span>
+              )}
             </button>
           );
         })}
