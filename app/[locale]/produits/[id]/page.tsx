@@ -68,7 +68,9 @@ export default async function PageProduitDetail({
             <h2 className="text-sm font-medium uppercase tracking-wide text-gray-500">
               {t("description")}
             </h2>
-            <p className="leading-relaxed text-gray-700">{description}</p>
+            <p className="whitespace-pre-line leading-relaxed text-gray-700">
+              {description}
+            </p>
           </div>
 
           <p className="text-sm font-medium text-green-700">{t("enStock")}</p>

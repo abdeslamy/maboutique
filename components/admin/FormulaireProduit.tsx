@@ -416,16 +416,21 @@ function ZoneTexte({
   required?: boolean;
   dir?: "ltr" | "rtl";
 }) {
+  // Compteur de caractères — repère utile pour l'admin pendant la saisie.
+  const nbCaracteres = value.length;
   return (
-    <label className="flex flex-col gap-1 text-sm">
-      <span className="font-medium text-gray-700">{label}</span>
+    <label className="flex flex-col gap-2 text-sm">
+      <div className="flex items-center justify-between">
+        <span className="font-medium text-gray-700">{label}</span>
+        <span className="text-xs text-gray-400">{nbCaracteres}</span>
+      </div>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
         dir={dir}
-        rows={3}
-        className="rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none"
+        rows={8}
+        className="min-h-48 resize-y rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm leading-relaxed text-gray-900 shadow-sm transition placeholder:text-gray-400 hover:border-gray-400 focus:border-black focus:shadow-md focus:outline-none focus:ring-2 focus:ring-black/5"
       />
     </label>
   );
