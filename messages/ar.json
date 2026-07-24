@@ -210,7 +210,9 @@
     "sousTitre": "منتجات مختارة بعناية، مع التوصيل إلى جميع ولايات الجزائر.",
     "voirProduits": "تصفّح المنتجات",
     "coupsDeCoeur": "أبرز اختياراتنا",
-    "toutVoir": "عرض الكل"
+    "toutVoir": "عرض الكل",
+    "recherchePlaceholder": "عمّ تبحث اليوم؟",
+    "rechercher": "بحث"
   },
   "footer": {
     "droits": "جميع الحقوق محفوظة.",
@@ -226,7 +228,8 @@
     "tout": "الكل",
     "mode": "موضة",
     "electronique": "إلكترونيات",
-    "maison": "منزل ودكور"
+    "maison": "منزل ودكور",
+    "camping": "تخييم"
   },
   "produit": {
     "voirDetail": "عرض التفاصيل",

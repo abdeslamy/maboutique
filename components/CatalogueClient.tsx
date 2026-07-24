@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import ProductCard from "./ProductCard";
 import { useProducts } from "@/context/ProductsContext";
@@ -12,6 +13,7 @@ const CATEGORIES: (Categorie | "tout")[] = [
   "mode",
   "electronique",
   "maison",
+  "camping",
 ];
 
 /**
@@ -28,8 +30,12 @@ export default function CatalogueClient() {
   const tCat = useTranslations("categories");
   const { produits } = useProducts();
 
+  // Si on arrive depuis la homepage avec ?q=xxx, on pré-remplit le champ.
+  const searchParams = useSearchParams();
+  const rechercheInitiale = searchParams.get("q") ?? "";
+
   // États : chaîne de recherche + catégorie active
-  const [recherche, setRecherche] = useState("");
+  const [recherche, setRecherche] = useState(rechercheInitiale);
   const [categorie, setCategorie] = useState<Categorie | "tout">("tout");
 
   // Liste filtrée : on la recalcule seulement quand recherche, categorie, locale

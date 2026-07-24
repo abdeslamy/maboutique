@@ -5,7 +5,7 @@
 // ──────────────────────────────────────────────────────────────────────────
 
 /** Catégories de produits supportées dans la boutique. */
-export type Categorie = "mode" | "electronique" | "maison";
+export type Categorie = "mode" | "electronique" | "maison" | "camping";
 
 /** Un texte qui existe dans nos deux langues. */
 export type TexteBilingue = {

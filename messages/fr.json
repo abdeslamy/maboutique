@@ -210,7 +210,9 @@
     "sousTitre": "Des produits soigneusement choisis, livrés partout en Algérie.",
     "voirProduits": "Voir les produits",
     "coupsDeCoeur": "Nos coups de cœur",
-    "toutVoir": "Tout voir"
+    "toutVoir": "Tout voir",
+    "recherchePlaceholder": "Que cherchez-vous aujourd'hui ?",
+    "rechercher": "Rechercher"
   },
   "footer": {
     "droits": "Tous droits réservés.",
@@ -226,7 +228,8 @@
     "tout": "Tout",
     "mode": "Mode",
     "electronique": "Électronique",
-    "maison": "Maison & déco"
+    "maison": "Maison & déco",
+    "camping": "Camping"
   },
   "produit": {
     "voirDetail": "Voir le détail",

@@ -288,6 +288,7 @@ export default function FormulaireProduit({
                 <option value="mode">{tCat("mode")}</option>
                 <option value="electronique">{tCat("electronique")}</option>
                 <option value="maison">{tCat("maison")}</option>
+                <option value="camping">{tCat("camping")}</option>
               </select>
             </label>
 

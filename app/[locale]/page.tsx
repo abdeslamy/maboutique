@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import ProductCard from "@/components/ProductCard";
+import BarreRechercheHome from "@/components/BarreRechercheHome";
 import { getAllProduits } from "@/lib/products";
 
 export default async function Accueil() {
@@ -13,17 +14,22 @@ export default async function Accueil() {
   return (
     <>
       {/* ── HERO ──────────────────────────────────────────────────────── */}
-      <section className="mx-auto flex max-w-3xl flex-col items-center justify-center gap-6 px-4 py-24 text-center sm:py-28">
-        <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-          {t("titre")}
-        </h1>
-        <p className="max-w-xl text-lg text-gray-600">{t("sousTitre")}</p>
+      <section className="mx-auto flex max-w-3xl flex-col items-center justify-center gap-8 px-4 py-20 text-center sm:py-24">
+        <div className="flex flex-col items-center gap-5">
+          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+            {t("titre")}
+          </h1>
+          <p className="max-w-xl text-lg text-gray-600">{t("sousTitre")}</p>
+        </div>
+
+        {/* Barre de recherche moderne (mobile + desktop) */}
+        <BarreRechercheHome />
 
         <Link
           href="/produits"
-          className="rounded-full bg-black px-8 py-3 text-white transition hover:bg-gray-800"
+          className="text-sm text-gray-600 underline-offset-2 hover:text-black hover:underline"
         >
-          {t("voirProduits")}
+          {t("voirProduits")} →
         </Link>
       </section>
 
