@@ -46,7 +46,9 @@
       "dashboard": "لوحة القيادة",
       "produits": "المنتجات",
       "commandes": "الطلبات",
-      "configuration": "الإعدادات"
+      "configuration": "الإعدادات",
+      "reduire": "تصغير القائمة",
+      "ouvrir": "توسيع القائمة"
     },
     "dashboard": {
       "kpi": {

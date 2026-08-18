@@ -1,5 +1,6 @@
 import { Wallet, ShoppingBag, ShoppingCart, Bell } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { requireAdmin } from "@/lib/admin";
 import { getStatistiquesAdmin } from "@/lib/orders";
 import { formatPrix } from "@/lib/format";
 import type { Locale } from "@/i18n/routing";
@@ -21,6 +22,8 @@ export default async function AdminAccueil({
 }) {
   const { locale } = await params;
   const localeTypee = locale as Locale;
+  // Déjà appelé par le layout — mis en cache, donc aucune requête DB en plus.
+  const admin = await requireAdmin(locale);
   const t = await getTranslations("admin");
   const tDash = await getTranslations("admin.dashboard");
 
@@ -30,7 +33,12 @@ export default async function AdminAccueil({
 
   return (
     <>
-      <p className="mb-6 text-sm text-gray-600">{t("intro")}</p>
+      <header className="mb-6">
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+          {t("bonjour", { nom: admin.nom })}
+        </h1>
+        <p className="mt-1 text-sm text-gray-600">{t("intro")}</p>
+      </header>
 
       {/* ─── Row 1 : 4 KPI cards avec sparklines ────────────────────── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

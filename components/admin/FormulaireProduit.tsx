@@ -139,9 +139,9 @@ export default function FormulaireProduit({
         <BoutonRetour href="/admin/produits" />
       </div>
 
-      <h2 className="mb-8 text-lg font-semibold tracking-tight text-gray-900">
+      <h1 className="mb-8 text-2xl font-semibold tracking-tight text-gray-900">
         {mode === "creer" ? t("titreCreation") : t("titreEdition")}
-      </h2>
+      </h1>
 
       <form onSubmit={soumettre} className="flex flex-col gap-6">
         {/* ─── Section : Photos ────────────────────────────────────── */}

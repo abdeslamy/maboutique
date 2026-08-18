@@ -15,12 +15,18 @@
 //    changement de rôle (promotion/démotion) est effectif immédiatement.
 // ============================================================================
 
+import { cache } from "react";
 import { notFound, redirect } from "next/navigation";
 import { getSession } from "./session";
 import { getUtilisateurParId } from "./auth";
 import type { Utilisateur } from "./types";
 
-export async function requireAdmin(locale: string): Promise<Utilisateur> {
+// cache() mémorise le résultat pour la DURÉE D'UN SEUL RENDU serveur.
+// Le layout admin et la page qu'il enveloppe peuvent donc appeler requireAdmin
+// tous les deux : la base n'est interrogée qu'une fois par requête.
+export const requireAdmin = cache(async function requireAdmin(
+  locale: string
+): Promise<Utilisateur> {
   const session = await getSession();
   if (!session) {
     // Non connecté → on envoie vers la page de connexion.
@@ -34,4 +40,4 @@ export async function requireAdmin(locale: string): Promise<Utilisateur> {
   }
 
   return utilisateur;
-}
+});

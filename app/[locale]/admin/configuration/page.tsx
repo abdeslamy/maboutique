@@ -13,9 +13,9 @@ export default async function AdminConfigurationPage() {
   return (
     <section>
       <header className="mb-6">
-        <h2 className="text-lg font-semibold tracking-tight text-gray-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
           {t("titre")}
-        </h2>
+        </h1>
         <p className="mt-1 text-sm text-gray-600">{t("sousTitre")}</p>
       </header>
 

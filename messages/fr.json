@@ -46,7 +46,9 @@
       "dashboard": "Dashboard",
       "produits": "Produits",
       "commandes": "Commandes",
-      "configuration": "Configuration"
+      "configuration": "Configuration",
+      "reduire": "Réduire le menu",
+      "ouvrir": "Ouvrir le menu"
     },
     "dashboard": {
       "kpi": {
