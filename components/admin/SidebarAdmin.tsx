@@ -242,23 +242,52 @@ export default function SidebarAdmin({
           reduit ? "w-[68px]" : "w-64"
         }`}
       >
-        {/* Identité */}
+        {/* En-tête : identité + bascule.
+            La bascule vit EN HAUT et reste visible dans les deux états.
+            Réduite, la sidebar n'affiche plus que ce bouton : le contrôle de
+            navigation prime sur l'identité, qui reste lisible dans la navbar. */}
         <div
-          className={`flex items-center gap-3 px-4 py-4 ${
+          className={`flex items-center gap-3 px-3 py-3 ${
             reduit ? "justify-center" : ""
           }`}
         >
-          <Avatar nom={nom} image={image} taille="sm" />
           {!reduit && (
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold leading-tight text-gray-900">
-                {nom}
-              </p>
-              <p className="truncate text-xs leading-tight text-gray-500">
-                {tNav("role")}
-              </p>
-            </div>
+            <>
+              <Avatar nom={nom} image={image} taille="sm" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold leading-tight text-gray-900">
+                  {nom}
+                </p>
+                <p className="truncate text-xs leading-tight text-gray-500">
+                  {tNav("role")}
+                </p>
+              </div>
+            </>
           )}
+          <button
+            type="button"
+            onClick={basculerReduit}
+            aria-label={reduit ? tNav("ouvrir") : tNav("reduire")}
+            title={reduit ? tNav("ouvrir") : tNav("reduire")}
+            aria-expanded={!reduit}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/20"
+          >
+            {/* Trait fin (1.5) et flèche orientée : l'icône dit ce que le clic
+                va faire. Miroir en RTL, où le menu passe à droite. */}
+            {reduit ? (
+              <PanelLeftOpen
+                className="h-[18px] w-[18px] rtl:-scale-x-100"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
+            ) : (
+              <PanelLeftClose
+                className="h-[18px] w-[18px] rtl:-scale-x-100"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
+            )}
+          </button>
         </div>
 
         <div className="mx-3 h-px bg-gray-100" />
@@ -299,34 +328,6 @@ export default function SidebarAdmin({
           </ul>
         </nav>
 
-        {/* Bascule réduire / ouvrir */}
-        <div
-          className={`flex p-3 ${reduit ? "justify-center" : "justify-start"}`}
-        >
-          <button
-            type="button"
-            onClick={basculerReduit}
-            aria-label={reduit ? tNav("ouvrir") : tNav("reduire")}
-            title={reduit ? tNav("ouvrir") : tNav("reduire")}
-            aria-expanded={!reduit}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
-          >
-            {/* Icônes miroir en RTL : le menu passe à droite en arabe. */}
-            {reduit ? (
-              <PanelLeftOpen
-                className="h-[18px] w-[18px] rtl:-scale-x-100"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
-            ) : (
-              <PanelLeftClose
-                className="h-[18px] w-[18px] rtl:-scale-x-100"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
-            )}
-          </button>
-        </div>
       </aside>
     </>
   );

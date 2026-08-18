@@ -132,17 +132,38 @@ export type StatistiquesAdmin = {
 export async function getStatistiquesAdmin(
   locale: Locale = "fr"
 ): Promise<StatistiquesAdmin> {
-  // Récupère toutes les commandes en une fois (petit volume — ok pour un petit shop).
-  const commandes = await prisma.commande.findMany({
-    select: {
-      id: true,
-      createdAt: true,
-      total: true,
-      statut: true,
-      etatAppel: true,
-    },
-    orderBy: { createdAt: "asc" },
-  });
+  // ⚡ Les 3 requêtes du dashboard sont INDÉPENDANTES → on les lance ensemble.
+  //
+  // Avant : 3 `await` à la suite. Chaque aller-retour vers Neon coûtant ~120 ms
+  // depuis le poste de dev, le dashboard attendait ~360 ms de réseau pur.
+  // Promise.all ramène ce coût à celui de la requête la plus lente.
+  //
+  // Note : on récupère TOUS les noms de produits plutôt que seulement ceux du
+  // top 5. Ça évite une 4e requête qui devrait attendre le résultat du groupBy
+  // (elle en dépend). Sur un catalogue de cette taille, charger les noms coûte
+  // beaucoup moins cher qu'un aller-retour réseau supplémentaire.
+  const [commandes, topAgg, tousLesProduits] = await Promise.all([
+    prisma.commande.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        total: true,
+        statut: true,
+        etatAppel: true,
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.ligneCommande.groupBy({
+      by: ["produitId"],
+      _sum: { quantite: true, sousTotal: true },
+      where: { produitId: { not: null } },
+      orderBy: { _sum: { quantite: "desc" } },
+      take: 5,
+    }),
+    prisma.produit.findMany({
+      select: { id: true, nomFr: true, nomAr: true },
+    }),
+  ]);
 
   // ── Répartition par statut ────────────────────────────────────────
   const parStatut: Record<StatutCommande, number> = {
@@ -186,25 +207,9 @@ export async function getStatistiquesAdmin(
   const tauxLivraisonReussie = denom > 0 ? parStatut.livree / denom : 0;
 
   // ── Top 5 produits (par quantité vendue) ─────────────────────────
-  const topAgg = await prisma.ligneCommande.groupBy({
-    by: ["produitId"],
-    _sum: { quantite: true, sousTotal: true },
-    where: { produitId: { not: null } },
-    orderBy: { _sum: { quantite: "desc" } },
-    take: 5,
-  });
-  const produitsIds = topAgg
-    .map((t) => t.produitId)
-    .filter((id): id is string => !!id);
-  const produits =
-    produitsIds.length > 0
-      ? await prisma.produit.findMany({
-          where: { id: { in: produitsIds } },
-          select: { id: true, nomFr: true, nomAr: true },
-        })
-      : [];
+  // topAgg et tousLesProduits ont déjà été chargés en parallèle plus haut.
   const mapNoms = new Map(
-    produits.map((p) => [p.id, locale === "ar" ? p.nomAr : p.nomFr])
+    tousLesProduits.map((p) => [p.id, locale === "ar" ? p.nomAr : p.nomFr])
   );
   const topProduits = topAgg.map((t) => ({
     id: t.produitId!,
