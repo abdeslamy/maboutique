@@ -41,6 +41,13 @@
     "badge": "لوحة الإدارة",
     "bonjour": "مرحبًا، {nom}",
     "intro": "متابعة نشاطك، وإدارة المنتجات والطلبات.",
+    "onglets": {
+      "aria": "أقسام لوحة الإدارة",
+      "dashboard": "لوحة القيادة",
+      "produits": "المنتجات",
+      "commandes": "الطلبات",
+      "configuration": "الإعدادات"
+    },
     "dashboard": {
       "kpi": {
         "caLivre": "الإيرادات المحقّقة",
@@ -68,14 +75,14 @@
       "commandes": "الطلبات",
       "commandesEnAttente": "قيد الانتظار"
     },
-    "actions": {
-      "produits": {
-        "titre": "إدارة المنتجات",
-        "description": "أضف، عدّل أو احذف منتجات المتجر."
-      },
-      "commandes": {
-        "titre": "إدارة الطلبات",
-        "description": "استعرض الطلبات الواردة وغيّر حالتها."
+    "configuration": {
+      "titre": "الإعدادات",
+      "sousTitre": "إعدادات المتجر.",
+      "aVenir": "قريبًا",
+      "description": "سيتيح لك هذا القسم تخصيص طريقة عمل المتجر.",
+      "prevu": {
+        "categories": "إدارة الفئات",
+        "livraison": "مدّة ورسوم التوصيل"
       }
     },
     "produits": {

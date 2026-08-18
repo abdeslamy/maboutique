@@ -59,10 +59,12 @@ export default function ListeProduitsAdmin({
   }
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-10">
+    <section>
       <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">{t("titre")}</h1>
+          <h2 className="text-lg font-semibold tracking-tight text-gray-900">
+            {t("titre")}
+          </h2>
           <p className="mt-1 text-sm text-gray-600">
             {t("total", { count: produitsInitiaux.length })}
           </p>

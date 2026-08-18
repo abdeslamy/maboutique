@@ -82,7 +82,7 @@ export default function DetailCommandeAdmin({
   }
 
   return (
-    <section className="mx-auto max-w-4xl px-4 py-10">
+    <section className="mx-auto max-w-4xl">
       <div className="mb-6">
         <BoutonRetour href="/admin/commandes" />
       </div>
@@ -90,9 +90,9 @@ export default function DetailCommandeAdmin({
       {/* En-tête */}
       <header className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h2 className="text-lg font-semibold tracking-tight text-gray-900">
             {t("commande")} — {commande.client.nom}
-          </h1>
+          </h2>
           <p className="mt-1 text-sm text-gray-600">
             {new Date(commande.date).toLocaleDateString(
               locale === "ar" ? "ar-DZ" : "fr-DZ",

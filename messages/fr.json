@@ -41,6 +41,13 @@
     "badge": "Espace administrateur",
     "bonjour": "Bienvenue, {nom}",
     "intro": "Suivi de ton activité, gestion du catalogue et des commandes.",
+    "onglets": {
+      "aria": "Sections de l'espace administrateur",
+      "dashboard": "Dashboard",
+      "produits": "Produits",
+      "commandes": "Commandes",
+      "configuration": "Configuration"
+    },
     "dashboard": {
       "kpi": {
         "caLivre": "CA réalisé",
@@ -68,14 +75,14 @@
       "commandes": "Commandes",
       "commandesEnAttente": "En attente"
     },
-    "actions": {
-      "produits": {
-        "titre": "Gérer les produits",
-        "description": "Ajouter, modifier ou supprimer les articles du catalogue."
-      },
-      "commandes": {
-        "titre": "Gérer les commandes",
-        "description": "Voir les commandes reçues et changer leur statut."
+    "configuration": {
+      "titre": "Configuration",
+      "sousTitre": "Paramètres de la boutique.",
+      "aVenir": "Bientôt disponible",
+      "description": "Cette section permettra de personnaliser le fonctionnement de la boutique.",
+      "prevu": {
+        "categories": "Gestion des catégories",
+        "livraison": "Délai et frais de livraison"
       }
     },
     "produits": {

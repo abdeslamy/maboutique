@@ -65,9 +65,11 @@ export default function ListeCommandesAdmin({
   }, [commandes, filtre, recherche]);
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-10">
+    <section>
       <header className="mb-6">
-        <h1 className="text-3xl font-semibold tracking-tight">{t("titre")}</h1>
+        <h2 className="text-lg font-semibold tracking-tight text-gray-900">
+          {t("titre")}
+        </h2>
         <p className="mt-1 text-sm text-gray-600">
           {t("total", { count: commandes.length })}
         </p>

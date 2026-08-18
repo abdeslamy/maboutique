@@ -1,13 +1,5 @@
-import {
-  Wallet,
-  ShoppingBag,
-  ShoppingCart,
-  Package,
-  Bell,
-} from "lucide-react";
+import { Wallet, ShoppingBag, ShoppingCart, Bell } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { requireAdmin } from "@/lib/admin";
 import { getStatistiquesAdmin } from "@/lib/orders";
 import { formatPrix } from "@/lib/format";
 import type { Locale } from "@/i18n/routing";
@@ -18,6 +10,10 @@ import EvolutionCA from "@/components/admin/dashboard/EvolutionCA";
 import TauxCles from "@/components/admin/dashboard/TauxCles";
 import TopProduits from "@/components/admin/dashboard/TopProduits";
 
+/**
+ * Onglet "Dashboard" (/admin).
+ * L'en-tête et les onglets sont fournis par le layout parent.
+ */
 export default async function AdminAccueil({
   params,
 }: {
@@ -25,7 +21,6 @@ export default async function AdminAccueil({
 }) {
   const { locale } = await params;
   const localeTypee = locale as Locale;
-  const admin = await requireAdmin(locale);
   const t = await getTranslations("admin");
   const tDash = await getTranslations("admin.dashboard");
 
@@ -34,16 +29,8 @@ export default async function AdminAccueil({
   const nbParJour = stats.evolution7Jours.map((p) => p.nb);
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-6">
-        <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-          {t("badge")}
-        </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
-          {t("bonjour", { nom: admin.nom })}
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">{t("intro")}</p>
-      </header>
+    <>
+      <p className="mb-6 text-sm text-gray-600">{t("intro")}</p>
 
       {/* ─── Row 1 : 4 KPI cards avec sparklines ────────────────────── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -99,38 +86,6 @@ export default async function AdminAccueil({
         />
         <TopProduits produits={stats.topProduits} locale={localeTypee} />
       </div>
-
-      {/* ─── Raccourcis ─────────────────────────────────────────────── */}
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Link
-          href="/admin/produits"
-          className="group flex flex-col gap-2 rounded-2xl border border-gray-200 bg-white p-5 transition hover:border-gray-400 hover:shadow-md"
-        >
-          <div className="flex items-center gap-2 text-gray-700 group-hover:text-black">
-            <Package className="h-5 w-5" />
-            <span className="font-medium">
-              {t("actions.produits.titre")}
-            </span>
-          </div>
-          <p className="text-sm text-gray-600">
-            {t("actions.produits.description")}
-          </p>
-        </Link>
-        <Link
-          href="/admin/commandes"
-          className="group flex flex-col gap-2 rounded-2xl border border-gray-200 bg-white p-5 transition hover:border-gray-400 hover:shadow-md"
-        >
-          <div className="flex items-center gap-2 text-gray-700 group-hover:text-black">
-            <ShoppingBag className="h-5 w-5" />
-            <span className="font-medium">
-              {t("actions.commandes.titre")}
-            </span>
-          </div>
-          <p className="text-sm text-gray-600">
-            {t("actions.commandes.description")}
-          </p>
-        </Link>
-      </div>
-    </section>
+    </>
   );
 }

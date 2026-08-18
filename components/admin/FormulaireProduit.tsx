@@ -134,14 +134,14 @@ export default function FormulaireProduit({
   }
 
   return (
-    <section className="mx-auto max-w-3xl px-4 py-10">
+    <section className="mx-auto max-w-3xl">
       <div className="mb-6">
         <BoutonRetour href="/admin/produits" />
       </div>
 
-      <h1 className="mb-8 text-3xl font-semibold tracking-tight">
+      <h2 className="mb-8 text-lg font-semibold tracking-tight text-gray-900">
         {mode === "creer" ? t("titreCreation") : t("titreEdition")}
-      </h1>
+      </h2>
 
       <form onSubmit={soumettre} className="flex flex-col gap-6">
         {/* ─── Section : Photos ────────────────────────────────────── */}
