@@ -26,14 +26,20 @@ export default async function AdminLayout({
 
   // Bloque tous ceux qui ne sont pas admin. Aucun octet privé n'est envoyé si
   // la vérif échoue (server-side).
-  await requireAdmin(locale);
+  const admin = await requireAdmin(locale);
 
   const cookieStore = await cookies();
   const reduitInitial = cookieStore.get("admin_sidebar")?.value === "reduite";
 
   return (
-    <div className="flex items-start">
-      <SidebarAdmin reduitInitial={reduitInitial} />
+    // Mobile : empilement (barre du menu au-dessus du contenu).
+    // Desktop (sm+) : deux colonnes, sidebar à gauche.
+    <div className="sm:flex sm:items-start">
+      <SidebarAdmin
+        reduitInitial={reduitInitial}
+        nom={admin.nom}
+        image={admin.image}
+      />
 
       {/* min-w-0 : autorise le contenu à rétrécir au lieu de déborder
           (sans ça, un tableau large pousserait toute la page). */}

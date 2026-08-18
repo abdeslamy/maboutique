@@ -1,24 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Package,
   ShoppingBag,
   Settings,
-  Store,
+  Menu,
+  X,
+  ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
+  Store,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
+import Avatar from "@/components/Avatar";
 
 /**
- * Menu latéral de l'espace admin.
+ * Navigation de l'espace admin — deux formats, un seul langage visuel.
  *
- * Navigation : chaque entrée est un VRAI lien vers une route (pas un state).
- * Les URLs restent partageables, le bouton retour du navigateur fonctionne,
- * et chaque page reste rendue côté serveur.
+ *  MOBILE  : barre fine avec bouton menu → ouvre un TIROIR par-dessus le
+ *            contenu, avec voile assombri (logique du menu Upwork).
+ *            Lignes hautes, séparateurs en retrait, chevrons.
+ *  DESKTOP : sidebar permanente et rétractable, même typographie et mêmes
+ *            icônes mais densité resserrée + pastille d'état actif
+ *            (une navigation permanente doit montrer où l'on se trouve,
+ *             contrairement à un menu qu'on ouvre puis referme).
  *
  * usePathname vient de @/i18n/navigation : il renvoie le chemin SANS le
  * préfixe de langue ("/admin/produits"), donc la détection marche en FR
@@ -29,14 +37,8 @@ import { Link, usePathname } from "@/i18n/navigation";
  *  - Les autres = par PRÉFIXE, pour que les sous-pages
  *    (/admin/produits/nouveau, /admin/commandes/[id]) gardent leur entrée active
  *
- * État réduit :
- *  - persisté dans un COOKIE (pas localStorage) pour que le serveur connaisse
- *    l'état dès le premier rendu → aucun "saut" visuel à l'hydratation
- *  - sur mobile la sidebar reste toujours en rail d'icônes : l'ouvrir mangerait
- *    l'écran. Le bouton de bascule n'apparaît donc qu'à partir de `sm`.
- *
- * Parti pris visuel : aucune bordure interne (pas de header/footer encadrés),
- * la hiérarchie passe uniquement par l'espacement et les aplats de couleur.
+ * L'état réduit du desktop est persisté dans un COOKIE (pas localStorage) pour
+ * que le serveur le connaisse dès le premier rendu → aucun saut à l'hydratation.
  */
 
 const ENTREES = [
@@ -46,17 +48,46 @@ const ENTREES = [
   { cle: "configuration", href: "/admin/configuration", Icon: Settings },
 ] as const;
 
+function estActif(href: string, pathname: string) {
+  return href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+}
+
 export default function SidebarAdmin({
   reduitInitial,
+  nom,
+  image,
 }: {
   reduitInitial: boolean;
+  nom: string;
+  image?: string;
 }) {
-  const t = useTranslations("admin");
   const tNav = useTranslations("admin.onglets");
   const pathname = usePathname();
-  const [reduit, setReduit] = useState(reduitInitial);
 
-  function basculer() {
+  const [reduit, setReduit] = useState(reduitInitial);
+  const [tiroirOuvert, setTiroirOuvert] = useState(false);
+
+  // Le tiroir se referme dès qu'on navigue.
+  useEffect(() => {
+    setTiroirOuvert(false);
+  }, [pathname]);
+
+  // Tiroir ouvert : Échap ferme, et le fond ne défile plus.
+  useEffect(() => {
+    if (!tiroirOuvert) return;
+    function surTouche(e: KeyboardEvent) {
+      if (e.key === "Escape") setTiroirOuvert(false);
+    }
+    document.addEventListener("keydown", surTouche);
+    const overflowInitial = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", surTouche);
+      document.body.style.overflow = overflowInitial;
+    };
+  }, [tiroirOuvert]);
+
+  function basculerReduit() {
     const suivant = !reduit;
     setReduit(suivant);
     // 1 an. Relu par le layout serveur au prochain chargement.
@@ -65,89 +96,238 @@ export default function SidebarAdmin({
     }; path=/; max-age=31536000; samesite=lax`;
   }
 
-  // Le libellé est masqué quand la sidebar est réduite, et toujours sur mobile.
-  const classeLabel = reduit ? "hidden" : "hidden truncate sm:inline";
-  // Alignement partagé par les entrées et le bouton de bascule.
-  const alignement = reduit
-    ? "justify-center"
-    : "justify-center sm:justify-start";
+  const sectionCourante = ENTREES.find((e) => estActif(e.href, pathname));
 
   return (
-    <aside
-      // top-14/sm:top-16 = hauteur de la navbar du site (elle est sticky).
-      // stone plutôt que gray : neutre CHAUD, moins "interface système" que le
-      // gris bleuté. Le filet de séparation remplace les bordures internes.
-      className={`sticky top-14 z-30 flex h-[calc(100vh-3.5rem)] shrink-0 flex-col border-e border-gray-200/60 bg-stone-50 transition-[width] duration-200 ease-out sm:top-16 sm:h-[calc(100vh-4rem)] ${
-        reduit ? "w-[60px]" : "w-[60px] sm:w-60"
-      }`}
-    >
-      {/* ─── Marque ──────────────────────────────────────────────────── */}
-      <div className={`flex items-center gap-2.5 px-3 pb-1 pt-4 ${alignement}`}>
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-stone-900 text-white">
-          <Store className="h-3.5 w-3.5" aria-hidden="true" />
-        </span>
-        <span
-          className={`${classeLabel} text-[13px] font-medium text-stone-900`}
-        >
-          {t("badge")}
-        </span>
-      </div>
-
-      {/* ─── Navigation ──────────────────────────────────────────────── */}
-      <nav aria-label={tNav("aria")} className="flex-1 overflow-y-auto p-2 pt-3">
-        <ul className="flex flex-col gap-0.5">
-          {ENTREES.map(({ cle, href, Icon }) => {
-            const actif =
-              href === "/admin"
-                ? pathname === "/admin"
-                : pathname.startsWith(href);
-            const label = tNav(cle);
-
-            return (
-              <li key={cle}>
-                <Link
-                  href={href}
-                  aria-current={actif ? "page" : undefined}
-                  // Infobulle native : indispensable quand seul l'icône est visible.
-                  title={label}
-                  className={`flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] transition-colors ${alignement} ${
-                    actif
-                      ? "bg-stone-200 font-medium text-stone-900"
-                      : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
-                  }`}
-                >
-                  <Icon
-                    className={`h-4 w-4 shrink-0 ${
-                      actif ? "text-stone-900" : "text-stone-500"
-                    }`}
-                    aria-hidden="true"
-                  />
-                  <span className={classeLabel}>{label}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-
-      {/* ─── Bascule réduire / ouvrir (desktop uniquement) ───────────── */}
-      <div className={`hidden shrink-0 p-2 pb-3 sm:flex ${alignement}`}>
+    <>
+      {/* ══════════════════════════════════════════════════════════════
+          MOBILE — barre fine (le tiroir s'ouvre par-dessus)
+         ══════════════════════════════════════════════════════════════ */}
+      <div className="flex items-center gap-3 border-b border-gray-100 px-4 py-3 sm:hidden">
         <button
           type="button"
-          onClick={basculer}
-          aria-label={reduit ? tNav("ouvrir") : tNav("reduire")}
-          title={reduit ? tNav("ouvrir") : tNav("reduire")}
-          aria-expanded={!reduit}
-          className="flex h-7 w-7 items-center justify-center rounded-md text-stone-400 transition-colors hover:bg-stone-200 hover:text-stone-700"
+          onClick={() => setTiroirOuvert(true)}
+          aria-label={tNav("menu")}
+          aria-expanded={tiroirOuvert}
+          className="-ms-1.5 flex h-9 w-9 items-center justify-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100 active:bg-gray-200"
         >
-          {/* Icônes miroir en RTL : le menu passe à droite en arabe. */}
-          {reduit ? (
-            <PanelLeftOpen className="h-4 w-4 rtl:-scale-x-100" aria-hidden="true" />
-          ) : (
-            <PanelLeftClose className="h-4 w-4 rtl:-scale-x-100" aria-hidden="true" />
-          )}
+          <Menu className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
         </button>
+        <span className="truncate text-[15px] font-semibold text-gray-900">
+          {sectionCourante ? tNav(sectionCourante.cle) : tNav("menu")}
+        </span>
       </div>
-    </aside>
+
+      {/* ══════════════════════════════════════════════════════════════
+          MOBILE — tiroir + voile
+          Toujours monté (jamais démonté) : c'est ce qui permet d'animer
+          l'ouverture ET la fermeture avec de simples transitions CSS.
+         ══════════════════════════════════════════════════════════════ */}
+      <div
+        className={`fixed inset-0 z-[60] sm:hidden ${
+          tiroirOuvert ? "" : "pointer-events-none"
+        }`}
+        aria-hidden={!tiroirOuvert}
+      >
+        {/* Voile assombri — un clic ferme */}
+        <button
+          type="button"
+          tabIndex={tiroirOuvert ? 0 : -1}
+          aria-label={tNav("fermer")}
+          onClick={() => setTiroirOuvert(false)}
+          className={`absolute inset-0 h-full w-full cursor-default bg-gray-900/40 transition-opacity duration-200 ${
+            tiroirOuvert ? "opacity-100" : "opacity-0"
+          }`}
+        />
+
+        {/* Panneau — glisse depuis le "start" (gauche en FR, droite en AR) */}
+        <aside
+          className={`absolute inset-y-0 start-0 flex w-[86%] max-w-xs flex-col bg-white shadow-2xl transition-transform duration-300 ease-out ${
+            tiroirOuvert
+              ? "translate-x-0"
+              : "-translate-x-full rtl:translate-x-full"
+          }`}
+        >
+          {/* En-tête : identité + fermeture */}
+          <div className="flex items-center gap-3 px-5 py-5">
+            <Avatar nom={nom} image={image} taille="md" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[17px] font-semibold leading-tight text-gray-900">
+                {nom}
+              </p>
+              <p className="truncate text-[15px] leading-tight text-gray-500">
+                {tNav("role")}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setTiroirOuvert(false)}
+              aria-label={tNav("fermer")}
+              tabIndex={tiroirOuvert ? 0 : -1}
+              className="-me-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100"
+            >
+              <X className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+            </button>
+          </div>
+
+          {/* Filet pleine largeur sous l'identité (comme la référence) */}
+          <div className="h-px bg-gray-100" />
+
+          {/* Entrées — lignes hautes, séparateurs EN RETRAIT sous le texte */}
+          <nav aria-label={tNav("aria")} className="flex-1 overflow-y-auto">
+            <ul>
+              {ENTREES.map(({ cle, href, Icon }, i) => {
+                const actif = estActif(href, pathname);
+                return (
+                  <li key={cle}>
+                    <Link
+                      href={href}
+                      aria-current={actif ? "page" : undefined}
+                      tabIndex={tiroirOuvert ? 0 : -1}
+                      className="flex items-center gap-5 px-5 py-4 transition-colors active:bg-gray-50"
+                    >
+                      <Icon
+                        className={`h-5 w-5 shrink-0 ${
+                          actif ? "text-gray-900" : "text-gray-700"
+                        }`}
+                        strokeWidth={1.75}
+                        aria-hidden="true"
+                      />
+                      <span
+                        className={`flex-1 text-[17px] ${
+                          actif
+                            ? "font-semibold text-gray-900"
+                            : "font-medium text-gray-800"
+                        }`}
+                      >
+                        {tNav(cle)}
+                      </span>
+                      <ChevronRight
+                        className="h-5 w-5 shrink-0 text-gray-300 rtl:-scale-x-100"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      />
+                    </Link>
+                    {/* Retrait de 60px = 20 (padding) + 20 (icône) + 20 (gap),
+                        pour que le filet démarre pile sous le libellé. */}
+                    {i < ENTREES.length - 1 && (
+                      <div className="ms-[60px] h-px bg-gray-100" />
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          {/* Pied : sortie vers la boutique */}
+          <div className="border-t border-gray-100 px-5 py-5">
+            <Link
+              href="/"
+              tabIndex={tiroirOuvert ? 0 : -1}
+              className="flex items-center justify-center gap-2 text-[15px] font-medium text-gray-700 transition-colors hover:text-gray-900"
+            >
+              <Store className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+              {tNav("voirBoutique")}
+            </Link>
+          </div>
+        </aside>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════
+          DESKTOP — sidebar permanente, rétractable
+         ══════════════════════════════════════════════════════════════ */}
+      <aside
+        // top-16 = hauteur de la navbar du site (elle est sticky).
+        className={`sticky top-16 z-30 hidden h-[calc(100vh-4rem)] shrink-0 flex-col border-e border-gray-100 bg-white transition-[width] duration-200 ease-out sm:flex ${
+          reduit ? "w-[68px]" : "w-64"
+        }`}
+      >
+        {/* Identité */}
+        <div
+          className={`flex items-center gap-3 px-4 py-4 ${
+            reduit ? "justify-center" : ""
+          }`}
+        >
+          <Avatar nom={nom} image={image} taille="sm" />
+          {!reduit && (
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold leading-tight text-gray-900">
+                {nom}
+              </p>
+              <p className="truncate text-xs leading-tight text-gray-500">
+                {tNav("role")}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="mx-3 h-px bg-gray-100" />
+
+        {/* Entrées */}
+        <nav aria-label={tNav("aria")} className="flex-1 overflow-y-auto p-3">
+          <ul className="flex flex-col gap-1">
+            {ENTREES.map(({ cle, href, Icon }) => {
+              const actif = estActif(href, pathname);
+              const label = tNav(cle);
+              return (
+                <li key={cle}>
+                  <Link
+                    href={href}
+                    aria-current={actif ? "page" : undefined}
+                    // Infobulle native : indispensable quand seul l'icône est visible.
+                    title={reduit ? label : undefined}
+                    className={`flex items-center gap-3 rounded-lg text-sm transition-colors ${
+                      reduit ? "justify-center px-0 py-2.5" : "px-3 py-2.5"
+                    } ${
+                      actif
+                        ? "bg-gray-100 font-semibold text-gray-900"
+                        : "font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    }`}
+                  >
+                    <Icon
+                      className={`h-[18px] w-[18px] shrink-0 ${
+                        actif ? "text-gray-900" : "text-gray-500"
+                      }`}
+                      strokeWidth={1.75}
+                      aria-hidden="true"
+                    />
+                    {!reduit && <span className="truncate">{label}</span>}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        {/* Bascule réduire / ouvrir */}
+        <div
+          className={`flex p-3 ${reduit ? "justify-center" : "justify-start"}`}
+        >
+          <button
+            type="button"
+            onClick={basculerReduit}
+            aria-label={reduit ? tNav("ouvrir") : tNav("reduire")}
+            title={reduit ? tNav("ouvrir") : tNav("reduire")}
+            aria-expanded={!reduit}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+          >
+            {/* Icônes miroir en RTL : le menu passe à droite en arabe. */}
+            {reduit ? (
+              <PanelLeftOpen
+                className="h-[18px] w-[18px] rtl:-scale-x-100"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
+            ) : (
+              <PanelLeftClose
+                className="h-[18px] w-[18px] rtl:-scale-x-100"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
+            )}
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

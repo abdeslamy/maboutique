@@ -48,7 +48,11 @@
       "commandes": "الطلبات",
       "configuration": "الإعدادات",
       "reduire": "تصغير القائمة",
-      "ouvrir": "توسيع القائمة"
+      "ouvrir": "توسيع القائمة",
+      "menu": "القائمة",
+      "fermer": "إغلاق القائمة",
+      "role": "مدير",
+      "voirBoutique": "العودة إلى المتجر"
     },
     "dashboard": {
       "kpi": {

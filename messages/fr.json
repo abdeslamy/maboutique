@@ -48,7 +48,11 @@
       "commandes": "Commandes",
       "configuration": "Configuration",
       "reduire": "Réduire le menu",
-      "ouvrir": "Ouvrir le menu"
+      "ouvrir": "Ouvrir le menu",
+      "menu": "Menu",
+      "fermer": "Fermer le menu",
+      "role": "Administrateur",
+      "voirBoutique": "Retour à la boutique"
     },
     "dashboard": {
       "kpi": {
