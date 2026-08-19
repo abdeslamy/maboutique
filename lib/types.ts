@@ -108,6 +108,8 @@ export type Commande = {
   sousTotal: number;
   livraison: number;
   total: number;
+  /** "domicile" ou "stopdesk", figé au moment de la commande. */
+  modeLivraison: string;
   statut: StatutCommande;
   /** État du contact client. undefined = jamais renseigné. */
   etatAppel?: EtatAppel;

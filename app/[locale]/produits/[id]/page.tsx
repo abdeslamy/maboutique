@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getProduitParId, getAllProduits } from "@/lib/products";
+import { getParametresLivraison } from "@/lib/livraison";
 import { formatPrix } from "@/lib/format";
 import type { Locale } from "@/i18n/routing";
 import BoutonAjouterPanier from "@/components/BoutonAjouterPanier";
@@ -23,8 +24,11 @@ export default async function PageProduitDetail({
   const { locale, id } = await params;
   const localeTypee = locale as Locale;
 
-  // Lecture asynchrone depuis la base.
-  const produit = await getProduitParId(id);
+  // Lecture asynchrone depuis la base (produit et réglages en parallèle).
+  const [produit, parametres] = await Promise.all([
+    getProduitParId(id),
+    getParametresLivraison(),
+  ]);
   if (!produit) {
     notFound();
   }
@@ -82,7 +86,13 @@ export default async function PageProduitDetail({
               {t("stockRestant", { n: produit.stock })}
             </p>
           ) : (
-            <p className="text-sm font-medium text-green-700">{t("enStock")}</p>
+            <p className="text-sm font-medium text-green-700">
+              {/* Délai issu des réglages admin, plus codé dans la traduction. */}
+              {t("enStock", {
+                min: parametres.delaiMin,
+                max: parametres.delaiMax,
+              })}
+            </p>
           )}
 
           <div className="mt-2">

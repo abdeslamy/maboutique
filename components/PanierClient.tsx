@@ -19,14 +19,14 @@ export default function PanierClient() {
   const t = useTranslations("panier");
   const tProduit = useTranslations("produit");
 
+  // livraison/total du contexte ne sont plus utilisés ici : le prix de
+  // livraison dépend de la wilaya, il est calculé à l'étape commande.
   const {
     articlesEnrichis,
     modifierQuantite,
     supprimer,
     vider,
     sousTotal,
-    livraison,
-    total,
     estCharge,
   } = useCart();
 
@@ -127,11 +127,14 @@ export default function PanierClient() {
       {/* Récap */}
       <div className="mt-8 flex flex-col gap-2 rounded-2xl border border-gray-200 bg-gray-50 p-6">
         <Ligne libelle={t("sousTotal")} montant={formatPrix(sousTotal, locale)} />
-        <Ligne libelle={t("livraison")} montant={formatPrix(livraison, locale)} />
+        {/* Le prix de livraison dépend de la wilaya et du mode : il n'est
+            connu qu'à l'étape suivante. On l'annonce au lieu d'afficher un
+            montant qui changerait ensuite. */}
+        <Ligne libelle={t("livraison")} montant={t("livraisonEtapeSuivante")} />
         <hr className="my-2 border-gray-200" />
         <Ligne
-          libelle={t("total")}
-          montant={formatPrix(total, locale)}
+          libelle={t("sousTotal")}
+          montant={formatPrix(sousTotal, locale)}
           enGras
         />
       </div>

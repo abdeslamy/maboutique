@@ -211,6 +211,45 @@
       },
       "stock": "الكمية المتوفّرة",
       "stockAide": "0 = نفدت الكمية، لا يمكن طلب المنتج"
+    },
+    "livraison": {
+      "titre": "التوصيل",
+      "sousTitre": "الأسعار حسب الولاية، المدّة والتوصيل المجاني.",
+      "sectionTarifs": "الأسعار حسب الولاية",
+      "sectionTarifsAide": "التوصيل إلى المكتب (ستوب ديسك) أرخص عادةً من التوصيل إلى المنزل.",
+      "sectionGeneral": "القواعد العامة",
+      "domicile": "إلى المنزل",
+      "stopdesk": "إلى المكتب",
+      "wilaya": "الولاية",
+      "active": "مغطّاة",
+      "rechercher": "ابحث عن ولاية…",
+      "appliquerToutes": "تطبيق على الكل",
+      "appliquerAide": "أدخل سعرًا ثم طبّقه دفعة واحدة على الولايات المعروضة.",
+      "appliquer": "تطبيق",
+      "seuilGratuite": "توصيل مجاني ابتداءً من",
+      "seuilGratuiteAide": "اتركه فارغًا لعدم تقديم التوصيل المجاني.",
+      "delai": "المدّة المعلنة للزبون",
+      "delaiAide": "تظهر في صفحة المنتج.",
+      "jours": "أيّام",
+      "de": "من",
+      "a": "إلى",
+      "toutesDesservies": "جميع الولايات مغطّاة",
+      "nonDesservies": "{n} ولاية غير مغطّاة",
+      "enregistrer": "حفظ",
+      "enregistrement": "جارٍ الحفظ…",
+      "enregistre": "تمّ حفظ التعديلات.",
+      "modifiees": "{n} تعديل غير محفوظ",
+      "aucunResultat": "لا توجد ولاية مطابقة.",
+      "erreurs": {
+        "prix_invalide": "يجب أن تكون الأسعار أعدادًا صحيحة موجبة.",
+        "seuil_invalide": "يجب أن يكون الحدّ عددًا صحيحًا موجبًا.",
+        "delai_invalide": "يجب أن تكون المدّة القصوى أكبر من أو تساوي الدنيا.",
+        "wilaya_invalide": "ولاية غير معروفة.",
+        "erreur_serveur": "حدث خطأ، حاول مجدّدًا.",
+        "json_invalide": "بيانات غير صالحة.",
+        "non_connecte": "يجب تسجيل الدخول.",
+        "acces_refuse": "الوصول مرفوض."
+      }
     }
   },
   "langue": {
@@ -253,7 +292,7 @@
     "diminuer": "إنقاص الكمية",
     "augmenter": "زيادة الكمية",
     "description": "الوصف",
-    "enStock": "✓ متوفّر — التوصيل خلال 3 إلى 5 أيام",
+    "enStock": "✓ متوفّر — التوصيل خلال {min} إلى {max} أيّام",
     "piece": "للقطعة",
     "imagePrecedente": "الصورة السابقة",
     "imageSuivante": "الصورة التالية",
@@ -273,7 +312,8 @@
     "livraison": "التوصيل",
     "total": "الإجمالي",
     "viderPanier": "إفراغ السلّة",
-    "passerCommande": "إتمام الطلب"
+    "passerCommande": "إتمام الطلب",
+    "livraisonEtapeSuivante": "تُحتسب في الخطوة التالية"
   },
   "notFound": {
     "titre": "الصفحة غير موجودة",
@@ -332,7 +372,7 @@
     "telephoneAide": "رقم هاتف جزائري من 9 أو 10 أرقام",
     "adresse": "العنوان الكامل",
     "wilaya": "الولاية",
-    "choisirWilaya": "— اختر الولاية —",
+    "choisirWilaya": "اختر ولاية",
     "recap": "ملخّص الطلب",
     "commander": "تأكيد الطلب",
     "envoi": "جارٍ الإرسال…",
@@ -348,8 +388,16 @@
       "erreur_serveur": "حدث خطأ، يرجى المحاولة مرّة أخرى.",
       "json_invalide": "بيانات غير صالحة.",
       "stock_insuffisant": "الكمية المتوفّرة من « {produit} » لم تعد كافية. عدّل سلّتك.",
-      "rupture_stock": "« {produit} » نفدت كميته. أزِله من السلّة للمتابعة."
-    }
+      "rupture_stock": "« {produit} » نفدت كميته. أزِله من السلّة للمتابعة.",
+      "wilaya_non_desservie": "لا نقوم بالتوصيل إلى هذه الولاية بعد."
+    },
+    "modeLivraison": "طريقة التوصيل",
+    "domicile": "إلى المنزل",
+    "domicileAide": "يأتي عامل التوصيل إلى عنوانك",
+    "stopdesk": "إلى المكتب (ستوب ديسك)",
+    "stopdeskAide": "تستلم الطرد من مكتب شركة التوصيل",
+    "livraisonGratuite": "مجاني",
+    "livraisonSelonWilaya": "اختر ولاية"
   },
   "confirmation": {
     "titre": "تمّ تأكيد طلبك!",

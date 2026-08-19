@@ -13,7 +13,13 @@
 
 import { prisma } from "@/lib/prisma";
 import { getProduitParId } from "./products";
-import { FRAIS_LIVRAISON } from "./format";
+import {
+  getTarifsLivraison,
+  getParametresLivraison,
+  calculerLivraison,
+  estModeValide,
+  type ModeLivraison,
+} from "./livraison";
 import { estWilayaValide } from "./wilayas";
 import type {
   Commande,
@@ -44,6 +50,7 @@ function dbToCommande(c: CommandeAvecLignes): Commande {
     annuleeAt: c.annuleeAt?.toISOString(),
     sousTotal: c.sousTotal,
     livraison: c.livraison,
+    modeLivraison: c.modeLivraison,
     total: c.total,
     client: {
       nom: c.nomClient,
@@ -417,7 +424,12 @@ export async function creerCommande(input: {
   utilisateurId?: string;
   /** Locale pour "geler" le nom du produit dans la commande. */
   locale: Locale;
+  /** Mode de livraison choisi. Domicile par défaut. */
+  modeLivraison?: string;
 }): Promise<ResultatCreation> {
+  const mode: ModeLivraison = estModeValide(input.modeLivraison ?? "")
+    ? (input.modeLivraison as ModeLivraison)
+    : "domicile";
   // ── Validations panier ────────────────────────────────────────────
   if (!Array.isArray(input.articles) || input.articles.length === 0) {
     return { ok: false, erreur: "panier_vide" };
@@ -482,7 +494,24 @@ export async function creerCommande(input: {
 
   // ── Totaux ───────────────────────────────────────────────────────
   const sousTotal = lignesCreation.reduce((s, l) => s + l.sousTotal, 0);
-  const livraison = FRAIS_LIVRAISON;
+
+  // Livraison recalculée ICI depuis la base, jamais reprise du client —
+  // même principe que les prix produits. Un client qui bidouillerait la
+  // requête ne peut pas s'offrir une livraison à 0.
+  const [tarifs, parametres] = await Promise.all([
+    getTarifsLivraison(),
+    getParametresLivraison(),
+  ]);
+  const tarifWilaya = tarifs.find((t) => t.wilaya === wilaya);
+  if (tarifWilaya && !tarifWilaya.actif) {
+    return { ok: false, erreur: "wilaya_non_desservie" };
+  }
+  const livraison = calculerLivraison(
+    tarifWilaya,
+    mode,
+    sousTotal,
+    parametres
+  );
   const total = sousTotal + livraison;
 
   // ── Création + décrément du stock, en TRANSACTION ────────────────
@@ -518,6 +547,7 @@ export async function creerCommande(input: {
           sousTotal,
           livraison,
           total,
+          modeLivraison: mode,
           utilisateurId: input.utilisateurId, // undefined si commande invitée
           // statut prend sa valeur par défaut : "en_attente"
           lignes: {

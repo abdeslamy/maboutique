@@ -7,6 +7,14 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { WILAYAS } from "@/lib/wilayas";
 import { formatPrix } from "@/lib/format";
+// ⚠️ On importe livraison-calcul (pur) et NON livraison.ts, qui embarque
+// Prisma et ne doit jamais atterrir dans le bundle navigateur.
+import {
+  calculerLivraison,
+  type TarifWilaya,
+  type ParametresLivraison,
+  type ModeLivraison,
+} from "@/lib/livraison-calcul";
 import type { Locale } from "@/i18n/routing";
 
 /**
@@ -18,12 +26,20 @@ import type { Locale } from "@/i18n/routing";
  * Le serveur recalcule les prix (jamais ceux du client).
  * En cas de succès : on vide le panier et on navigue vers /confirmation?id=...
  */
-export default function FormulaireCommande() {
+export default function FormulaireCommande({
+  tarifs,
+  parametres,
+}: {
+  tarifs: TarifWilaya[];
+  parametres: ParametresLivraison;
+}) {
   const t = useTranslations("commande");
   const tPanier = useTranslations("panier");
   const locale = useLocale() as Locale;
 
-  const { articles, articlesEnrichis, sousTotal, livraison, total, vider, estCharge } = useCart();
+  // `livraison` et `total` du panier ne servent plus ici : le prix dépend
+  // désormais de la wilaya et du mode, donc on le recalcule sur place.
+  const { articles, articlesEnrichis, sousTotal, vider, estCharge } = useCart();
   const { utilisateur } = useAuth();
   const router = useRouter();
 
@@ -31,6 +47,21 @@ export default function FormulaireCommande() {
   const [telephone, setTelephone] = useState("");
   const [adresse, setAdresse] = useState("");
   const [wilaya, setWilaya] = useState("");
+  const [modeLivraison, setModeLivraison] = useState<ModeLivraison>("domicile");
+
+  // Seules les wilayas desservies sont proposées.
+  const wilayasDisponibles = WILAYAS.filter((w) =>
+    tarifs.find((tr) => tr.wilaya === w.code)?.actif ?? true
+  );
+
+  const tarifChoisi = tarifs.find((tr) => tr.wilaya === wilaya);
+  // Même fonction que le serveur → aucun écart possible entre le prix
+  // affiché et le prix facturé.
+  const livraison = wilaya
+    ? calculerLivraison(tarifChoisi, modeLivraison, sousTotal, parametres)
+    : null;
+  const total = sousTotal + (livraison ?? 0);
+  const livraisonOfferte = livraison === 0;
 
   const [cleErreur, setCleErreur] = useState<string | null>(null);
   const [erreurTelephone, setErreurTelephone] = useState<string | null>(null);
@@ -113,6 +144,7 @@ export default function FormulaireCommande() {
         body: JSON.stringify({
           articles, // [{ produitId, quantite }]
           client: { nom, telephone, adresse, wilaya },
+          modeLivraison,
           locale,
         }),
       });
@@ -185,13 +217,68 @@ export default function FormulaireCommande() {
               className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-base focus:border-black focus:outline-none"
             >
               <option value="">{t("choisirWilaya")}</option>
-              {WILAYAS.map((w) => (
+              {wilayasDisponibles.map((w) => (
                 <option key={w.code} value={w.code}>
                   {w.code} — {w.nom[locale]}
                 </option>
               ))}
             </select>
           </label>
+
+          {/* ─── Mode de livraison ──────────────────────────────────
+              Les deux prix sont affichés dès qu'une wilaya est choisie :
+              le client voit immédiatement ce qu'il économise en stopdesk. */}
+          <fieldset className="flex flex-col gap-2 text-sm">
+            <legend className="mb-1 font-medium text-gray-700">
+              {t("modeLivraison")}
+            </legend>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {(["domicile", "stopdesk"] as ModeLivraison[]).map((m) => {
+                const choisi = modeLivraison === m;
+                const prix = tarifChoisi
+                  ? m === "stopdesk"
+                    ? tarifChoisi.prixStopdesk
+                    : tarifChoisi.prixDomicile
+                  : null;
+                return (
+                  <label
+                    key={m}
+                    className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition ${
+                      choisi
+                        ? "border-black bg-gray-50"
+                        : "border-gray-200 hover:border-gray-400"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="modeLivraison"
+                      value={m}
+                      checked={choisi}
+                      onChange={() => setModeLivraison(m)}
+                      className="mt-0.5 accent-black"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-baseline justify-between gap-2">
+                        <span className="font-medium text-gray-900">
+                          {t(m)}
+                        </span>
+                        {prix !== null && (
+                          <span className="shrink-0 text-sm font-semibold text-gray-900">
+                            {livraisonOfferte
+                              ? t("livraisonGratuite")
+                              : formatPrix(prix, locale)}
+                          </span>
+                        )}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-gray-500">
+                        {t(`${m}Aide`)}
+                      </span>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
 
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium text-gray-700">{t("adresse")}</span>
@@ -252,7 +339,18 @@ export default function FormulaireCommande() {
           <hr className="my-3 border-gray-200" />
 
           <Ligne libelle={tPanier("sousTotal")} montant={formatPrix(sousTotal, locale)} />
-          <Ligne libelle={tPanier("livraison")} montant={formatPrix(livraison, locale)} />
+          <Ligne
+            libelle={tPanier("livraison")}
+            montant={
+              // Tant qu'aucune wilaya n'est choisie, le prix est inconnu :
+              // on le dit plutôt que d'afficher un montant faux.
+              livraison === null
+                ? t("livraisonSelonWilaya")
+                : livraison === 0
+                ? t("livraisonGratuite")
+                : formatPrix(livraison, locale)
+            }
+          />
           <hr className="my-3 border-gray-200" />
           <Ligne libelle={tPanier("total")} montant={formatPrix(total, locale)} enGras />
         </aside>

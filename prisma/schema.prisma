@@ -103,6 +103,9 @@ model Commande {
   sousTotal     Int
   livraison     Int
   total         Int
+  // "domicile" ou "stopdesk" — figé au moment de la commande, car le tarif
+  // de la wilaya peut changer plus tard sans devoir réécrire l'historique.
+  modeLivraison String          @default("domicile")
   statut        String          @default("en_attente")
   // État du contact client (call center COD). Optionnel car les commandes
   // existantes n'en ont pas → null par défaut. Voir EtatAppel dans lib/types.ts.
@@ -134,6 +137,35 @@ model Commande {
 //    ses lignes le sont aussi (elles n'ont pas de sens seules).
 //  - onDelete: SetNull sur produitId : si un produit est supprimé, la
 //    ligne existe toujours (elle a son propre snapshot du nom et du prix).
+// ══════════════════════════════════════════════════════════════════════
+// TarifLivraison — un tarif par wilaya
+// ══════════════════════════════════════════════════════════════════════
+// Une ligne par wilaya (code officiel "01" à "58"), créée au démarrage.
+//  - prixDomicile : livraison à l'adresse du client
+//  - prixStopdesk : retrait au bureau du transporteur (toujours moins cher)
+//  - actif : permet de ne pas desservir une wilaya sans perdre son tarif
+model TarifLivraison {
+  wilaya       String  @id
+  prixDomicile Int
+  prixStopdesk Int
+  actif        Boolean @default(true)
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ParametresBoutique — réglages globaux (ligne UNIQUE)
+// ══════════════════════════════════════════════════════════════════════
+// Table à une seule ligne, dont l'id est figé à "boutique".
+// Le jour où la plateforme devient multi-boutique, cet id devient la clé
+// de rattachement au marchand — la structure n'aura pas à changer.
+model ParametresBoutique {
+  id                     String @id @default("boutique")
+  /// Montant à partir duquel la livraison est offerte. null = jamais.
+  seuilLivraisonGratuite Int?
+  /// Délai annoncé au client, en jours.
+  delaiMin               Int    @default(3)
+  delaiMax               Int    @default(5)
+}
+
 model LigneCommande {
   id           String    @id @default(cuid())
   nomProduit   String

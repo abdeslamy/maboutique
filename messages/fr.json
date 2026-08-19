@@ -211,6 +211,45 @@
       },
       "stock": "Quantité en stock",
       "stockAide": "0 = produit en rupture, non commandable"
+    },
+    "livraison": {
+      "titre": "Livraison",
+      "sousTitre": "Tarifs par wilaya, délais et gratuité.",
+      "sectionTarifs": "Tarifs par wilaya",
+      "sectionTarifsAide": "Le stopdesk (retrait au bureau du transporteur) est généralement moins cher que le domicile.",
+      "sectionGeneral": "Règles générales",
+      "domicile": "À domicile",
+      "stopdesk": "Stopdesk",
+      "wilaya": "Wilaya",
+      "active": "Desservie",
+      "rechercher": "Rechercher une wilaya…",
+      "appliquerToutes": "Appliquer à toutes",
+      "appliquerAide": "Renseigne un tarif puis applique-le d'un coup aux wilayas affichées.",
+      "appliquer": "Appliquer",
+      "seuilGratuite": "Livraison gratuite à partir de",
+      "seuilGratuiteAide": "Laisse vide pour ne jamais offrir la livraison.",
+      "delai": "Délai annoncé au client",
+      "delaiAide": "Affiché sur la fiche produit.",
+      "jours": "jours",
+      "de": "de",
+      "a": "à",
+      "toutesDesservies": "Toutes les wilayas sont desservies",
+      "nonDesservies": "{n} wilaya(s) non desservie(s)",
+      "enregistrer": "Enregistrer",
+      "enregistrement": "Enregistrement…",
+      "enregistre": "Modifications enregistrées.",
+      "modifiees": "{n} modification(s) non enregistrée(s)",
+      "aucunResultat": "Aucune wilaya ne correspond.",
+      "erreurs": {
+        "prix_invalide": "Les tarifs doivent être des entiers positifs.",
+        "seuil_invalide": "Le seuil doit être un entier positif.",
+        "delai_invalide": "Le délai maximum doit être supérieur ou égal au minimum.",
+        "wilaya_invalide": "Wilaya inconnue.",
+        "erreur_serveur": "Une erreur est survenue. Réessaie.",
+        "json_invalide": "Données invalides.",
+        "non_connecte": "Tu dois être connecté.",
+        "acces_refuse": "Accès refusé."
+      }
     }
   },
   "langue": {
@@ -253,7 +292,7 @@
     "diminuer": "Diminuer la quantité",
     "augmenter": "Augmenter la quantité",
     "description": "Description",
-    "enStock": "✓ En stock — livraison sous 3 à 5 jours",
+    "enStock": "✓ En stock — livraison sous {min} à {max} jours",
     "piece": "pièce",
     "imagePrecedente": "Image précédente",
     "imageSuivante": "Image suivante",
@@ -273,7 +312,8 @@
     "livraison": "Livraison",
     "total": "Total",
     "viderPanier": "Vider le panier",
-    "passerCommande": "Passer commande"
+    "passerCommande": "Passer commande",
+    "livraisonEtapeSuivante": "Calculée à l'étape suivante"
   },
   "notFound": {
     "titre": "Page introuvable",
@@ -332,7 +372,7 @@
     "telephoneAide": "Numéro algérien à 9 ou 10 chiffres",
     "adresse": "Adresse complète",
     "wilaya": "Wilaya",
-    "choisirWilaya": "— Choisir une wilaya —",
+    "choisirWilaya": "Choisir une wilaya",
     "recap": "Récapitulatif",
     "commander": "Commander",
     "envoi": "Envoi en cours…",
@@ -348,8 +388,16 @@
       "erreur_serveur": "Une erreur est survenue. Réessayez dans un instant.",
       "json_invalide": "Données invalides.",
       "stock_insuffisant": "« {produit} » n'est plus disponible en quantité suffisante. Ajuste ton panier.",
-      "rupture_stock": "« {produit} » est en rupture de stock. Retire-le de ton panier pour continuer."
-    }
+      "rupture_stock": "« {produit} » est en rupture de stock. Retire-le de ton panier pour continuer.",
+      "wilaya_non_desservie": "Nous ne livrons pas encore dans cette wilaya."
+    },
+    "modeLivraison": "Mode de livraison",
+    "domicile": "À domicile",
+    "domicileAide": "Le livreur vient à votre adresse",
+    "stopdesk": "Au bureau (stopdesk)",
+    "stopdeskAide": "Vous retirez le colis au bureau du transporteur",
+    "livraisonGratuite": "Offerte",
+    "livraisonSelonWilaya": "Choisissez une wilaya"
   },
   "confirmation": {
     "titre": "Commande confirmée !",

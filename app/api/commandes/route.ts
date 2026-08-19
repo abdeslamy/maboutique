@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
       adresse?: string;
       wilaya?: string;
     };
+    modeLivraison?: string;
     locale?: string;
   };
   try {
@@ -55,6 +56,9 @@ export async function POST(req: NextRequest) {
     articles,
     client,
     utilisateurId: session?.id,
+    // Valeur reçue du client, mais re-validée par creerCommande : une valeur
+    // inconnue retombe sur "domicile".
+    modeLivraison: body.modeLivraison,
     locale,
   });
 
