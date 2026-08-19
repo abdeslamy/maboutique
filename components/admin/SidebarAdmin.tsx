@@ -9,8 +9,7 @@ import {
   Menu,
   X,
   ChevronRight,
-  PanelLeftClose,
-  PanelLeftOpen,
+  ChevronLeft,
   Store,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -272,21 +271,16 @@ export default function SidebarAdmin({
             aria-expanded={!reduit}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/20"
           >
-            {/* Trait fin (1.5) et flèche orientée : l'icône dit ce que le clic
-                va faire. Miroir en RTL, où le menu passe à droite. */}
-            {reduit ? (
-              <PanelLeftOpen
-                className="h-[18px] w-[18px] rtl:-scale-x-100"
-                strokeWidth={1.5}
-                aria-hidden="true"
-              />
-            ) : (
-              <PanelLeftClose
-                className="h-[18px] w-[18px] rtl:-scale-x-100"
-                strokeWidth={1.5}
-                aria-hidden="true"
-              />
-            )}
+            {/* Un simple chevron, comme Notion : il pointe vers là où le menu
+                va aller. Une seule icône pivotée, pas deux dessins différents.
+                Le miroir RTL est géré par la rotation elle-même. */}
+            <ChevronLeft
+              className={`h-[18px] w-[18px] transition-transform duration-200 ${
+                reduit ? "rotate-180" : ""
+              } rtl:-scale-x-100`}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
           </button>
         </div>
 

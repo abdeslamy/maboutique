@@ -184,8 +184,6 @@
       "details": "Détails",
       "prix": "Prix",
       "categorie": "Catégorie",
-      "emoji": "Emoji",
-      "emojiAide": "Utilisé comme décoration si aucune photo (fallback).",
       "videoUrl": "URL vidéo",
       "optionnel": "optionnel",
       "slug": "Identifiant URL",
@@ -208,8 +206,11 @@
         "erreur_serveur": "Une erreur est survenue. Réessaie.",
         "json_invalide": "Données invalides.",
         "non_connecte": "Tu dois être connecté.",
-        "acces_refuse": "Accès refusé."
-      }
+        "acces_refuse": "Accès refusé.",
+        "stock_invalide": "La quantité en stock doit être un entier positif ou nul."
+      },
+      "stock": "Quantité en stock",
+      "stockAide": "0 = produit en rupture, non commandable"
     }
   },
   "langue": {
@@ -255,7 +256,11 @@
     "enStock": "✓ En stock — livraison sous 3 à 5 jours",
     "piece": "pièce",
     "imagePrecedente": "Image précédente",
-    "imageSuivante": "Image suivante"
+    "imageSuivante": "Image suivante",
+    "rupture": "En rupture de stock",
+    "ruptureCourt": "Rupture",
+    "stockRestant": "Plus que {n} en stock",
+    "stock": "{n} en stock"
   },
   "panier": {
     "titre": "Mon panier",
@@ -341,7 +346,9 @@
       "quantite_invalide": "Une quantité est invalide.",
       "produit_introuvable": "Un des produits n'existe plus dans le catalogue.",
       "erreur_serveur": "Une erreur est survenue. Réessayez dans un instant.",
-      "json_invalide": "Données invalides."
+      "json_invalide": "Données invalides.",
+      "stock_insuffisant": "« {produit} » n'est plus disponible en quantité suffisante. Ajuste ton panier.",
+      "rupture_stock": "« {produit} » est en rupture de stock. Retire-le de ton panier pour continuer."
     }
   },
   "confirmation": {

@@ -29,6 +29,7 @@ function dbToProduit(p: ProduitModel): Produit {
     images: p.images,
     videoUrl: p.videoUrl ?? undefined,
     emoji: p.emoji,
+    stock: p.stock,
   };
 }
 
@@ -72,7 +73,10 @@ export type EntreeProduit = {
   prix: number;
   categorie: Categorie;
   images: string[];
-  emoji: string;
+  /** Stock initial / mis à jour. Entier >= 0. */
+  stock: number;
+  /** Optionnel : n'est plus saisi dans le formulaire (repli legacy). */
+  emoji?: string;
   videoUrl?: string;
 };
 
@@ -105,7 +109,9 @@ export async function creerProduit(
         prix: input.prix,
         categorie: input.categorie,
         images: input.images,
-        emoji: input.emoji,
+        stock: input.stock,
+        // Sans valeur fournie, le schéma applique son défaut ("📦").
+        ...(input.emoji ? { emoji: input.emoji } : {}),
         videoUrl: input.videoUrl || null,
       },
     });
@@ -134,7 +140,9 @@ export async function mettreAJourProduit(
         prix: input.prix,
         categorie: input.categorie,
         images: input.images,
-        emoji: input.emoji,
+        stock: input.stock,
+        // L'emoji n'est plus modifiable depuis le formulaire : on laisse
+        // intacte la valeur existante en base plutôt que de l'écraser.
         videoUrl: input.videoUrl || null,
       },
     });

@@ -29,8 +29,13 @@ export type Produit = {
   images: string[];
   /** URL de la vidéo produit, optionnelle. */
   videoUrl?: string;
-  /** Petit emoji décoratif affiché par-dessus chaque placeholder. */
+  /**
+   * Emoji de repli, affiché uniquement pour les produits historiques qui n'ont
+   * pas de vraie photo. N'est plus saisi dans le formulaire admin.
+   */
   emoji: string;
+  /** Stock disponible. 0 = rupture → produit non commandable. */
+  stock: number;
 };
 
 /** Un article dans le panier : référence un produit par son id + une quantité. */

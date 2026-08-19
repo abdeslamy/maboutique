@@ -34,6 +34,8 @@ export default function FormulaireCommande() {
 
   const [cleErreur, setCleErreur] = useState<string | null>(null);
   const [erreurTelephone, setErreurTelephone] = useState<string | null>(null);
+  // Nom du produit à l'origine d'une erreur de stock (sinon null).
+  const [produitEnCause, setProduitEnCause] = useState<string | null>(null);
   const [envoi, setEnvoi] = useState(false);
   // Flag qui indique que la commande vient d'être créée avec succès. Sert à
   // éviter le flash "Panier vide" pendant le laps de temps entre vider()
@@ -116,6 +118,8 @@ export default function FormulaireCommande() {
       });
       const data = await res.json();
       if (!res.ok) {
+        // Les erreurs de stock nomment le produit fautif.
+        setProduitEnCause(data.produitNom ?? null);
         setCleErreur(data.erreur ?? "erreur_serveur");
         return;
       }
@@ -206,7 +210,11 @@ export default function FormulaireCommande() {
               role="alert"
               className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
             >
-              {t(`erreurs.${cleErreur}`)}
+              {/* Les messages de stock attendent le nom du produit ; les autres
+                  n'ont pas de variable. */}
+              {produitEnCause
+                ? t(`erreurs.${cleErreur}`, { produit: produitEnCause })
+                : t(`erreurs.${cleErreur}`)}
             </p>
           )}
 

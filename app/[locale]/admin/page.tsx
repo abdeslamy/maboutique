@@ -1,5 +1,6 @@
-import { Wallet, ShoppingBag, ShoppingCart, Bell } from "lucide-react";
+import { Wallet, ShoppingBag, ShoppingCart, Bell, Plus } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { requireAdmin } from "@/lib/admin";
 import { getStatistiquesAdmin } from "@/lib/orders";
 import { formatPrix } from "@/lib/format";
@@ -26,6 +27,7 @@ export default async function AdminAccueil({
   const admin = await requireAdmin(locale);
   const t = await getTranslations("admin");
   const tDash = await getTranslations("admin.dashboard");
+  const tProduits = await getTranslations("admin.produits");
 
   const stats = await getStatistiquesAdmin(localeTypee);
   const caParJour = stats.evolution7Jours.map((p) => p.ca);
@@ -33,11 +35,22 @@ export default async function AdminAccueil({
 
   return (
     <>
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-          {t("bonjour", { nom: admin.nom })}
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">{t("intro")}</p>
+      {/* Titre à gauche, action principale alignée à droite sur la même ligne.
+          Sur mobile, le bouton passe sous le titre pour rester lisible. */}
+      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+            {t("bonjour", { nom: admin.nom })}
+          </h1>
+          <p className="mt-1 text-sm text-gray-600">{t("intro")}</p>
+        </div>
+        <Link
+          href="/admin/produits/nouveau"
+          className="inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
+        >
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          {tProduits("nouveau")}
+        </Link>
       </header>
 
       {/* ─── Row 1 : 4 KPI cards avec sparklines ────────────────────── */}

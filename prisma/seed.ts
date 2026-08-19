@@ -29,6 +29,8 @@ async function main() {
     await prisma.produit.upsert({
       where: { id: p.id },
       // Ce qui est appliqué si le produit existe déjà :
+      // le stock n'est PAS remis à zéro — il reflète l'inventaire réel,
+      // qui a pu bouger depuis. Seul le contenu éditorial est rafraîchi.
       update: {
         nomFr: p.nom.fr,
         nomAr: p.nom.ar,
@@ -50,6 +52,7 @@ async function main() {
         categorie: p.categorie,
         images: p.images,
         emoji: p.emoji,
+        stock: p.stock,
       },
     });
     console.log(`  ✓ ${p.nom.fr}`);

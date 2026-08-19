@@ -27,16 +27,33 @@ export default function BoutonAjouterPanier({ produit }: { produit: Produit }) {
     };
   }, []);
 
+  const enRupture = produit.stock <= 0;
+
   function ajouterAuPanier() {
+    if (enRupture) return;
     ajouter(produit.id, quantite);
     setVientDeAjouter(true);
     if (minuterieRef.current) clearTimeout(minuterieRef.current);
     minuterieRef.current = setTimeout(() => setVientDeAjouter(false), 2000);
   }
 
+  // Produit épuisé : plus de sélecteur ni de bouton actif.
+  if (enRupture) {
+    return (
+      <button
+        type="button"
+        disabled
+        className="w-full rounded-full bg-gray-100 px-6 py-3 text-sm font-medium text-gray-500 sm:w-auto"
+      >
+        {t("rupture")}
+      </button>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-      <QuantitySelector value={quantite} onChange={setQuantite} />
+      {/* Le sélecteur ne dépasse jamais le stock réellement disponible. */}
+      <QuantitySelector value={quantite} onChange={setQuantite} max={produit.stock} />
       <button
         type="button"
         onClick={ajouterAuPanier}

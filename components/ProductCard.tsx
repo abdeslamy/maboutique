@@ -35,15 +35,23 @@ export default function ProductCard({ produit }: { produit: Produit }) {
       className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:-translate-y-0.5 hover:border-gray-400 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
       aria-label={nom}
     >
-      {/* Image / placeholder : un léger zoom au survol pour faire "vivant". */}
+      {/* Image / placeholder : un léger zoom au survol pour faire "vivant".
+          `relative` porte le badge de rupture. */}
       {estUrl ? (
-        <div className="h-44 overflow-hidden bg-gray-50">
+        <div className="relative h-44 overflow-hidden bg-gray-50">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={imageVignette}
             alt={nom}
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-110"
+            className={`h-full w-full object-cover transition duration-300 group-hover:scale-110 ${
+              produit.stock <= 0 ? "opacity-50" : ""
+            }`}
           />
+          {produit.stock <= 0 && (
+            <span className="absolute start-2 top-2 rounded-full bg-gray-900/85 px-2.5 py-1 text-xs font-medium text-white">
+              {t("ruptureCourt")}
+            </span>
+          )}
         </div>
       ) : (
         <div

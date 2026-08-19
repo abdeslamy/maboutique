@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Produit" ADD COLUMN     "stock" INTEGER NOT NULL DEFAULT 0,
+ALTER COLUMN "emoji" SET DEFAULT '📦';

@@ -66,7 +66,13 @@ model Produit {
   categorie      String
   images         String[]
   videoUrl       String?
-  emoji          String
+  // emoji : plus saisi dans le formulaire (les produits ont de vraies photos).
+  // La colonne reste pour les produits historiques qui s'en servent encore
+  // comme vignette de repli. Valeur par défaut pour les nouveaux produits.
+  emoji          String          @default("📦")
+  // Stock total disponible. 0 = rupture → le produit n'est plus commandable.
+  // Décrémenté automatiquement à chaque commande (voir creerCommande).
+  stock          Int             @default(0)
   createdAt      DateTime        @default(now())
 
   lignesCommande LigneCommande[]

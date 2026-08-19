@@ -25,6 +25,7 @@ export default function ListeProduitsAdmin({
   produitsInitiaux: Produit[];
 }) {
   const t = useTranslations("admin.produits");
+  const tProd = useTranslations("produit");
   const tCat = useTranslations("categories");
   const locale = useLocale() as Locale;
   const router = useRouter();
@@ -127,9 +128,25 @@ export default function ListeProduitsAdmin({
                   <p className="truncate text-base font-medium text-gray-900">
                     {p.nom[locale]}
                   </p>
-                  <span className="mt-1 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
-                    {tCat(p.categorie)}
-                  </span>
+                  <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                    <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
+                      {tCat(p.categorie)}
+                    </span>
+                    {/* Stock : rouge en rupture, ambre si le seuil approche. */}
+                    <span
+                      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                        p.stock <= 0
+                          ? "bg-red-50 text-red-700"
+                          : p.stock <= 5
+                          ? "bg-amber-50 text-amber-700"
+                          : "bg-green-50 text-green-700"
+                      }`}
+                    >
+                      {p.stock <= 0
+                        ? tProd("rupture")
+                        : tProd("stock", { n: p.stock })}
+                    </span>
+                  </div>
                   {/* Prix desktop uniquement (mobile a le prix en bas) */}
                   <p className="mt-1 hidden text-sm font-semibold text-black sm:block">
                     {formatPrix(p.prix, locale)}

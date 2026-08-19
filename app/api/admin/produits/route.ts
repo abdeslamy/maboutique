@@ -8,7 +8,7 @@ const CATEGORIES_VALIDES: Categorie[] = ["mode", "electronique", "maison"];
 
 /**
  * POST /api/admin/produits
- * Body : { id?, nomFr, nomAr, descriptionFr, descriptionAr, prix, categorie, images[], emoji, videoUrl? }
+ * Body : { id?, nomFr, nomAr, descriptionFr, descriptionAr, prix, categorie, images[], stock, videoUrl? }
  *
  * Sécurité : garde admin (garde stricte, on ne fait PAS confiance au JWT pour le rôle).
  * Si `id` n'est pas fourni, on le génère depuis nomFr (slug).
@@ -77,12 +77,18 @@ export function validerEntree(
     return { erreur: "categorie_invalide" };
   }
 
+  // Stock : entier >= 0. On refuse explicitement les valeurs absentes ou
+  // décimales plutôt que de retomber sur 0 en silence.
+  const stockNum = Number(body.stock);
+  if (!Number.isInteger(stockNum) || stockNum < 0) {
+    return { erreur: "stock_invalide" };
+  }
+
   const images = Array.isArray(body.images)
     ? body.images.filter((u): u is string => typeof u === "string")
     : [];
   if (images.length === 0) return { erreur: "images_manquantes" };
 
-  const emoji = String(body.emoji ?? "").trim() || "📦";
   const videoUrl = body.videoUrl ? String(body.videoUrl).trim() : undefined;
 
   const idBrut = String(body.id ?? "").trim();
@@ -98,7 +104,7 @@ export function validerEntree(
     prix: prixNum,
     categorie,
     images,
-    emoji,
+    stock: stockNum,
     videoUrl,
   };
 }

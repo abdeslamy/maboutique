@@ -48,7 +48,9 @@ export default function FormulaireProduit({
   const [categorie, setCategorie] = useState<Categorie>(
     produit?.categorie ?? "mode"
   );
-  const [emoji, setEmoji] = useState(produit?.emoji ?? "📦");
+  const [stock, setStock] = useState<string>(
+    produit ? String(produit.stock) : "0"
+  );
   const [images, setImages] = useState<string[]>(produit?.images ?? []);
   const [videoUrl, setVideoUrl] = useState(produit?.videoUrl ?? "");
   const [id, setId] = useState(produit?.id ?? "");
@@ -82,12 +84,15 @@ export default function FormulaireProduit({
 
     // Validation client basique (le serveur revalide tout)
     const prixNum = Number(prix);
+    const stockNum = Number(stock);
     if (nomFr.trim().length < 2) return setErreur("nom_fr_court");
     if (nomAr.trim().length < 2) return setErreur("nom_ar_court");
     if (descFr.trim().length < 5) return setErreur("description_fr_courte");
     if (descAr.trim().length < 5) return setErreur("description_ar_courte");
     if (!Number.isInteger(prixNum) || prixNum < 1)
       return setErreur("prix_invalide");
+    if (!Number.isInteger(stockNum) || stockNum < 0)
+      return setErreur("stock_invalide");
     if (images.length === 0) return setErreur("images_manquantes");
     if (mode === "creer" && !id) return setErreur("id_invalide");
 
@@ -102,7 +107,7 @@ export default function FormulaireProduit({
         prix: prixNum,
         categorie,
         images,
-        emoji,
+        stock: stockNum,
         videoUrl: videoUrl || undefined,
       };
 
@@ -293,15 +298,17 @@ export default function FormulaireProduit({
             </label>
 
             <label className="flex flex-col gap-1 text-sm">
-              <span className="font-medium text-gray-700">{t("emoji")}</span>
+              <span className="font-medium text-gray-700">{t("stock")}</span>
               <input
-                type="text"
-                value={emoji}
-                onChange={(e) => setEmoji(e.target.value)}
-                maxLength={4}
-                className="w-24 rounded-lg border border-gray-300 bg-white px-3 py-2 text-2xl focus:border-black focus:outline-none"
+                type="number"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                min={0}
+                step={1}
+                required
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none"
               />
-              <span className="text-xs text-gray-500">{t("emojiAide")}</span>
+              <span className="text-xs text-gray-500">{t("stockAide")}</span>
             </label>
 
             <label className="flex flex-col gap-1 text-sm">

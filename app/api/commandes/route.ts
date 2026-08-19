@@ -59,7 +59,16 @@ export async function POST(req: NextRequest) {
   });
 
   if (!resultat.ok) {
-    return NextResponse.json({ erreur: resultat.erreur }, { status: 400 });
+    // On transmet le nom du produit fautif pour que le client affiche
+    // « X n'est plus disponible » plutôt qu'un message générique.
+    return NextResponse.json(
+      {
+        erreur: resultat.erreur,
+        produitNom: resultat.produitNom,
+        stockDisponible: resultat.stockDisponible,
+      },
+      { status: 400 }
+    );
   }
 
   return NextResponse.json(

@@ -396,7 +396,13 @@ type Client = {
 
 export type ResultatCreation =
   | { ok: true; commande: Commande }
-  | { ok: false; erreur: string };
+  | {
+      ok: false;
+      erreur: string;
+      /** Renseignés pour les erreurs de stock, pour un message précis. */
+      produitNom?: string;
+      stockDisponible?: number;
+    };
 
 /**
  * Crée une commande + ses lignes en UNE seule opération atomique.
@@ -441,13 +447,33 @@ export async function creerCommande(input: {
     if (!Number.isInteger(a.quantite) || a.quantite < 1) {
       return { ok: false, erreur: "quantite_invalide" };
     }
-    const produit = await getProduitParId(a.produitId);
+  }
+
+  // Un seul aller-retour pour tous les produits du panier (au lieu d'une
+  // requête par article, qui coûtait ~120 ms chacune).
+  const produits = await prisma.produit.findMany({
+    where: { id: { in: input.articles.map((a) => a.produitId) } },
+  });
+  const parId = new Map(produits.map((p) => [p.id, p]));
+
+  for (const a of input.articles) {
+    const produit = parId.get(a.produitId);
     if (!produit) {
       return { ok: false, erreur: "produit_introuvable" };
     }
+    // Pré-contrôle du stock : permet de renvoyer un message précis au client.
+    // Le contrôle qui FAIT AUTORITÉ est celui de la transaction, plus bas.
+    if (produit.stock < a.quantite) {
+      return {
+        ok: false,
+        erreur: produit.stock === 0 ? "rupture_stock" : "stock_insuffisant",
+        produitNom: input.locale === "ar" ? produit.nomAr : produit.nomFr,
+        stockDisponible: produit.stock,
+      };
+    }
     lignesCreation.push({
       produitId: produit.id,
-      nomProduit: produit.nom[input.locale],
+      nomProduit: input.locale === "ar" ? produit.nomAr : produit.nomFr,
       prixUnitaire: produit.prix, // ← prix serveur, jamais client
       quantite: a.quantite,
       sousTotal: produit.prix * a.quantite,
@@ -459,27 +485,60 @@ export async function creerCommande(input: {
   const livraison = FRAIS_LIVRAISON;
   const total = sousTotal + livraison;
 
-  // ── Création IMBRIQUÉE — 1 seule opération atomique ──────────────
+  // ── Création + décrément du stock, en TRANSACTION ────────────────
+  //
+  // Pourquoi une transaction : entre le contrôle de stock ci-dessus et
+  // l'écriture, un autre client peut acheter le dernier article. Sans
+  // protection, les deux commandes passeraient et le stock deviendrait négatif
+  // (survente). C'est la "race condition" classique du commerce en ligne.
+  //
+  // La garde est le `where: { stock: { gte: quantite } }` : PostgreSQL
+  // n'applique la décrémentation QUE si le stock est encore suffisant au
+  // moment précis de l'écriture. Si `count` vaut 0, c'est qu'un autre client
+  // est passé avant → on lève une erreur, et TOUTE la transaction est annulée
+  // (la commande n'est pas créée, les stocks déjà décrémentés sont restaurés).
   try {
-    const commande = await prisma.commande.create({
-      data: {
-        nomClient: nom.trim(),
-        telephone: telephone.trim(),
-        adresse: adresse.trim(),
-        wilaya,
-        sousTotal,
-        livraison,
-        total,
-        utilisateurId: input.utilisateurId, // undefined si commande invitée
-        // statut prend sa valeur par défaut : "en_attente"
-        lignes: {
-          create: lignesCreation, // ← les lignes créées en même temps
+    const commande = await prisma.$transaction(async (tx) => {
+      for (const ligne of lignesCreation) {
+        const { count } = await tx.produit.updateMany({
+          where: { id: ligne.produitId, stock: { gte: ligne.quantite } },
+          data: { stock: { decrement: ligne.quantite } },
+        });
+        if (count === 0) {
+          throw new ErreurStock(ligne.nomProduit);
+        }
+      }
+
+      return tx.commande.create({
+        data: {
+          nomClient: nom.trim(),
+          telephone: telephone.trim(),
+          adresse: adresse.trim(),
+          wilaya,
+          sousTotal,
+          livraison,
+          total,
+          utilisateurId: input.utilisateurId, // undefined si commande invitée
+          // statut prend sa valeur par défaut : "en_attente"
+          lignes: {
+            create: lignesCreation, // ← les lignes créées en même temps
+          },
         },
-      },
-      include: { lignes: true },
+        include: { lignes: true },
+      });
     });
     return { ok: true, commande: dbToCommande(commande) };
-  } catch {
+  } catch (e) {
+    if (e instanceof ErreurStock) {
+      return { ok: false, erreur: "stock_insuffisant", produitNom: e.produitNom };
+    }
     return { ok: false, erreur: "erreur_serveur" };
+  }
+}
+
+/** Signale qu'un produit est devenu indisponible pendant la transaction. */
+class ErreurStock extends Error {
+  constructor(public produitNom: string) {
+    super("stock_insuffisant");
   }
 }

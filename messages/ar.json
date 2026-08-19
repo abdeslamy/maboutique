@@ -184,8 +184,6 @@
       "details": "التفاصيل",
       "prix": "السعر",
       "categorie": "الفئة",
-      "emoji": "إيموجي",
-      "emojiAide": "يُستخدم كزخرفة عند غياب الصور.",
       "videoUrl": "رابط الفيديو",
       "optionnel": "اختياري",
       "slug": "معرّف الرابط",
@@ -208,8 +206,11 @@
         "erreur_serveur": "حدث خطأ، حاول مجدّدًا.",
         "json_invalide": "بيانات غير صالحة.",
         "non_connecte": "يجب تسجيل الدخول.",
-        "acces_refuse": "الوصول مرفوض."
-      }
+        "acces_refuse": "الوصول مرفوض.",
+        "stock_invalide": "يجب أن تكون الكمية عددًا صحيحًا أكبر من أو يساوي صفر."
+      },
+      "stock": "الكمية المتوفّرة",
+      "stockAide": "0 = نفدت الكمية، لا يمكن طلب المنتج"
     }
   },
   "langue": {
@@ -255,7 +256,11 @@
     "enStock": "✓ متوفّر — التوصيل خلال 3 إلى 5 أيام",
     "piece": "للقطعة",
     "imagePrecedente": "الصورة السابقة",
-    "imageSuivante": "الصورة التالية"
+    "imageSuivante": "الصورة التالية",
+    "rupture": "نفدت الكمية",
+    "ruptureCourt": "نفد",
+    "stockRestant": "بقي {n} فقط",
+    "stock": "{n} متوفّر"
   },
   "panier": {
     "titre": "سلّتي",
@@ -341,7 +346,9 @@
       "quantite_invalide": "الكمية غير صالحة.",
       "produit_introuvable": "أحد المنتجات لم يعد متوفّرًا.",
       "erreur_serveur": "حدث خطأ، يرجى المحاولة مرّة أخرى.",
-      "json_invalide": "بيانات غير صالحة."
+      "json_invalide": "بيانات غير صالحة.",
+      "stock_insuffisant": "الكمية المتوفّرة من « {produit} » لم تعد كافية. عدّل سلّتك.",
+      "rupture_stock": "« {produit} » نفدت كميته. أزِله من السلّة للمتابعة."
     }
   },
   "confirmation": {

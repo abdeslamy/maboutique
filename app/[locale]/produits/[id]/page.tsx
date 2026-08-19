@@ -73,7 +73,17 @@ export default async function PageProduitDetail({
             </p>
           </div>
 
-          <p className="text-sm font-medium text-green-700">{t("enStock")}</p>
+          {/* Disponibilité : rouge en rupture, ambre quand il reste peu
+              (l'urgence est réelle, pas décorative), vert sinon. */}
+          {produit.stock <= 0 ? (
+            <p className="text-sm font-medium text-red-700">{t("rupture")}</p>
+          ) : produit.stock <= 5 ? (
+            <p className="text-sm font-medium text-amber-700">
+              {t("stockRestant", { n: produit.stock })}
+            </p>
+          ) : (
+            <p className="text-sm font-medium text-green-700">{t("enStock")}</p>
+          )}
 
           <div className="mt-2">
             <BoutonAjouterPanier produit={produit} />
