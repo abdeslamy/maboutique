@@ -30,7 +30,7 @@ export default async function Navbar({ locale }: { locale: Locale }) {
 
   // Gabarit commun aux pastilles de la capsule.
   const pastille =
-    "flex h-9 w-9 items-center justify-center rounded-full text-gray-700 transition hover:bg-gray-100 hover:text-black";
+    "flex h-8 w-8 items-center justify-center rounded-full text-gray-900 transition hover:bg-gray-100";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/90 backdrop-blur">
@@ -59,7 +59,7 @@ export default async function Navbar({ locale }: { locale: Locale }) {
 
         {/* ── Zone "end" : capsule d'actions + profil ────────────────── */}
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          <div className="flex items-center gap-0.5 rounded-full border border-gray-200 bg-white p-1 shadow-sm">
+          <div className="flex items-center gap-0.5 rounded-full bg-white p-0.5 shadow-[0_1px_6px_rgba(0,0,0,0.10)]">
             <SelecteurLangue localeActive={locale} />
 
             {/* La loupe mène au catalogue, où vit la vraie recherche. */}
@@ -69,7 +69,7 @@ export default async function Navbar({ locale }: { locale: Locale }) {
               aria-label={t("rechercher")}
               title={t("rechercher")}
             >
-              <Search className="h-[18px] w-[18px]" strokeWidth={1.75} />
+              <Search className="h-[18px] w-[18px]" strokeWidth={2.25} />
             </Link>
 
             {/* `relative` porte la pastille du compteur. */}
@@ -79,7 +79,7 @@ export default async function Navbar({ locale }: { locale: Locale }) {
               aria-label={t("panier")}
               title={t("panier")}
             >
-              <ShoppingCart className="h-[18px] w-[18px]" strokeWidth={1.75} />
+              <ShoppingCart className="h-[18px] w-[18px]" strokeWidth={2.25} />
               <PanierCompteur />
             </Link>
           </div>

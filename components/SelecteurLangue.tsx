@@ -67,10 +67,9 @@ export default function SelecteurLangue({
         aria-expanded={ouvert}
         aria-label={t("actuelle", { langue: t(localeActive) })}
         title={t("actuelle", { langue: t(localeActive) })}
-        className={`flex h-9 w-9 items-center justify-center rounded-full text-[11px] font-semibold uppercase transition ${
-          ouvert
-            ? "bg-gray-900 text-white"
-            : "text-gray-700 hover:bg-gray-100 hover:text-black"
+        // Même gabarit que les autres pastilles de la capsule : 32 px.
+        className={`flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold uppercase transition ${
+          ouvert ? "bg-gray-900 text-white" : "text-gray-900 hover:bg-gray-100"
         }`}
       >
         {localeActive}

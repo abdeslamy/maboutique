@@ -23,7 +23,7 @@ export default function PanierCompteur() {
   return (
     <span
       // -end-0.5 : coin supérieur "fin" — droite en français, gauche en arabe.
-      className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gray-900 px-1 text-[10px] font-semibold tabular-nums text-white"
+      className="absolute -end-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gray-900 px-1 text-[10px] font-semibold tabular-nums text-white"
       aria-hidden="true"
     >
       {valeur > 9 ? "9+" : valeur}
