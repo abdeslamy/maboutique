@@ -42,6 +42,13 @@ type GroupeBrouillon = {
   wilayas: string[];
   prixDomicile: number | null;
   prixStopdesk: number | null;
+  /**
+   * true tant que ce tarif n a JAMAIS ete enregistre.
+   * Il reste alors en mode creation : son bouton « wilayas » demeure visible
+   * et « Ajouter un tarif » reste inactif, meme apres avoir choisi des
+   * wilayas — sinon la creation paraitrait terminee avant l enregistrement.
+   */
+  nouveau?: boolean;
 };
 
 type ErreurGroupe = { stopdesk?: boolean; wilayas?: boolean };
@@ -84,13 +91,18 @@ export default function ConfigurationLivraison({
   );
   const nonLivrees = WILAYAS.filter((w) => !wilayasCouvertes.has(w.code));
 
-  // Un tarif sans wilaya est un brouillon en cours : on bloque la création
-  // d'un nouveau tant qu'il n'est pas complété.
-  const tarifIncomplet = groupes.some((g) => g.wilayas.length === 0);
+  // Un tarif jamais enregistre est une creation en cours : on bloque
+  // l ouverture d un autre tant qu il n est pas enregistre.
+  const creationEnCours = groupes.some((g) => g.nouveau);
 
   // Deux zones de modification distinctes → deux boutons distincts.
-  const groupesModifies =
-    JSON.stringify(groupes) !== JSON.stringify(groupesInitiaux);
+  // On compare le CONTENU seulement : le marqueur `nouveau` est un etat
+  // d interface, pas une donnee a enregistrer.
+  const contenu = (gs: GroupeBrouillon[]) =>
+    JSON.stringify(
+      gs.map((g) => [g.wilayas, g.prixDomicile, g.prixStopdesk])
+    );
+  const groupesModifies = contenu(groupes) !== contenu(groupesInitiaux);
   const parametresModifies =
     parametres.seuilLivraisonGratuite !==
     parametresInitiaux.seuilLivraisonGratuite;
@@ -115,7 +127,7 @@ export default function ConfigurationLivraison({
     // du sélecteur peut ainsi rappeler les tarifs en cours de saisie.
     setGroupes((prev) => [
       ...prev,
-      { wilayas: [], prixDomicile: null, prixStopdesk: null },
+      { wilayas: [], prixDomicile: null, prixStopdesk: null, nouveau: true },
     ]);
     setMessage(null);
     setErreurs({});
@@ -171,13 +183,22 @@ export default function ConfigurationLivraison({
       const res = await fetch("/api/admin/livraison", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ groupes }),
+        body: JSON.stringify({
+          groupes: groupes.map(({ wilayas, prixDomicile, prixStopdesk }) => ({
+            wilayas,
+            prixDomicile,
+            prixStopdesk,
+          })),
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
         setErreur(data.erreur ?? "erreur_serveur");
         return;
       }
+      // Les tarifs sont enregistres : ils sortent du mode creation, ce qui
+      // rend « Ajouter un tarif » de nouveau disponible.
+      setGroupes((prev) => prev.map((g) => ({ ...g, nouveau: false })));
       setMessage("enregistre");
       router.refresh();
     } catch {
@@ -290,10 +311,10 @@ export default function ConfigurationLivraison({
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
-                      {/* Le crayon n'apparaît QUE si le tarif a déjà des
-                          wilayas. Sinon c'est le bouton du bas qui sert —
-                          lui seul peut porter la bordure rouge de validation. */}
-                      {g.wilayas.length > 0 && (
+                      {/* Le crayon ne sert que pour un tarif DÉJÀ enregistré.
+                          Pendant la création, c'est le bouton du bas qui reste
+                          en place — lui seul porte la bordure de validation. */}
+                      {!g.nouveau && g.wilayas.length > 0 && (
                         <button
                           type="button"
                           onClick={() => setEditionIndex(i)}
@@ -338,10 +359,11 @@ export default function ConfigurationLivraison({
                     />
                   </div>
 
-                  {/* Ligne 3 : premier choix des wilayas. Une fois qu'elles
-                      sont définies, le crayon en haut prend le relais et ce
-                      bouton disparaît — pas deux commandes pour une action. */}
-                  {g.wilayas.length === 0 && (
+                  {/* Ligne 3 : choix des wilayas. Le bouton reste en place
+                      pendant TOUTE la création — y compris après avoir choisi
+                      des wilayas — car le tarif n'est pas encore enregistré.
+                      Il ne cède la place au crayon qu'une fois sauvegardé. */}
+                  {(g.nouveau || g.wilayas.length === 0) && (
                     <div className="mt-4">
                       <button
                         type="button"
@@ -353,7 +375,9 @@ export default function ConfigurationLivraison({
                         }`}
                       >
                         <Plus className="h-4 w-4" strokeWidth={2} />
-                        {t("ajouterWilayas")}
+                        {g.wilayas.length === 0
+                          ? t("ajouterWilayas")
+                          : t("modifierWilayas")}
                       </button>
                       {err?.wilayas && (
                         <p className="mt-1.5 text-xs font-medium text-red-600">
@@ -379,7 +403,7 @@ export default function ConfigurationLivraison({
           <button
             type="button"
             onClick={ajouterGroupe}
-            disabled={tarifIncomplet}
+            disabled={creationEnCours}
             className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-900 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400 disabled:hover:bg-white"
           >
             <Plus className="h-4 w-4" strokeWidth={2} />
@@ -456,10 +480,10 @@ export default function ConfigurationLivraison({
             )
           }
           onAnnuler={() => {
-            // Un tarif créé puis abandonné sans wilaya est retiré.
-            if (groupes[editionIndex].wilayas.length === 0) {
-              setGroupes((prev) => prev.filter((_, i) => i !== editionIndex));
-            }
+            // Fermer la fenêtre ne fait QUE la fermer : le tarif en cours et
+            // les prix déjà saisis restent à l'écran. Supprimer la carte ici
+            // faisait perdre la saisie à la moindre fermeture accidentelle ;
+            // c'est la corbeille qui sert à abandonner un tarif.
             setEditionIndex(null);
           }}
           onValider={(codes) => {
