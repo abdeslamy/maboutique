@@ -5,6 +5,7 @@ import {
   Search,
   Check,
   Trash2,
+  Pencil,
   Plus,
   Gift,
   Store,
@@ -82,6 +83,10 @@ export default function ConfigurationLivraison({
     [groupes]
   );
   const nonLivrees = WILAYAS.filter((w) => !wilayasCouvertes.has(w.code));
+
+  // Un tarif sans wilaya est un brouillon en cours : on bloque la création
+  // d'un nouveau tant qu'il n'est pas complété.
+  const tarifIncomplet = groupes.some((g) => g.wilayas.length === 0);
 
   // Deux zones de modification distinctes → deux boutons distincts.
   const groupesModifies =
@@ -284,15 +289,31 @@ export default function ConfigurationLivraison({
                               .join(", ")}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => supprimerGroupe(i)}
-                      aria-label={t("supprimerGroupe")}
-                      title={t("supprimerGroupe")}
-                      className="shrink-0 rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4" strokeWidth={1.75} />
-                    </button>
+                    <div className="flex shrink-0 items-center gap-1">
+                      {/* Le crayon n'apparaît QUE si le tarif a déjà des
+                          wilayas. Sinon c'est le bouton du bas qui sert —
+                          lui seul peut porter la bordure rouge de validation. */}
+                      {g.wilayas.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setEditionIndex(i)}
+                          aria-label={t("modifierWilayas")}
+                          title={t("modifierWilayas")}
+                          className="rounded-full p-2 text-gray-400 transition hover:bg-stone-100 hover:text-gray-900"
+                        >
+                          <Pencil className="h-4 w-4" strokeWidth={1.75} />
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => supprimerGroupe(i)}
+                        aria-label={t("supprimerGroupe")}
+                        title={t("supprimerGroupe")}
+                        className="rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" strokeWidth={1.75} />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Ligne 2 : bureau à gauche, domicile à droite */}
@@ -313,33 +334,34 @@ export default function ConfigurationLivraison({
                       aide={t("prixDomicileVide")}
                       Icone={Home}
                       valeur={g.prixDomicile}
-                      alignFin
                       onChange={(v) => majGroupe(i, "prixDomicile", v)}
                     />
                   </div>
 
-                  {/* Ligne 3 : accès au choix des wilayas */}
-                  <div className="mt-4">
-                    <button
-                      type="button"
-                      onClick={() => setEditionIndex(i)}
-                      className={`inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-medium transition ${
-                        err?.wilayas
-                          ? "border-red-300 text-red-700 hover:bg-red-50"
-                          : "border-gray-300 text-gray-900 hover:bg-stone-100"
-                      }`}
-                    >
-                      <Plus className="h-4 w-4" strokeWidth={2} />
-                      {g.wilayas.length === 0
-                        ? t("ajouterWilayas")
-                        : t("modifierWilayas")}
-                    </button>
-                    {err?.wilayas && (
-                      <p className="mt-1.5 text-xs font-medium text-red-600">
-                        {t("erreurWilayas")}
-                      </p>
-                    )}
-                  </div>
+                  {/* Ligne 3 : premier choix des wilayas. Une fois qu'elles
+                      sont définies, le crayon en haut prend le relais et ce
+                      bouton disparaît — pas deux commandes pour une action. */}
+                  {g.wilayas.length === 0 && (
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        onClick={() => setEditionIndex(i)}
+                        className={`inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-medium transition ${
+                          err?.wilayas
+                            ? "border-red-400 text-red-700 hover:bg-red-50"
+                            : "border-gray-300 text-gray-900 hover:bg-stone-100"
+                        }`}
+                      >
+                        <Plus className="h-4 w-4" strokeWidth={2} />
+                        {t("ajouterWilayas")}
+                      </button>
+                      {err?.wilayas && (
+                        <p className="mt-1.5 text-xs font-medium text-red-600">
+                          {t("erreurWilayas")}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </article>
               );
             })}
@@ -351,10 +373,14 @@ export default function ConfigurationLivraison({
             pres du contenu, action principale en bout de ligne.
             Sur mobile, tout s'empile dans l'ordre de lecture. */}
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* Tant qu'un tarif n'a pas ses wilayas, on n'en ouvre pas un autre :
+              empiler des cartes vides rend la page illisible et brouille les
+              messages de validation. */}
           <button
             type="button"
             onClick={ajouterGroupe}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-900 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition hover:bg-stone-100"
+            disabled={tarifIncomplet}
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-900 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400 disabled:hover:bg-white"
           >
             <Plus className="h-4 w-4" strokeWidth={2} />
             {t("ajouter")}
@@ -469,7 +495,6 @@ function ChampPrix({
   Icone,
   valeur,
   onChange,
-  alignFin = false,
   enErreur = false,
   messageErreur,
 }: {
@@ -479,25 +504,21 @@ function ChampPrix({
   /** null = champ vide. Pour le domicile, cela signifie « pas de livraison ». */
   valeur: number | null;
   onChange: (v: number | null) => void;
-  /** Aligne le contenu en fin de ligne (le champ « domicile », à droite). */
-  alignFin?: boolean;
   enErreur?: boolean;
   messageErreur?: string;
 }) {
   return (
     <div>
+      {/* Les deux champs sont alignés de la même façon (début de leur bloc) :
+          un champ aligné à droite créait une asymétrie inutile à lire. */}
       <label
         className={`block rounded-xl border p-4 transition ${
-          enErreur
-            ? "border-red-300 bg-red-50/50"
-            : "border-transparent bg-stone-50"
-        } ${alignFin ? "sm:text-end" : ""}`}
+          // Bordure rouge SEULE en cas d'erreur : un aplat rouge en plus
+          // surchargerait la page pour une information déjà lisible.
+          enErreur ? "border-red-400" : "border-transparent"
+        } bg-stone-50`}
       >
-        <span
-          className={`flex items-center gap-1.5 ${
-            alignFin ? "sm:justify-end" : ""
-          }`}
-        >
+        <span className="flex items-center gap-1.5">
           <span className="text-xs font-medium text-gray-700">{label}</span>
           {/* Icône juste après le libellé, légèrement ombrée. */}
           <Icone
@@ -507,11 +528,7 @@ function ChampPrix({
           />
         </span>
         <span className="mt-0.5 block text-[11px] text-gray-500">{aide}</span>
-        <span
-          className={`mt-2 flex items-center gap-2 ${
-            alignFin ? "sm:justify-end" : ""
-          }`}
-        >
+        <span className="mt-2 flex items-center gap-2">
           <input
             type="number"
             min={0}
@@ -524,19 +541,13 @@ function ChampPrix({
               onChange(e.target.value === "" ? null : Number(e.target.value))
             }
             placeholder="—"
-            className={`w-28 rounded-lg bg-white px-3 py-2 text-base font-semibold tabular-nums text-gray-900 outline-none transition focus:ring-2 focus:ring-gray-900 ${
-              alignFin ? "sm:text-end" : ""
-            }`}
+            className="w-28 rounded-lg bg-white px-3 py-2 text-base font-semibold tabular-nums text-gray-900 outline-none transition focus:ring-2 focus:ring-gray-900"
           />
           <span className="text-xs font-medium text-gray-500">DA</span>
         </span>
       </label>
       {enErreur && messageErreur && (
-        <p
-          className={`mt-1.5 text-xs font-medium text-red-600 ${
-            alignFin ? "sm:text-end" : ""
-          }`}
-        >
+        <p className="mt-1.5 text-xs font-medium text-red-600">
           {messageErreur}
         </p>
       )}
