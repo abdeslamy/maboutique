@@ -228,13 +228,12 @@
       "prixDomicileAide": "عامل التوصيل يوصل الطرد إلى الزبون",
       "prixStopdeskAide": "الزبون يأتي لاستلام طرده",
       "wilayasDuGroupe": "{n} ولاية",
-      "choisirWilayas": "اختيار الولايات",
-      "modifierWilayas": "تعديل",
+      "choisirWilayas": "ولايات هذا السعر",
+      "modifierWilayas": "تعديل ولايات هذا السعر",
       "supprimerGroupe": "حذف هذا السعر",
       "confirmSupprimer": "حذف هذا السعر؟ لن يتمّ التوصيل إلى الولايات المعنية.",
       "toutSelectionner": "تحديد الكل",
       "toutDeselectionner": "إلغاء تحديد الكل",
-      "dejaUtilisee": "مدرجة في سعر آخر",
       "valider": "تأكيد",
       "annuler": "إلغاء",
       "rechercher": "ابحث عن ولاية…",
@@ -243,7 +242,7 @@
       "toutesLivrees": "يتمّ التوصيل إلى جميع الولايات",
       "voirNonLivrees": "عرضها",
       "seuilGratuite": "توصيل مجاني ابتداءً من",
-      "seuilGratuiteAide": "اتركه فارغًا إن كنت لا تقدّم التوصيل المجاني.",
+      "seuilGratuiteAide": "اتركه فارغًا إن كنت لا تقدّم التوصيل المجاني أبدًا.",
       "enregistrer": "حفظ",
       "enregistrement": "جارٍ الحفظ…",
       "enregistre": "تمّ الحفظ.",
@@ -260,7 +259,10 @@
         "acces_refuse": "الوصول مرفوض."
       },
       "nonLivreesAide": "أضفها إلى سعر ليتمكّن زبائنها من الطلب.",
-      "enregistrerSection": "حفظ"
+      "enregistrerSection": "حفظ",
+      "selecteurAide": "حدّد الولايات التي تأخذ هذا السعر، وأزل التحديد عن التي تريد استبعادها.",
+      "dejaDansTarif": "حاليًا بـ {domicile} دج إلى المنزل · {stopdesk} دج إلى المكتب",
+      "dejaDansTarifAide": "تحديدها ينقلها إلى هذا السعر."
     }
   },
   "langue": {
@@ -414,7 +416,9 @@
     "stopdesk": "إلى المكتب (ستوب ديسك)",
     "stopdeskAide": "تستلم الطرد من مكتب شركة التوصيل",
     "livraisonGratuite": "مجاني",
-    "livraisonSelonWilaya": "اختر ولاية"
+    "livraisonSelonWilaya": "اختر ولاية",
+    "aucuneWilayaLivree": "لا يتمّ التوصيل إلى أيّ ولاية حاليًا.",
+    "aucuneWilayaLivreeAide": "أضف ولايات وأسعارها ليتمكّن زبائنك من الطلب."
   },
   "confirmation": {
     "titre": "تمّ تأكيد طلبك!",

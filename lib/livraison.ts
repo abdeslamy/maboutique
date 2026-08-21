@@ -132,12 +132,20 @@ export async function enregistrerGroupes(
     // Ici : 3 requêtes au total, quel que soit le nombre de wilayas.
     // Le tout reste atomique — jamais d'instant où la boutique ne livre nulle
     // part, puisque la suppression et l'insertion sont dans la même transaction.
-    await prisma.$transaction([
-      prisma.tarifLivraison.deleteMany({}),
-      prisma.tarifLivraison.createMany({ data: tarifs }),
-    ]);
+    await prisma.$transaction(
+      [
+        prisma.tarifLivraison.deleteMany({}),
+        prisma.tarifLivraison.createMany({ data: tarifs }),
+      ],
+      // Marge confortable : la valeur par défaut (5 s) est juste quand la
+      // latence vers Neon est élevée ou qu'une autre écriture tient un verrou.
+      { timeout: 20_000 }
+    );
     return { ok: true };
-  } catch {
+  } catch (e) {
+    // On TRACE la cause réelle. Un catch muet rend ce genre d'échec
+    // impossible à diagnostiquer depuis les logs de production.
+    console.error("[livraison] echec enregistrerGroupes :", e);
     return { ok: false, erreur: "erreur_serveur" };
   }
 }
@@ -161,7 +169,8 @@ export async function enregistrerParametres(
       create: { id: "boutique", seuilLivraisonGratuite: seuil },
     });
     return { ok: true };
-  } catch {
+  } catch (e) {
+    console.error("[livraison] echec enregistrerParametres :", e);
     return { ok: false, erreur: "erreur_serveur" };
   }
 }

@@ -228,13 +228,12 @@
       "prixDomicileAide": "Le livreur apporte le colis chez le client",
       "prixStopdeskAide": "Le client vient chercher son colis",
       "wilayasDuGroupe": "{n} wilaya(s)",
-      "choisirWilayas": "Choisir les wilayas",
-      "modifierWilayas": "Modifier",
+      "choisirWilayas": "Wilayas de ce tarif",
+      "modifierWilayas": "Modifier les wilayas de ce tarif",
       "supprimerGroupe": "Supprimer ce tarif",
       "confirmSupprimer": "Supprimer ce tarif ? Les wilayas concernées ne seront plus livrées.",
       "toutSelectionner": "Tout sélectionner",
       "toutDeselectionner": "Tout désélectionner",
-      "dejaUtilisee": "déjà dans un autre tarif",
       "valider": "Valider",
       "annuler": "Annuler",
       "rechercher": "Rechercher une wilaya…",
@@ -243,7 +242,7 @@
       "toutesLivrees": "Toutes les wilayas sont livrées",
       "voirNonLivrees": "Voir lesquelles",
       "seuilGratuite": "Livraison gratuite à partir de",
-      "seuilGratuiteAide": "Laissez vide si vous n'offrez jamais la livraison.",
+      "seuilGratuiteAide": "Laissez vide si vous n’offrez jamais une livraison gratuite.",
       "enregistrer": "Enregistrer",
       "enregistrement": "Enregistrement…",
       "enregistre": "C'est enregistré.",
@@ -260,7 +259,10 @@
         "acces_refuse": "Accès refusé."
       },
       "nonLivreesAide": "Ajoutez-les à un tarif pour que leurs clients puissent commander.",
-      "enregistrerSection": "Enregistrer"
+      "enregistrerSection": "Enregistrer",
+      "selecteurAide": "Cochez les wilayas qui doivent avoir ce tarif, décochez celles à en retirer.",
+      "dejaDansTarif": "Actuellement à {domicile} DA à domicile · {stopdesk} DA au bureau",
+      "dejaDansTarifAide": "La cocher la déplacera vers ce tarif."
     }
   },
   "langue": {
@@ -414,7 +416,9 @@
     "stopdesk": "Au bureau (stopdesk)",
     "stopdeskAide": "Vous retirez le colis au bureau du transporteur",
     "livraisonGratuite": "Offerte",
-    "livraisonSelonWilaya": "Choisissez une wilaya"
+    "livraisonSelonWilaya": "Choisissez une wilaya",
+    "aucuneWilayaLivree": "Aucune wilaya n’est livrée pour le moment.",
+    "aucuneWilayaLivreeAide": "Ajoutez des wilayas et leurs tarifs pour que vos clients puissent commander."
   },
   "confirmation": {
     "titre": "Commande confirmée !",

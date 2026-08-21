@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Search, Check, Trash2, Plus, Gift, X } from "lucide-react";
+import { Search, Check, Trash2, Pencil, Plus, Gift, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { WILAYAS } from "@/lib/wilayas";
@@ -82,7 +82,7 @@ export default function ConfigurationLivraison({
   function ajouterGroupe() {
     setGroupes((prev) => [
       ...prev,
-      { wilayas: [], prixDomicile: 500, prixStopdesk: 400 },
+      { wilayas: [], prixDomicile: 600, prixStopdesk: 500 },
     ]);
     // On ouvre directement le sélecteur : un tarif sans wilaya ne sert à rien.
     setEditionIndex(groupes.length);
@@ -139,7 +139,7 @@ export default function ConfigurationLivraison({
   }
 
   return (
-    <div className="pb-28">
+    <div className="pb-8">
       <header className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
           {t("titre")}
@@ -242,9 +242,11 @@ export default function ConfigurationLivraison({
                     <button
                       type="button"
                       onClick={() => setEditionIndex(i)}
-                      className="rounded-full bg-stone-100 px-3.5 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-stone-200"
+                      aria-label={t("modifierWilayas")}
+                      title={t("modifierWilayas")}
+                      className="rounded-full p-2 text-gray-400 transition hover:bg-stone-100 hover:text-gray-900"
                     >
-                      {t("modifierWilayas")}
+                      <Pencil className="h-4 w-4" strokeWidth={1.75} />
                     </button>
                     <button
                       type="button"
@@ -278,14 +280,42 @@ export default function ConfigurationLivraison({
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={ajouterGroupe}
-          className="mt-4 inline-flex items-center gap-2 rounded-full bg-gray-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700"
-        >
-          <Plus className="h-4 w-4" strokeWidth={2} />
-          {t("ajouter")}
-        </button>
+        {/* Actions de la section, sur une seule ligne : ajouter puis enregistrer.
+            Le bouton d'ajout est secondaire (contour), l'enregistrement est
+            l'action principale (plein) — la hiérarchie se lit d'un coup d'œil. */}
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={ajouterGroupe}
+            className="inline-flex items-center gap-2 rounded-full border border-gray-900 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition hover:bg-stone-100"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2} />
+            {t("ajouter")}
+          </button>
+
+          <button
+            type="button"
+            onClick={enregistrer}
+            disabled={envoi || !groupesModifies}
+            className="rounded-full bg-gray-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+          >
+            {envoi ? t("enregistrement") : t("enregistrerSection")}
+          </button>
+
+          {message && (
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-700">
+              <Check className="h-4 w-4" strokeWidth={2} />
+              {t("enregistre")}
+            </span>
+          )}
+          {erreur && (
+            <span className="text-sm font-medium text-red-600">
+              {t.has(`erreurs.${erreur}`)
+                ? t(`erreurs.${erreur}`)
+                : t("erreurs.erreur_serveur")}
+            </span>
+          )}
+        </div>
 
         {/* Rappel des wilayas non couvertes — information, pas alerte.
             On ne liste PLUS les noms : à 55 wilayas, le pavé écrasait le reste
@@ -308,12 +338,24 @@ export default function ConfigurationLivraison({
       {editionIndex !== null && groupes[editionIndex] && (
         <SelecteurWilayas
           selection={groupes[editionIndex].wilayas}
-          // Wilayas prises par les AUTRES tarifs : on les grise pour éviter
-          // qu'une même destination ait deux prix contradictoires.
-          indisponibles={
-            new Set(
+          // Wilayas appartenant aux AUTRES tarifs, avec leur prix actuel.
+          // Elles restent sélectionnables : la cocher la DÉPLACE ici, ce qui
+          // évite d'obliger l'admin à aller la retirer de l'autre tarif d'abord.
+          tarifsAilleurs={
+            new Map(
               groupes.flatMap((g, idx) =>
-                idx === editionIndex ? [] : g.wilayas
+                idx === editionIndex
+                  ? []
+                  : g.wilayas.map(
+                      (w) =>
+                        [
+                          w,
+                          {
+                            prixDomicile: g.prixDomicile,
+                            prixStopdesk: g.prixStopdesk,
+                          },
+                        ] as const
+                    )
               )
             )
           }
@@ -325,42 +367,23 @@ export default function ConfigurationLivraison({
             setEditionIndex(null);
           }}
           onValider={(codes) => {
-            majGroupe(editionIndex, "wilayas", codes);
+            const pris = new Set(codes);
+            setGroupes((prev) =>
+              prev
+                .map((g, idx) =>
+                  idx === editionIndex
+                    ? { ...g, wilayas: codes }
+                    : // Les wilayas reprises sont retirées de leur ancien tarif :
+                      // une wilaya n'a qu'un seul prix.
+                      { ...g, wilayas: g.wilayas.filter((w) => !pris.has(w)) }
+                )
+                // Un tarif vidé de toutes ses wilayas n'a plus d'objet.
+                .filter((g, idx) => idx === editionIndex || g.wilayas.length > 0)
+            );
+            setMessage(null);
             setEditionIndex(null);
           }}
         />
-      )}
-
-      {/* ═══ Barre de sauvegarde ════════════════════════════════════ */}
-      {(groupesModifies || message || erreur) && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-            <p className="min-w-0 truncate text-sm">
-              {erreur ? (
-                <span className="font-medium text-red-600">
-                  {t.has(`erreurs.${erreur}`)
-                    ? t(`erreurs.${erreur}`)
-                    : t("erreurs.erreur_serveur")}
-                </span>
-              ) : message ? (
-                <span className="inline-flex items-center gap-1.5 font-medium text-green-700">
-                  <Check className="h-4 w-4" strokeWidth={2} />
-                  {t("enregistre")}
-                </span>
-              ) : (
-                <span className="text-gray-600">{t("modifsEnCours")}</span>
-              )}
-            </p>
-            <button
-              type="button"
-              onClick={enregistrer}
-              disabled={envoi || !groupesModifies}
-              className="shrink-0 rounded-full bg-gray-900 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
-            >
-              {envoi ? t("enregistrement") : t("enregistrer")}
-            </button>
-          </div>
-        </div>
       )}
     </div>
   );
@@ -407,12 +430,13 @@ function ChampPrix({
 
 function SelecteurWilayas({
   selection,
-  indisponibles,
+  tarifsAilleurs,
   onValider,
   onAnnuler,
 }: {
   selection: string[];
-  indisponibles: Set<string>;
+  /** Wilayas déjà rattachées à un AUTRE tarif, avec les prix de ce tarif. */
+  tarifsAilleurs: Map<string, { prixDomicile: number; prixStopdesk: number }>;
   onValider: (codes: string[]) => void;
   onAnnuler: () => void;
 }) {
@@ -443,8 +467,8 @@ function SelecteurWilayas({
     );
   }, [recherche, locale]);
 
-  // « Tout sélectionner » n'agit que sur les lignes visibles et libres.
-  const selectionnables = affichees.filter((w) => !indisponibles.has(w.code));
+  // « Tout sélectionner » agit sur les lignes visibles (aucune n'est bloquée).
+  const selectionnables = affichees;
   const toutesChoisies =
     selectionnables.length > 0 &&
     selectionnables.every((w) => choisies.has(w.code));
@@ -480,10 +504,13 @@ function SelecteurWilayas({
 
       <div className="relative flex max-h-[85vh] w-full flex-col rounded-t-3xl bg-white sm:max-h-[80vh] sm:max-w-lg sm:rounded-3xl">
         {/* En-tête */}
-        <div className="flex items-center justify-between gap-3 px-6 pt-6">
-          <h2 className="text-lg font-semibold tracking-tight text-gray-900">
-            {t("choisirWilayas")}
-          </h2>
+        <div className="flex items-start justify-between gap-3 px-6 pt-6">
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold tracking-tight text-gray-900">
+              {t("choisirWilayas")}
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">{t("selecteurAide")}</p>
+          </div>
           <button
             type="button"
             onClick={onAnnuler}
@@ -526,35 +553,37 @@ function SelecteurWilayas({
         <div className="mt-2 flex-1 overflow-y-auto px-6 py-2">
           <ul className="flex flex-col">
             {affichees.map((w) => {
-              const prise = indisponibles.has(w.code);
+              const ailleurs = tarifsAilleurs.get(w.code);
               const cochee = choisies.has(w.code);
               return (
                 <li key={w.code}>
-                  <label
-                    className={`flex items-center gap-3 rounded-lg px-2 py-2.5 ${
-                      prise
-                        ? "cursor-not-allowed opacity-40"
-                        : "cursor-pointer hover:bg-stone-50"
-                    }`}
-                  >
+                  <label className="flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2.5 hover:bg-stone-50">
                     <input
                       type="checkbox"
                       checked={cochee}
-                      disabled={prise}
                       onChange={() => basculer(w.code)}
-                      className="h-4 w-4 shrink-0 accent-gray-900"
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-gray-900"
                     />
-                    <span className="min-w-0 flex-1 text-sm text-gray-900">
-                      <span className="tabular-nums text-gray-400">
-                        {w.code}
-                      </span>{" "}
-                      {w.nom[locale]}
-                    </span>
-                    {prise && (
-                      <span className="shrink-0 text-[11px] text-gray-400">
-                        {t("dejaUtilisee")}
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm text-gray-900">
+                        <span className="tabular-nums text-gray-400">
+                          {w.code}
+                        </span>{" "}
+                        {w.nom[locale]}
                       </span>
-                    )}
+                      {/* Wilaya déjà rattachée ailleurs : on affiche SON tarif
+                          actuel, pour que l'admin sache ce qu'il déplace. */}
+                      {ailleurs && !cochee && (
+                        <span className="mt-0.5 block text-[11px] leading-tight text-amber-700">
+                          {t("dejaDansTarif", {
+                            domicile: ailleurs.prixDomicile,
+                            stopdesk: ailleurs.prixStopdesk,
+                          })}
+                          {" · "}
+                          {t("dejaDansTarifAide")}
+                        </span>
+                      )}
+                    </span>
                   </label>
                 </li>
               );
