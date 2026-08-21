@@ -280,41 +280,43 @@ export default function ConfigurationLivraison({
           </div>
         )}
 
-        {/* Actions de la section, sur une seule ligne : ajouter puis enregistrer.
-            Le bouton d'ajout est secondaire (contour), l'enregistrement est
-            l'action principale (plein) — la hiérarchie se lit d'un coup d'œil. */}
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+        {/* Actions de la section. Sur desktop, "Ajouter" reste a gauche et
+            "Enregistrer" est pousse a droite (ms-auto) : action secondaire
+            pres du contenu, action principale en bout de ligne.
+            Sur mobile, tout s'empile dans l'ordre de lecture. */}
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
           <button
             type="button"
             onClick={ajouterGroupe}
-            className="inline-flex items-center gap-2 rounded-full border border-gray-900 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition hover:bg-stone-100"
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-900 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition hover:bg-stone-100"
           >
             <Plus className="h-4 w-4" strokeWidth={2} />
             {t("ajouter")}
           </button>
 
-          <button
-            type="button"
-            onClick={enregistrer}
-            disabled={envoi || !groupesModifies}
-            className="rounded-full bg-gray-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
-          >
-            {envoi ? t("enregistrement") : t("enregistrerSection")}
-          </button>
-
-          {message && (
-            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-700">
-              <Check className="h-4 w-4" strokeWidth={2} />
-              {t("enregistre")}
-            </span>
-          )}
-          {erreur && (
-            <span className="text-sm font-medium text-red-600">
-              {t.has(`erreurs.${erreur}`)
-                ? t(`erreurs.${erreur}`)
-                : t("erreurs.erreur_serveur")}
-            </span>
-          )}
+          <div className="flex flex-wrap items-center gap-3 sm:ms-auto">
+            {message && (
+              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-700">
+                <Check className="h-4 w-4" strokeWidth={2} />
+                {t("enregistre")}
+              </span>
+            )}
+            {erreur && (
+              <span className="text-sm font-medium text-red-600">
+                {t.has(`erreurs.${erreur}`)
+                  ? t(`erreurs.${erreur}`)
+                  : t("erreurs.erreur_serveur")}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={enregistrer}
+              disabled={envoi || !groupesModifies}
+              className="rounded-full bg-gray-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+            >
+              {envoi ? t("enregistrement") : t("enregistrerSection")}
+            </button>
+          </div>
         </div>
 
         {/* Rappel des wilayas non couvertes — information, pas alerte.
@@ -537,8 +539,9 @@ function SelecteurWilayas({
           />
         </div>
 
-        {/* Tout sélectionner */}
+        {/* Règle du déplacement + tout sélectionner */}
         <div className="px-6 pt-3">
+          <p className="mb-1.5 text-xs text-gray-500">{t("deplacementAide")}</p>
           <button
             type="button"
             onClick={basculerToutes}
@@ -574,13 +577,11 @@ function SelecteurWilayas({
                       {/* Wilaya déjà rattachée ailleurs : on affiche SON tarif
                           actuel, pour que l'admin sache ce qu'il déplace. */}
                       {ailleurs && !cochee && (
-                        <span className="mt-0.5 block text-[11px] leading-tight text-amber-700">
+                        <span className="mt-0.5 block text-[11px] leading-tight text-gray-500">
                           {t("dejaDansTarif", {
                             domicile: ailleurs.prixDomicile,
                             stopdesk: ailleurs.prixStopdesk,
                           })}
-                          {" · "}
-                          {t("dejaDansTarifAide")}
                         </span>
                       )}
                     </span>

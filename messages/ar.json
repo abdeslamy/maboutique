@@ -261,8 +261,8 @@
       "nonLivreesAide": "أضفها إلى سعر ليتمكّن زبائنها من الطلب.",
       "enregistrerSection": "حفظ",
       "selecteurAide": "حدّد الولايات التي تأخذ هذا السعر، وأزل التحديد عن التي تريد استبعادها.",
-      "dejaDansTarif": "حاليًا بـ {domicile} دج إلى المنزل · {stopdesk} دج إلى المكتب",
-      "dejaDansTarifAide": "تحديدها ينقلها إلى هذا السعر."
+      "dejaDansTarif": "حاليًا {stopdesk} دج إلى المكتب، {domicile} دج إلى المنزل",
+      "deplacementAide": "تحديد ولاية مستعملة ينقلها إلى هذا السعر."
     }
   },
   "langue": {

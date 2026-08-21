@@ -261,8 +261,8 @@
       "nonLivreesAide": "Ajoutez-les à un tarif pour que leurs clients puissent commander.",
       "enregistrerSection": "Enregistrer",
       "selecteurAide": "Cochez les wilayas qui doivent avoir ce tarif, décochez celles à en retirer.",
-      "dejaDansTarif": "Actuellement à {domicile} DA à domicile · {stopdesk} DA au bureau",
-      "dejaDansTarifAide": "La cocher la déplacera vers ce tarif."
+      "dejaDansTarif": "Actuellement à {stopdesk} DA au bureau, {domicile} DA à domicile",
+      "deplacementAide": "Cocher une wilaya déjà prise la déplace vers ce tarif."
     }
   },
   "langue": {
