@@ -27,6 +27,7 @@ export {
   MODES_LIVRAISON,
   estModeValide,
   calculerLivraison,
+  modeDisponible,
   grouperTarifs,
   aplatirGroupes,
   DELAIS_LIVRAISON,
@@ -99,12 +100,15 @@ export async function enregistrerGroupes(
     if (g.wilayas.some((w) => !codesValides.has(w))) {
       return { ok: false, erreur: "wilaya_invalide" };
     }
+    // Le prix a domicile peut etre absent (null) : le groupe est alors
+    // livre au bureau uniquement. Le stopdesk, lui, est obligatoire.
     if (
-      !Number.isInteger(g.prixDomicile) ||
-      g.prixDomicile < 0 ||
-      !Number.isInteger(g.prixStopdesk) ||
-      g.prixStopdesk < 0
+      g.prixDomicile !== null &&
+      (!Number.isInteger(g.prixDomicile) || g.prixDomicile < 0)
     ) {
+      return { ok: false, erreur: "prix_invalide" };
+    }
+    if (!Number.isInteger(g.prixStopdesk) || g.prixStopdesk < 0) {
       return { ok: false, erreur: "prix_invalide" };
     }
   }

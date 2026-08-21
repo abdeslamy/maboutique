@@ -27,7 +27,8 @@ export function estModeValide(v: string): v is ModeLivraison {
  */
 export type TarifWilaya = {
   wilaya: string;
-  prixDomicile: number;
+  /** null = pas de livraison à domicile pour cette wilaya. */
+  prixDomicile: number | null;
   prixStopdesk: number;
 };
 
@@ -38,7 +39,8 @@ export type TarifWilaya = {
  */
 export type GroupeTarif = {
   wilayas: string[];
-  prixDomicile: number;
+  /** null = ce groupe n’est pas livré à domicile. */
+  prixDomicile: number | null;
   prixStopdesk: number;
 };
 
@@ -115,7 +117,22 @@ export function calculerLivraison(
   // Wilaya sans tarif = non desservie. L'appelant doit l'avoir écartée avant ;
   // ce repli n'est qu'un garde-fou.
   if (!tarif) return TARIF_PAR_DEFAUT;
-  return mode === "stopdesk" ? tarif.prixStopdesk : tarif.prixDomicile;
+  if (mode === "stopdesk") return tarif.prixStopdesk;
+  // Domicile indisponible : l'appelant aurait dû l'écarter via
+  // modeDisponible(). Repli sur le stopdesk plutôt que sur un prix inventé.
+  return tarif.prixDomicile ?? tarif.prixStopdesk;
+}
+
+/**
+ * Ce mode est-il proposé pour cette wilaya ?
+ * Le stopdesk l'est toujours ; le domicile seulement si un prix est défini.
+ */
+export function modeDisponible(
+  tarif: TarifWilaya | undefined,
+  mode: ModeLivraison
+): boolean {
+  if (!tarif) return false;
+  return mode === "stopdesk" ? true : tarif.prixDomicile !== null;
 }
 
 // ──────────────────────────────────────────────────────────────────────

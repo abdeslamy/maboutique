@@ -5,7 +5,6 @@ import {
   Search,
   Check,
   Trash2,
-  Pencil,
   Plus,
   Gift,
   Store,
@@ -34,6 +33,18 @@ import type { Locale } from "@/i18n/routing";
  * absente de tous les tarifs ne l'est pas. Pas d'interrupteur supplémentaire.
  */
 
+/**
+ * Brouillon de tarif manipulé dans le formulaire. Les deux prix peuvent être
+ * vides pendant la saisie ; seul le stopdesk est obligatoire à l'enregistrement.
+ */
+type GroupeBrouillon = {
+  wilayas: string[];
+  prixDomicile: number | null;
+  prixStopdesk: number | null;
+};
+
+type ErreurGroupe = { stopdesk?: boolean; wilayas?: boolean };
+
 type Props = {
   groupesInitiaux: GroupeTarif[];
   parametresInitiaux: ParametresLivraison;
@@ -47,7 +58,9 @@ export default function ConfigurationLivraison({
   const locale = useLocale() as Locale;
   const router = useRouter();
 
-  const [groupes, setGroupes] = useState<GroupeTarif[]>(groupesInitiaux);
+  const [groupes, setGroupes] = useState<GroupeBrouillon[]>(groupesInitiaux);
+  // Erreurs de validation, par index de tarif. Vidées dès qu'on corrige.
+  const [erreurs, setErreurs] = useState<Record<number, ErreurGroupe>>({});
   const [parametres, setParametres] =
     useState<ParametresLivraison>(parametresInitiaux);
   const [envoi, setEnvoi] = useState(false);
@@ -77,11 +90,12 @@ export default function ConfigurationLivraison({
     parametres.seuilLivraisonGratuite !==
     parametresInitiaux.seuilLivraisonGratuite;
 
-  function majGroupe(i: number, champ: keyof GroupeTarif, valeur: unknown) {
+  function majGroupe(i: number, champ: keyof GroupeBrouillon, valeur: unknown) {
     setGroupes((prev) =>
       prev.map((g, idx) => (idx === i ? { ...g, [champ]: valeur } : g))
     );
     setMessage(null);
+    setErreurs({});
   }
 
   function supprimerGroupe(i: number) {
@@ -91,13 +105,15 @@ export default function ConfigurationLivraison({
   }
 
   function ajouterGroupe() {
+    // On n ouvre PAS le sélecteur tout de suite : l admin renseigne d abord
+    // les prix, puis choisit les wilayas via le bouton de la carte. Le titre
+    // du sélecteur peut ainsi rappeler les tarifs en cours de saisie.
     setGroupes((prev) => [
       ...prev,
-      { wilayas: [], prixDomicile: 600, prixStopdesk: 500 },
+      { wilayas: [], prixDomicile: null, prixStopdesk: null },
     ]);
-    // On ouvre directement le sélecteur : un tarif sans wilaya ne sert à rien.
-    setEditionIndex(groupes.length);
     setMessage(null);
+    setErreurs({});
   }
 
   /** Enregistre UNIQUEMENT le seuil de gratuité. */
@@ -121,19 +137,36 @@ export default function ConfigurationLivraison({
     }
   }
 
-  /** Enregistre UNIQUEMENT les tarifs. */
+  /** Enregistre UNIQUEMENT les tarifs, après validation locale. */
   async function enregistrer() {
+    // Un tarif est valide s'il a un prix au bureau ET au moins une wilaya.
+    // Le prix à domicile, lui, peut rester vide : cela veut dire « pas de
+    // livraison à domicile pour ces wilayas ».
+    const trouvees: Record<number, ErreurGroupe> = {};
+    groupes.forEach((g, i) => {
+      const e: ErreurGroupe = {};
+      if (g.prixStopdesk === null) e.stopdesk = true;
+      if (g.wilayas.length === 0) e.wilayas = true;
+      if (e.stopdesk || e.wilayas) trouvees[i] = e;
+    });
+    if (Object.keys(trouvees).length > 0) {
+      // On signale TOUS les problèmes d'un coup, pas le premier seulement :
+      // corriger puis re-soumettre pour découvrir le suivant est pénible.
+      setErreurs(trouvees);
+      setMessage(null);
+      setErreur(null);
+      return;
+    }
+
     setEnvoi(true);
     setErreur(null);
     setMessage(null);
+    setErreurs({});
     try {
       const res = await fetch("/api/admin/livraison", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        // On n'envoie pas les tarifs vides : ce sont des brouillons.
-        body: JSON.stringify({
-          groupes: groupes.filter((g) => g.wilayas.length > 0),
-        }),
+        body: JSON.stringify({ groupes }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -232,62 +265,84 @@ export default function ConfigurationLivraison({
           </p>
         ) : (
           <div className="mt-6 flex flex-col gap-3">
-            {groupes.map((g, i) => (
-              <article key={i} className="rounded-2xl bg-white p-5">
-                {/* Ligne 1 : wilayas du tarif */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900">
-                      {t("wilayasDuGroupe", { n: g.wilayas.length })}
-                    </p>
-                    <p className="mt-1 line-clamp-2 text-xs text-gray-500">
-                      {g.wilayas.length === 0
-                        ? "—"
-                        : g.wilayas
-                            .map((w) => nomWilaya.get(w))
-                            .filter(Boolean)
-                            .join(", ")}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setEditionIndex(i)}
-                      aria-label={t("modifierWilayas")}
-                      title={t("modifierWilayas")}
-                      className="rounded-full p-2 text-gray-400 transition hover:bg-stone-100 hover:text-gray-900"
-                    >
-                      <Pencil className="h-4 w-4" strokeWidth={1.75} />
-                    </button>
+            {groupes.map((g, i) => {
+              const err = erreurs[i];
+              return (
+                <article key={i} className="rounded-2xl bg-white p-5">
+                  {/* Ligne 1 : wilayas du tarif + suppression */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-gray-900">
+                        {t("wilayasDuGroupe", { n: g.wilayas.length })}
+                      </p>
+                      <p className="mt-1 line-clamp-2 text-xs text-gray-500">
+                        {g.wilayas.length === 0
+                          ? "—"
+                          : g.wilayas
+                              .map((w) => nomWilaya.get(w))
+                              .filter(Boolean)
+                              .join(", ")}
+                      </p>
+                    </div>
                     <button
                       type="button"
                       onClick={() => supprimerGroupe(i)}
                       aria-label={t("supprimerGroupe")}
                       title={t("supprimerGroupe")}
-                      className="rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
+                      className="shrink-0 rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600"
                     >
                       <Trash2 className="h-4 w-4" strokeWidth={1.75} />
                     </button>
                   </div>
-                </div>
 
-                {/* Ligne 2 : les deux prix */}
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <ChampPrix
-                    label={t("prixDomicile")}
-                    aide={t("prixDomicileAide")}
-                    valeur={g.prixDomicile}
-                    onChange={(v) => majGroupe(i, "prixDomicile", v)}
-                  />
-                  <ChampPrix
-                    label={t("prixStopdesk")}
-                    aide={t("prixStopdeskAide")}
-                    valeur={g.prixStopdesk}
-                    onChange={(v) => majGroupe(i, "prixStopdesk", v)}
-                  />
-                </div>
-              </article>
-            ))}
+                  {/* Ligne 2 : bureau à gauche, domicile à droite */}
+                  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <ChampPrix
+                      label={t("prixStopdesk")}
+                      aide={t("prixStopdeskAide")}
+                      Icone={Store}
+                      valeur={g.prixStopdesk}
+                      enErreur={!!err?.stopdesk}
+                      messageErreur={t("erreurStopdesk")}
+                      onChange={(v) => majGroupe(i, "prixStopdesk", v)}
+                    />
+                    <ChampPrix
+                      label={t("prixDomicile")}
+                      // Vide = pas de livraison à domicile : on le dit ici,
+                      // sinon un champ laissé vide passe pour un oubli.
+                      aide={t("prixDomicileVide")}
+                      Icone={Home}
+                      valeur={g.prixDomicile}
+                      alignFin
+                      onChange={(v) => majGroupe(i, "prixDomicile", v)}
+                    />
+                  </div>
+
+                  {/* Ligne 3 : accès au choix des wilayas */}
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      onClick={() => setEditionIndex(i)}
+                      className={`inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-medium transition ${
+                        err?.wilayas
+                          ? "border-red-300 text-red-700 hover:bg-red-50"
+                          : "border-gray-300 text-gray-900 hover:bg-stone-100"
+                      }`}
+                    >
+                      <Plus className="h-4 w-4" strokeWidth={2} />
+                      {g.wilayas.length === 0
+                        ? t("ajouterWilayas")
+                        : t("modifierWilayas")}
+                    </button>
+                    {err?.wilayas && (
+                      <p className="mt-1.5 text-xs font-medium text-red-600">
+                        {t("erreurWilayas")}
+                      </p>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
 
@@ -411,31 +466,81 @@ export default function ConfigurationLivraison({
 function ChampPrix({
   label,
   aide,
+  Icone,
   valeur,
   onChange,
+  alignFin = false,
+  enErreur = false,
+  messageErreur,
 }: {
   label: string;
   aide: string;
-  valeur: number;
-  onChange: (v: number) => void;
+  Icone: typeof Store;
+  /** null = champ vide. Pour le domicile, cela signifie « pas de livraison ». */
+  valeur: number | null;
+  onChange: (v: number | null) => void;
+  /** Aligne le contenu en fin de ligne (le champ « domicile », à droite). */
+  alignFin?: boolean;
+  enErreur?: boolean;
+  messageErreur?: string;
 }) {
   return (
-    <label className="block rounded-xl bg-stone-50 p-4">
-      <span className="block text-xs font-medium text-gray-700">{label}</span>
-      <span className="mt-0.5 block text-[11px] text-gray-500">{aide}</span>
-      <span className="mt-2 flex items-center gap-2">
-        <input
-          type="number"
-          min={0}
-          step={1}
-          inputMode="numeric"
-          value={valeur}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="w-28 rounded-lg bg-white px-3 py-2 text-base font-semibold tabular-nums text-gray-900 outline-none transition focus:ring-2 focus:ring-gray-900"
-        />
-        <span className="text-xs font-medium text-gray-500">DA</span>
-      </span>
-    </label>
+    <div>
+      <label
+        className={`block rounded-xl border p-4 transition ${
+          enErreur
+            ? "border-red-300 bg-red-50/50"
+            : "border-transparent bg-stone-50"
+        } ${alignFin ? "sm:text-end" : ""}`}
+      >
+        <span
+          className={`flex items-center gap-1.5 ${
+            alignFin ? "sm:justify-end" : ""
+          }`}
+        >
+          <span className="text-xs font-medium text-gray-700">{label}</span>
+          {/* Icône juste après le libellé, légèrement ombrée. */}
+          <Icone
+            className="h-4 w-4 shrink-0 text-gray-500 drop-shadow-sm"
+            strokeWidth={1.75}
+            aria-hidden="true"
+          />
+        </span>
+        <span className="mt-0.5 block text-[11px] text-gray-500">{aide}</span>
+        <span
+          className={`mt-2 flex items-center gap-2 ${
+            alignFin ? "sm:justify-end" : ""
+          }`}
+        >
+          <input
+            type="number"
+            min={0}
+            step={1}
+            inputMode="numeric"
+            // Champ vide → null, et non 0 : un prix de 0 voudrait dire
+            // « gratuit », pas « indisponible ».
+            value={valeur ?? ""}
+            onChange={(e) =>
+              onChange(e.target.value === "" ? null : Number(e.target.value))
+            }
+            placeholder="—"
+            className={`w-28 rounded-lg bg-white px-3 py-2 text-base font-semibold tabular-nums text-gray-900 outline-none transition focus:ring-2 focus:ring-gray-900 ${
+              alignFin ? "sm:text-end" : ""
+            }`}
+          />
+          <span className="text-xs font-medium text-gray-500">DA</span>
+        </span>
+      </label>
+      {enErreur && messageErreur && (
+        <p
+          className={`mt-1.5 text-xs font-medium text-red-600 ${
+            alignFin ? "sm:text-end" : ""
+          }`}
+        >
+          {messageErreur}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -453,10 +558,14 @@ function SelecteurWilayas({
 }: {
   selection: string[];
   /** Wilayas déjà rattachées à un AUTRE tarif, avec les prix de ce tarif. */
-  tarifsAilleurs: Map<string, { prixDomicile: number; prixStopdesk: number }>;
-  /** Prix du tarif en cours d'édition — affichés dans le titre. */
-  prixDomicile: number;
-  prixStopdesk: number;
+  tarifsAilleurs: Map<
+    string,
+    { prixDomicile: number | null; prixStopdesk: number | null }
+  >;
+  /** Prix du tarif en cours d'édition — affichés dans le titre.
+      null tant que le champ est vide : le titre montre alors « -- ». */
+  prixDomicile: number | null;
+  prixStopdesk: number | null;
   onValider: (codes: string[]) => void;
   onAnnuler: () => void;
 }) {
@@ -542,7 +651,7 @@ function SelecteurWilayas({
                 className="h-[18px] w-[18px] text-gray-400"
                 strokeWidth={1.75}
               />
-              {prixStopdesk} DA
+              {prixStopdesk === null ? t("nonRenseigne") : prixStopdesk + " DA"}
             </span>
             <span className="text-gray-300">|</span>
             <span className="inline-flex items-center gap-1.5">
@@ -550,7 +659,7 @@ function SelecteurWilayas({
                 className="h-[18px] w-[18px] text-gray-400"
                 strokeWidth={1.75}
               />
-              {prixDomicile} DA
+              {prixDomicile === null ? t("nonRenseigne") : prixDomicile + " DA"}
             </span>
           </h2>
         </div>
@@ -622,8 +731,12 @@ function SelecteurWilayas({
                       {ailleurs && !cochee && (
                         <span className="mt-0.5 block text-[11px] leading-tight text-gray-500">
                           {t("dejaDansTarif", {
-                            domicile: ailleurs.prixDomicile,
-                            stopdesk: ailleurs.prixStopdesk,
+                            // Un prix absent s'affiche « -- » plutôt que
+                            // de faire échouer l'interpolation.
+                            domicile:
+                              ailleurs.prixDomicile ?? t("nonRenseigne"),
+                            stopdesk:
+                              ailleurs.prixStopdesk ?? t("nonRenseigne"),
                           })}
                         </span>
                       )}

@@ -73,7 +73,13 @@ export async function PUT(request: Request) {
         wilayas: Array.isArray(o.wilayas)
           ? o.wilayas.filter((w): w is string => typeof w === "string")
           : [],
-        prixDomicile: Number(o.prixDomicile),
+        // Champ vide -> null = pas de livraison a domicile pour ce groupe.
+        prixDomicile:
+          o.prixDomicile === null ||
+          o.prixDomicile === "" ||
+          o.prixDomicile === undefined
+            ? null
+            : Number(o.prixDomicile),
         prixStopdesk: Number(o.prixStopdesk),
       };
     });

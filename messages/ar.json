@@ -219,9 +219,9 @@
     "livraison": {
       "titre": "التوصيل",
       "sousTitre": "كم يكلّف التوصيل، حسب الوجهة.",
-      "groupes": "أسعارك",
+      "groupes": "أسعار التوصيل",
       "groupesAide": "اجمع الولايات التي لها نفس السعر. الولاية غير المدرجة لن يتمّ التوصيل إليها.",
-      "ajouter": "إضافة ولايات",
+      "ajouter": "إضافة سعر",
       "nouveauGroupe": "سعر جديد",
       "prixDomicile": "السعر إلى المنزل",
       "prixStopdesk": "السعر إلى المكتب",
@@ -229,7 +229,7 @@
       "prixStopdeskAide": "الزبون يأتي لاستلام طرده",
       "wilayasDuGroupe": "{n} ولاية",
       "choisirWilayas": "ولايات هذا السعر",
-      "modifierWilayas": "تعديل ولايات هذا السعر",
+      "modifierWilayas": "تعديل الولايات",
       "supprimerGroupe": "حذف هذا السعر",
       "confirmSupprimer": "حذف هذا السعر؟ لن يتمّ التوصيل إلى الولايات المعنية.",
       "toutSelectionner": "تحديد الكل",
@@ -265,7 +265,12 @@
       "deplacementAide": "إذا اخترت ولاية مرتبطة بسعر آخر، سيتمّ نقلها إلى السعر الجديد.",
       "tarifsTitre": "الأسعار:",
       "reinitialiser": "إعادة ضبط التحديد",
-      "retour": "رجوع"
+      "retour": "رجوع",
+      "ajouterWilayas": "إضافة ولايات",
+      "prixDomicileVide": "فارغ = لا يوجد توصيل إلى المنزل",
+      "erreurStopdesk": "يرجى إدخال سعر التوصيل إلى المكتب",
+      "erreurWilayas": "يرجى اختيار ولايات هذا السعر",
+      "nonRenseigne": "--"
     }
   },
   "langue": {
@@ -411,7 +416,8 @@
       "json_invalide": "بيانات غير صالحة.",
       "stock_insuffisant": "الكمية المتوفّرة من « {produit} » لم تعد كافية. عدّل سلّتك.",
       "rupture_stock": "« {produit} » نفدت كميته. أزِله من السلّة للمتابعة.",
-      "wilaya_non_desservie": "لا نقوم بالتوصيل إلى هذه الولاية بعد."
+      "wilaya_non_desservie": "لا نقوم بالتوصيل إلى هذه الولاية بعد.",
+      "mode_livraison_indisponible": "طريقة التوصيل هذه غير متوفّرة لهذه الولاية."
     },
     "modeLivraison": "طريقة التوصيل",
     "domicile": "إلى المنزل",
@@ -421,7 +427,8 @@
     "livraisonGratuite": "مجاني",
     "livraisonSelonWilaya": "اختر ولاية",
     "aucuneWilayaLivree": "لا يتمّ التوصيل إلى أيّ ولاية حاليًا.",
-    "aucuneWilayaLivreeAide": "أضف ولايات وأسعارها ليتمكّن زبائنك من الطلب."
+    "aucuneWilayaLivreeAide": "أضف ولايات وأسعارها ليتمكّن زبائنك من الطلب.",
+    "modeIndisponible": "غير متوفّر لهذه الولاية"
   },
   "confirmation": {
     "titre": "تمّ تأكيد طلبك!",

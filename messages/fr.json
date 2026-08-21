@@ -219,9 +219,9 @@
     "livraison": {
       "titre": "Livraison",
       "sousTitre": "Combien coûte la livraison, selon la destination.",
-      "groupes": "Vos tarifs",
+      "groupes": "Vos tarifs de livraison",
       "groupesAide": "Regroupez les wilayas qui ont le même prix. Une wilaya absente de vos tarifs ne sera pas livrée.",
-      "ajouter": "Ajouter des wilayas",
+      "ajouter": "Ajouter un tarif",
       "nouveauGroupe": "Nouveau tarif",
       "prixDomicile": "Prix à domicile",
       "prixStopdesk": "Prix au bureau",
@@ -229,7 +229,7 @@
       "prixStopdeskAide": "Le client vient chercher son colis",
       "wilayasDuGroupe": "{n} wilaya(s)",
       "choisirWilayas": "Wilayas de ce tarif",
-      "modifierWilayas": "Modifier les wilayas de ce tarif",
+      "modifierWilayas": "Modifier les wilayas",
       "supprimerGroupe": "Supprimer ce tarif",
       "confirmSupprimer": "Supprimer ce tarif ? Les wilayas concernées ne seront plus livrées.",
       "toutSelectionner": "Tout sélectionner",
@@ -265,7 +265,12 @@
       "deplacementAide": "Si tu sélectionnes une wilaya déjà associée à un tarif, elle sera déplacée vers le nouveau.",
       "tarifsTitre": "Tarifs :",
       "reinitialiser": "Réinitialiser la sélection",
-      "retour": "Retour"
+      "retour": "Retour",
+      "ajouterWilayas": "Ajouter des wilayas",
+      "prixDomicileVide": "Vide = pas de livraison à domicile",
+      "erreurStopdesk": "Veuillez remplir le prix de livraison au bureau",
+      "erreurWilayas": "Veuillez sélectionner les wilayas de ce tarif",
+      "nonRenseigne": "--"
     }
   },
   "langue": {
@@ -411,7 +416,8 @@
       "json_invalide": "Données invalides.",
       "stock_insuffisant": "« {produit} » n'est plus disponible en quantité suffisante. Ajuste ton panier.",
       "rupture_stock": "« {produit} » est en rupture de stock. Retire-le de ton panier pour continuer.",
-      "wilaya_non_desservie": "Nous ne livrons pas encore dans cette wilaya."
+      "wilaya_non_desservie": "Nous ne livrons pas encore dans cette wilaya.",
+      "mode_livraison_indisponible": "Ce mode de livraison n’est pas disponible pour cette wilaya."
     },
     "modeLivraison": "Mode de livraison",
     "domicile": "À domicile",
@@ -421,7 +427,8 @@
     "livraisonGratuite": "Offerte",
     "livraisonSelonWilaya": "Choisissez une wilaya",
     "aucuneWilayaLivree": "Aucune wilaya n’est livrée pour le moment.",
-    "aucuneWilayaLivreeAide": "Ajoutez des wilayas et leurs tarifs pour que vos clients puissent commander."
+    "aucuneWilayaLivreeAide": "Ajoutez des wilayas et leurs tarifs pour que vos clients puissent commander.",
+    "modeIndisponible": "Non disponible pour cette wilaya"
   },
   "confirmation": {
     "titre": "Commande confirmée !",

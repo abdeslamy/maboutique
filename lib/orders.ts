@@ -17,6 +17,7 @@ import {
   getTarifsLivraison,
   getParametresLivraison,
   calculerLivraison,
+  modeDisponible,
   estModeValide,
   type ModeLivraison,
 } from "./livraison";
@@ -560,6 +561,11 @@ export async function creerCommande(input: {
   const tarifWilaya = tarifs.find((t) => t.wilaya === wilaya);
   if (!tarifWilaya) {
     return { ok: false, erreur: "wilaya_non_desservie" };
+  }
+  // Domicile non propose pour cette wilaya : on refuse plutot que de
+  // facturer un mode que la boutique n assure pas.
+  if (!modeDisponible(tarifWilaya, mode)) {
+    return { ok: false, erreur: "mode_livraison_indisponible" };
   }
   const livraison = calculerLivraison(
     tarifWilaya,

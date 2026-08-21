@@ -144,7 +144,8 @@ model Commande {
 // TarifLivraison — un tarif par wilaya
 // ══════════════════════════════════════════════════════════════════════
 // Une ligne par wilaya (code officiel "01" à "58").
-//  - prixDomicile : livraison à l'adresse du client
+//  - prixDomicile : livraison à l'adresse du client. NULL = ce groupe de
+//    wilayas n'est PAS livré à domicile (retrait au bureau uniquement).
 //  - prixStopdesk : retrait au bureau du transporteur (toujours moins cher)
 //
 // ⚠️ Règle : PRÉSENCE DE LA LIGNE = wilaya desservie.
@@ -154,7 +155,7 @@ model Commande {
 // évite une table de jointure et garde la recherche de tarif immédiate.
 model TarifLivraison {
   wilaya       String @id
-  prixDomicile Int
+  prixDomicile Int?
   prixStopdesk Int
 }
 

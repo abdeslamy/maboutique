@@ -11,6 +11,7 @@ import { formatPrix } from "@/lib/format";
 // Prisma et ne doit jamais atterrir dans le bundle navigateur.
 import {
   calculerLivraison,
+  modeDisponible,
   type TarifWilaya,
   type ParametresLivraison,
   type ModeLivraison,
@@ -55,10 +56,17 @@ export default function FormulaireCommande({
   const wilayasDisponibles = WILAYAS.filter((w) => codesDesservis.has(w.code));
 
   const tarifChoisi = tarifs.find((tr) => tr.wilaya === wilaya);
+  // Ce groupe de wilayas n a pas de prix a domicile : seul le retrait au
+  // bureau est possible. On bascule le choix sans attendre une action.
+  const domicileIndispo =
+    !!tarifChoisi && !modeDisponible(tarifChoisi, "domicile");
+  const modeEffectif: ModeLivraison = domicileIndispo
+    ? "stopdesk"
+    : modeLivraison;
   // Même fonction que le serveur → aucun écart possible entre le prix
   // affiché et le prix facturé.
   const livraison = wilaya
-    ? calculerLivraison(tarifChoisi, modeLivraison, sousTotal, parametres)
+    ? calculerLivraison(tarifChoisi, modeEffectif, sousTotal, parametres)
     : null;
   const total = sousTotal + (livraison ?? 0);
   const livraisonOfferte = livraison === 0;
@@ -144,7 +152,7 @@ export default function FormulaireCommande({
         body: JSON.stringify({
           articles, // [{ produitId, quantite }]
           client: { nom, telephone, adresse, wilaya },
-          modeLivraison,
+          modeLivraison: modeEffectif,
           locale,
         }),
       });
@@ -234,7 +242,10 @@ export default function FormulaireCommande({
             </legend>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {(["domicile", "stopdesk"] as ModeLivraison[]).map((m) => {
-                const choisi = modeLivraison === m;
+                const choisi = modeEffectif === m;
+                // Domicile sans prix = la boutique ne livre pas à l'adresse
+                // pour cette wilaya : l'option reste visible mais inactive.
+                const indisponible = m === "domicile" && domicileIndispo;
                 const prix = tarifChoisi
                   ? m === "stopdesk"
                     ? tarifChoisi.prixStopdesk
@@ -243,10 +254,12 @@ export default function FormulaireCommande({
                 return (
                   <label
                     key={m}
-                    className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition ${
-                      choisi
-                        ? "border-black bg-gray-50"
-                        : "border-gray-200 hover:border-gray-400"
+                    className={`flex items-start gap-3 rounded-xl border p-3 transition ${
+                      indisponible
+                        ? "cursor-not-allowed border-gray-200 bg-gray-50 opacity-60"
+                        : choisi
+                        ? "cursor-pointer border-black bg-gray-50"
+                        : "cursor-pointer border-gray-200 hover:border-gray-400"
                     }`}
                   >
                     <input
@@ -254,15 +267,20 @@ export default function FormulaireCommande({
                       name="modeLivraison"
                       value={m}
                       checked={choisi}
+                      disabled={indisponible}
                       onChange={() => setModeLivraison(m)}
                       className="mt-0.5 accent-black"
                     />
                     <span className="min-w-0 flex-1">
                       <span className="flex items-baseline justify-between gap-2">
-                        <span className="font-medium text-gray-900">
+                        <span
+                          className={`font-medium ${
+                            indisponible ? "text-gray-500" : "text-gray-900"
+                          }`}
+                        >
                           {t(m)}
                         </span>
-                        {prix !== null && (
+                        {prix !== null && !indisponible && (
                           <span className="shrink-0 text-sm font-semibold text-gray-900">
                             {livraisonOfferte
                               ? t("livraisonGratuite")
@@ -271,7 +289,9 @@ export default function FormulaireCommande({
                         )}
                       </span>
                       <span className="mt-0.5 block text-xs text-gray-500">
-                        {t(`${m}Aide`)}
+                        {indisponible
+                          ? t("modeIndisponible")
+                          : t(`${m}Aide`)}
                       </span>
                     </span>
                   </label>
