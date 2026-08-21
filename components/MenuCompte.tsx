@@ -66,14 +66,16 @@ export default function MenuCompte() {
 
   if (!utilisateur) {
     return (
+      // Même gabarit que l'avatar et que les pastilles de la capsule : 36 px.
+      // Le libellé « Se connecter » disparaît au profit de l'icône, pour que
+      // la barre garde quatre éléments de taille identique.
       <Link
         href="/connexion"
-        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100 hover:text-black sm:px-3"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:bg-gray-100 hover:text-black"
         aria-label={t("connexion")}
+        title={t("connexion")}
       >
-        {/* Icône sur mobile, texte sur desktop */}
-        <LogIn className="h-4 w-4 sm:hidden" aria-hidden="true" />
-        <span className="hidden sm:inline">{t("connexion")}</span>
+        <LogIn className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden="true" />
       </Link>
     );
   }

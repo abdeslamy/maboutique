@@ -1,21 +1,23 @@
 "use client";
 
-import { Globe } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 
 /**
- * Sélecteur de langue moderne — bouton compact :
- *   [🌐 FR]  ou  [🌐 AR]
+ * Sélecteur de langue — pastille compacte affichant le code actif (FR / AR),
+ * qui ouvre un petit menu ancré juste dessous.
  *
- * Comme on n'a que 2 langues, un simple TOGGLE est plus rapide qu'un menu
- * déroulant : un clic = on passe à l'autre langue.
+ * Pourquoi un menu plutôt qu'une bascule directe :
+ * l'ancienne version changeait de langue AU CLIC, sans prévenir. Un clic par
+ * curiosité (ou par erreur) rechargeait toute la page dans une autre langue,
+ * sans moyen d'annuler avant. Le menu rend le choix explicite et réversible :
+ * un clic à côté et il ne s'est rien passé.
  *
- * Pourquoi pas un <select> ? Il a des limites :
- *  - Style limité (rendu natif du navigateur, varie sur mobile)
- *  - Moins compact, moins moderne
- *  - On n'a que 2 options → un toggle suffit
+ * Volontairement un menu léger, pas un panneau plein écran : le choix est
+ * trop simple pour justifier d'interrompre la navigation.
  */
 export default function SelecteurLangue({
   localeActive,
@@ -26,23 +28,91 @@ export default function SelecteurLangue({
   const pathname = usePathname();
   const t = useTranslations("langue");
 
-  // Trouve "l'autre" langue (celle vers laquelle on bascule).
-  const autreLangue = routing.locales.find((l) => l !== localeActive) as Locale;
+  const [ouvert, setOuvert] = useState(false);
+  const ref = useRef<HTMLDivElement | null>(null);
 
-  function basculer() {
-    router.replace(pathname, { locale: autreLangue });
+  // Fermeture au clic en dehors et à la touche Échap.
+  useEffect(() => {
+    if (!ouvert) return;
+    function clicExterieur(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOuvert(false);
+      }
+    }
+    function toucheEchap(e: KeyboardEvent) {
+      if (e.key === "Escape") setOuvert(false);
+    }
+    document.addEventListener("mousedown", clicExterieur);
+    document.addEventListener("keydown", toucheEchap);
+    return () => {
+      document.removeEventListener("mousedown", clicExterieur);
+      document.removeEventListener("keydown", toucheEchap);
+    };
+  }, [ouvert]);
+
+  function choisir(langue: Locale) {
+    setOuvert(false);
+    if (langue === localeActive) return;
+    // replace : changer de langue ne doit pas empiler une entrée dans
+    // l'historique, sinon « retour » ramène à la langue précédente.
+    router.replace(pathname, { locale: langue });
   }
 
   return (
-    <button
-      type="button"
-      onClick={basculer}
-      className="inline-flex items-center gap-1.5 rounded-full border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-gray-500 hover:text-black"
-      aria-label={t("basculerVers", { langue: t(autreLangue) })}
-      title={t("basculerVers", { langue: t(autreLangue) })}
-    >
-      <Globe className="h-4 w-4" aria-hidden="true" />
-      <span className="uppercase">{localeActive}</span>
-    </button>
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOuvert((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={ouvert}
+        aria-label={t("actuelle", { langue: t(localeActive) })}
+        title={t("actuelle", { langue: t(localeActive) })}
+        className={`flex h-9 w-9 items-center justify-center rounded-full text-[11px] font-semibold uppercase transition ${
+          ouvert
+            ? "bg-gray-900 text-white"
+            : "text-gray-700 hover:bg-gray-100 hover:text-black"
+        }`}
+      >
+        {localeActive}
+      </button>
+
+      {ouvert && (
+        <div
+          role="menu"
+          // end-0 : le menu se colle au bord "fin" du bouton — à droite en
+          // français, à gauche en arabe, sans une ligne de JavaScript.
+          className="absolute end-0 top-full z-50 mt-2 min-w-36 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
+        >
+          {routing.locales.map((l) => {
+            const actif = l === localeActive;
+            return (
+              <button
+                key={l}
+                type="button"
+                role="menuitem"
+                onClick={() => choisir(l)}
+                className={`flex w-full items-center gap-2.5 px-3 py-2 text-sm transition ${
+                  actif
+                    ? "font-medium text-gray-900"
+                    : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+              >
+                <span className="w-6 shrink-0 text-[11px] font-semibold uppercase text-gray-400">
+                  {l}
+                </span>
+                <span className="flex-1 text-start">{t(l)}</span>
+                {actif && (
+                  <Check
+                    className="h-4 w-4 shrink-0 text-gray-900"
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }

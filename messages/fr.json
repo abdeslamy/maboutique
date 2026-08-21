@@ -13,7 +13,8 @@
     "retour": "Retour",
     "parametres": "Paramètres du profil",
     "mesCommandes": "Mes commandes",
-    "admin": "Espace admin"
+    "admin": "Espace admin",
+    "rechercher": "Rechercher un produit"
   },
   "timeline": {
     "commandeAnnulee": "Commande annulée",
@@ -277,7 +278,8 @@
     "label": "Langue",
     "fr": "Français",
     "ar": "العربية",
-    "basculerVers": "Basculer vers {langue}"
+    "basculerVers": "Basculer vers {langue}",
+    "actuelle": "Langue : {langue}"
   },
   "accueil": {
     "titre": "Bienvenue sur Ma Boutique",

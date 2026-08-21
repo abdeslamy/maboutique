@@ -3,24 +3,30 @@
 import { useCart } from "@/context/CartContext";
 
 /**
- * Petit compteur affiché à côté de l'icône panier dans la Navbar.
- * Lit le nombre d'articles depuis le Context.
+ * Pastille du nombre d'articles, posée sur l'icône du panier.
  *
- * Tant que le panier n'est pas encore chargé depuis localStorage,
- * on affiche (0) — important pour éviter une différence entre rendu serveur
- * et rendu client (sinon React râle avec une erreur d'hydration).
+ * Elle n'apparaît QUE si le panier contient quelque chose : un « 0 » affiché
+ * en permanence n'apporte rien et alourdit la barre.
+ *
+ * Tant que le panier n'est pas relu depuis localStorage, on considère qu'il
+ * est vide — sinon le rendu serveur et le rendu client diffèrent et React
+ * signale une erreur d'hydratation.
+ *
+ * Le parent doit être `relative` pour que le positionnement fonctionne.
  */
 export default function PanierCompteur() {
   const { nombreArticles, estCharge } = useCart();
   const valeur = estCharge ? nombreArticles : 0;
 
+  if (valeur === 0) return null;
+
   return (
     <span
-      className={`text-xs ${
-        valeur > 0 ? "font-semibold text-black" : "text-gray-500"
-      }`}
+      // -end-0.5 : coin supérieur "fin" — droite en français, gauche en arabe.
+      className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gray-900 px-1 text-[10px] font-semibold tabular-nums text-white"
+      aria-hidden="true"
     >
-      ({valeur})
+      {valeur > 9 ? "9+" : valeur}
     </span>
   );
 }
