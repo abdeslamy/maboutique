@@ -165,7 +165,8 @@
         "statut_invalide": "Statut invalide.",
         "etat_appel_invalide": "État d'appel invalide.",
         "json_invalide": "Données invalides.",
-        "erreur_serveur": "Une erreur est survenue. Réessaie."
+        "erreur_serveur": "Une erreur est survenue. Réessaie.",
+        "stock_insuffisant_reactivation": "Stock insuffisant pour réactiver cette commande. Réapprovisionnez le produit avant de changer son statut."
       }
     },
     "formulaireProduit": {
@@ -220,7 +221,7 @@
       "sousTitre": "Combien coûte la livraison, selon la destination.",
       "groupes": "Vos tarifs",
       "groupesAide": "Regroupez les wilayas qui ont le même prix. Une wilaya absente de vos tarifs ne sera pas livrée.",
-      "ajouter": "+ Ajouter des wilayas",
+      "ajouter": "Ajouter des wilayas",
       "nouveauGroupe": "Nouveau tarif",
       "prixDomicile": "Prix à domicile",
       "prixStopdesk": "Prix au bureau",
@@ -238,7 +239,7 @@
       "annuler": "Annuler",
       "rechercher": "Rechercher une wilaya…",
       "aucunGroupe": "Aucun tarif configuré. Ajoutez vos wilayas pour commencer.",
-      "nonLivrees": "{n} wilaya(s) ne sont pas livrées",
+      "nonLivrees": "{n} wilaya(s) ne sont pas encore livrées.",
       "toutesLivrees": "Toutes les wilayas sont livrées",
       "voirNonLivrees": "Voir lesquelles",
       "seuilGratuite": "Livraison gratuite à partir de",
@@ -257,7 +258,9 @@
         "json_invalide": "Données invalides.",
         "non_connecte": "Vous devez être connecté.",
         "acces_refuse": "Accès refusé."
-      }
+      },
+      "nonLivreesAide": "Ajoutez-les à un tarif pour que leurs clients puissent commander.",
+      "enregistrerSection": "Enregistrer"
     }
   },
   "langue": {

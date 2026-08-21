@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { getUtilisateurParId } from "@/lib/auth";
-import { enregistrerGroupes, type GroupeTarif } from "@/lib/livraison";
+import {
+  enregistrerGroupes,
+  enregistrerParametres,
+  type GroupeTarif,
+} from "@/lib/livraison";
 
 /**
  * PUT /api/admin/livraison
@@ -37,33 +41,47 @@ export async function PUT(request: Request) {
     parametres?: { seuilLivraisonGratuite?: unknown };
   };
 
-  if (!Array.isArray(brut.groupes)) {
+  // Enregistrement PARTIEL : chaque section de la page a son propre bouton.
+  // On ne touche qu'à ce qui est effectivement transmis, pour qu'un
+  // enregistrement des réglages n'emporte pas des tarifs en cours d'édition.
+  if (brut.groupes === undefined && brut.parametres === undefined) {
     return NextResponse.json({ erreur: "json_invalide" }, { status: 400 });
   }
 
-  const groupes: GroupeTarif[] = brut.groupes.map((g) => {
-    const o = g as Record<string, unknown>;
-    return {
-      wilayas: Array.isArray(o.wilayas)
-        ? o.wilayas.filter((w): w is string => typeof w === "string")
-        : [],
-      prixDomicile: Number(o.prixDomicile),
-      prixStopdesk: Number(o.prixStopdesk),
-    };
-  });
-
-  const seuilBrut = brut.parametres?.seuilLivraisonGratuite;
-  const resultat = await enregistrerGroupes(groupes, {
-    // Champ vidé → pas de gratuité (null), et non 0 qui signifierait
-    // « offerte dès le premier dinar ».
-    seuilLivraisonGratuite:
-      seuilBrut === null || seuilBrut === "" || seuilBrut === undefined
-        ? null
-        : Number(seuilBrut),
-  });
-
-  if (!resultat.ok) {
-    return NextResponse.json({ erreur: resultat.erreur }, { status: 400 });
+  if (brut.parametres !== undefined) {
+    const seuilBrut = brut.parametres.seuilLivraisonGratuite;
+    const r = await enregistrerParametres({
+      // Champ vidé → pas de gratuité (null), et non 0 qui signifierait
+      // « offerte dès le premier dinar ».
+      seuilLivraisonGratuite:
+        seuilBrut === null || seuilBrut === "" || seuilBrut === undefined
+          ? null
+          : Number(seuilBrut),
+    });
+    if (!r.ok) {
+      return NextResponse.json({ erreur: r.erreur }, { status: 400 });
+    }
   }
+
+  if (brut.groupes !== undefined) {
+    if (!Array.isArray(brut.groupes)) {
+      return NextResponse.json({ erreur: "json_invalide" }, { status: 400 });
+    }
+    const groupes: GroupeTarif[] = brut.groupes.map((g) => {
+      const o = g as Record<string, unknown>;
+      return {
+        wilayas: Array.isArray(o.wilayas)
+          ? o.wilayas.filter((w): w is string => typeof w === "string")
+          : [],
+        prixDomicile: Number(o.prixDomicile),
+        prixStopdesk: Number(o.prixStopdesk),
+      };
+    });
+    const r = await enregistrerGroupes(groupes);
+    if (!r.ok) {
+      return NextResponse.json({ erreur: r.erreur }, { status: 400 });
+    }
+  }
+
   return NextResponse.json({ succes: true });
 }

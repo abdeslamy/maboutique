@@ -165,7 +165,8 @@
         "statut_invalide": "الحالة غير صالحة.",
         "etat_appel_invalide": "حالة الاتصال غير صالحة.",
         "json_invalide": "بيانات غير صالحة.",
-        "erreur_serveur": "حدث خطأ، حاول مجدّدًا."
+        "erreur_serveur": "حدث خطأ، حاول مجدّدًا.",
+        "stock_insuffisant_reactivation": "الكمية غير كافية لإعادة تفعيل هذا الطلب. أعد تعبئة مخزون المنتج قبل تغيير حالته."
       }
     },
     "formulaireProduit": {
@@ -220,7 +221,7 @@
       "sousTitre": "كم يكلّف التوصيل، حسب الوجهة.",
       "groupes": "أسعارك",
       "groupesAide": "اجمع الولايات التي لها نفس السعر. الولاية غير المدرجة لن يتمّ التوصيل إليها.",
-      "ajouter": "+ إضافة ولايات",
+      "ajouter": "إضافة ولايات",
       "nouveauGroupe": "سعر جديد",
       "prixDomicile": "السعر إلى المنزل",
       "prixStopdesk": "السعر إلى المكتب",
@@ -238,7 +239,7 @@
       "annuler": "إلغاء",
       "rechercher": "ابحث عن ولاية…",
       "aucunGroupe": "لا يوجد سعر بعد. أضف ولاياتك للبدء.",
-      "nonLivrees": "{n} ولاية لا يتمّ التوصيل إليها",
+      "nonLivrees": "{n} ولاية لا يتمّ التوصيل إليها بعد.",
       "toutesLivrees": "يتمّ التوصيل إلى جميع الولايات",
       "voirNonLivrees": "عرضها",
       "seuilGratuite": "توصيل مجاني ابتداءً من",
@@ -257,7 +258,9 @@
         "json_invalide": "بيانات غير صالحة.",
         "non_connecte": "يجب تسجيل الدخول.",
         "acces_refuse": "الوصول مرفوض."
-      }
+      },
+      "nonLivreesAide": "أضفها إلى سعر ليتمكّن زبائنها من الطلب.",
+      "enregistrerSection": "حفظ"
     }
   },
   "langue": {

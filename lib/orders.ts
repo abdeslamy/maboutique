@@ -341,14 +341,23 @@ export async function mettreAJourCommandeAdmin(
     annuleeAt?: Date;
   } = {};
 
+  // Mouvement de stock déclenché par le changement de statut.
+  //   "rendre"  : la commande est annulée → les articles retournent en stock
+  //   "reprendre" : une commande annulée redevient active → on les ressort
+  //   null      : le stock ne bouge pas
+  let mouvementStock: "rendre" | "reprendre" | null = null;
+  let lignes: { produitId: string | null; quantite: number }[] = [];
+
   if (modifs.statut) {
     const existante = await prisma.commande.findUnique({
       where: { id },
       select: {
+        statut: true,
         confirmedAt: true,
         enLivraisonAt: true,
         livreeAt: true,
         annuleeAt: true,
+        lignes: { select: { produitId: true, quantite: true } },
       },
     });
     if (!existante) {
@@ -364,30 +373,75 @@ export async function mettreAJourCommandeAdmin(
     } else if (modifs.statut === "annulee" && !existante.annuleeAt) {
       horodatages.annuleeAt = now;
     }
+
+    // On compare l'ANCIEN et le NOUVEAU statut, jamais l'horodatage : c'est
+    // ce qui garantit qu'un aller-retour "annulée → confirmée → annulée" ne
+    // remet pas deux fois les mêmes articles en stock.
+    lignes = existante.lignes;
+    const etaitAnnulee = existante.statut === "annulee";
+    const devientAnnulee = modifs.statut === "annulee";
+    if (!etaitAnnulee && devientAnnulee) mouvementStock = "rendre";
+    else if (etaitAnnulee && !devientAnnulee) mouvementStock = "reprendre";
   }
 
+  // Lignes rattachées à un produit encore existant (produitId passe à NULL
+  // quand un produit est supprimé — il n'y a alors plus rien à recréditer).
+  const lignesAvecProduit = lignes.filter(
+    (l): l is { produitId: string; quantite: number } => l.produitId !== null
+  );
+
   try {
-    const row = await prisma.commande.update({
-      where: { id },
-      data: {
-        statut: modifs.statut,
-        etatAppel: modifs.etatAppel,
-        // notes : chaîne vide → on efface (null). Sinon on enregistre.
-        notes:
-          modifs.notes === undefined
-            ? undefined
-            : modifs.notes.trim() === ""
-            ? null
-            : modifs.notes.trim(),
-        ...horodatages,
-      },
-      include: { lignes: true },
+    // Statut et stock bougent ensemble : impossible d'avoir une commande
+    // annulée dont les articles ne sont pas revenus en stock, ou l'inverse.
+    const row = await prisma.$transaction(async (tx) => {
+      if (mouvementStock === "rendre") {
+        for (const l of lignesAvecProduit) {
+          await tx.produit.update({
+            where: { id: l.produitId },
+            data: { stock: { increment: l.quantite } },
+          });
+        }
+      } else if (mouvementStock === "reprendre") {
+        // Réactiver une commande annulée reprend les articles au stock.
+        // Même garde qu'à la création : si le stock ne suffit plus, on refuse
+        // plutôt que de le laisser passer sous zéro.
+        for (const l of lignesAvecProduit) {
+          const { count } = await tx.produit.updateMany({
+            where: { id: l.produitId, stock: { gte: l.quantite } },
+            data: { stock: { decrement: l.quantite } },
+          });
+          if (count === 0) throw new ErreurStockAdmin();
+        }
+      }
+
+      return tx.commande.update({
+        where: { id },
+        data: {
+          statut: modifs.statut,
+          etatAppel: modifs.etatAppel,
+          // notes : chaîne vide → on efface (null). Sinon on enregistre.
+          notes:
+            modifs.notes === undefined
+              ? undefined
+              : modifs.notes.trim() === ""
+              ? null
+              : modifs.notes.trim(),
+          ...horodatages,
+        },
+        include: { lignes: true },
+      });
     });
     return { ok: true, commande: dbToCommande(row) };
-  } catch {
+  } catch (e) {
+    if (e instanceof ErreurStockAdmin) {
+      return { ok: false, erreur: "stock_insuffisant_reactivation" };
+    }
     return { ok: false, erreur: "commande_introuvable" };
   }
 }
+
+/** Stock devenu insuffisant pour réactiver une commande annulée. */
+class ErreurStockAdmin extends Error {}
 
 // ──────────────────────────────────────────────────────────────────────
 // Création

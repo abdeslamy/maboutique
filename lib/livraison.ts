@@ -88,8 +88,7 @@ export async function getParametresLivraison(): Promise<ParametresLivraison> {
  * boutique ne livrerait nulle part.
  */
 export async function enregistrerGroupes(
-  groupes: GroupeTarif[],
-  parametres: ParametresLivraison
+  groupes: GroupeTarif[]
 ): Promise<{ ok: true } | { ok: false; erreur: string }> {
   const codesValides = new Set(WILAYAS.map((w) => w.code));
 
@@ -120,11 +119,6 @@ export async function enregistrerGroupes(
     }
   }
 
-  const seuil = parametres.seuilLivraisonGratuite;
-  if (seuil !== null && (!Number.isInteger(seuil) || seuil < 0)) {
-    return { ok: false, erreur: "seuil_invalide" };
-  }
-
   const tarifs = aplatirGroupes(groupes);
 
   try {
@@ -141,12 +135,31 @@ export async function enregistrerGroupes(
     await prisma.$transaction([
       prisma.tarifLivraison.deleteMany({}),
       prisma.tarifLivraison.createMany({ data: tarifs }),
-      prisma.parametresBoutique.upsert({
-        where: { id: "boutique" },
-        update: { seuilLivraisonGratuite: seuil },
-        create: { id: "boutique", seuilLivraisonGratuite: seuil },
-      }),
     ]);
+    return { ok: true };
+  } catch {
+    return { ok: false, erreur: "erreur_serveur" };
+  }
+}
+
+/**
+ * Enregistre les réglages généraux, indépendamment des tarifs.
+ * Séparé pour que la section « livraison gratuite » ait son propre bouton :
+ * l'admin sauve un réglage sans emporter des tarifs encore en cours d'édition.
+ */
+export async function enregistrerParametres(
+  parametres: ParametresLivraison
+): Promise<{ ok: true } | { ok: false; erreur: string }> {
+  const seuil = parametres.seuilLivraisonGratuite;
+  if (seuil !== null && (!Number.isInteger(seuil) || seuil < 0)) {
+    return { ok: false, erreur: "seuil_invalide" };
+  }
+  try {
+    await prisma.parametresBoutique.upsert({
+      where: { id: "boutique" },
+      update: { seuilLivraisonGratuite: seuil },
+      create: { id: "boutique", seuilLivraisonGratuite: seuil },
+    });
     return { ok: true };
   } catch {
     return { ok: false, erreur: "erreur_serveur" };

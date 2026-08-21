@@ -42,6 +42,9 @@ export default function ConfigurationLivraison({
   const [envoi, setEnvoi] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
+  // État de la section « livraison gratuite », indépendant de celui des tarifs.
+  const [envoiParams, setEnvoiParams] = useState(false);
+  const [messageParams, setMessageParams] = useState<string | null>(null);
   // Index du groupe dont on édite les wilayas ; null = fenêtre fermée.
   const [editionIndex, setEditionIndex] = useState<number | null>(null);
 
@@ -56,10 +59,12 @@ export default function ConfigurationLivraison({
   );
   const nonLivrees = WILAYAS.filter((w) => !wilayasCouvertes.has(w.code));
 
-  const modifie =
-    JSON.stringify(groupes) !== JSON.stringify(groupesInitiaux) ||
+  // Deux zones de modification distinctes → deux boutons distincts.
+  const groupesModifies =
+    JSON.stringify(groupes) !== JSON.stringify(groupesInitiaux);
+  const parametresModifies =
     parametres.seuilLivraisonGratuite !==
-      parametresInitiaux.seuilLivraisonGratuite;
+    parametresInitiaux.seuilLivraisonGratuite;
 
   function majGroupe(i: number, champ: keyof GroupeTarif, valeur: unknown) {
     setGroupes((prev) =>
@@ -84,6 +89,28 @@ export default function ConfigurationLivraison({
     setMessage(null);
   }
 
+  /** Enregistre UNIQUEMENT le seuil de gratuité. */
+  async function enregistrerParams() {
+    setEnvoiParams(true);
+    setMessageParams(null);
+    try {
+      const res = await fetch("/api/admin/livraison", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        // Pas de `groupes` dans le corps → les tarifs ne sont pas touchés.
+        body: JSON.stringify({ parametres }),
+      });
+      const data = await res.json();
+      setMessageParams(res.ok ? "ok" : data.erreur ?? "erreur_serveur");
+      if (res.ok) router.refresh();
+    } catch {
+      setMessageParams("erreur_serveur");
+    } finally {
+      setEnvoiParams(false);
+    }
+  }
+
+  /** Enregistre UNIQUEMENT les tarifs. */
   async function enregistrer() {
     setEnvoi(true);
     setErreur(null);
@@ -95,7 +122,6 @@ export default function ConfigurationLivraison({
         // On n'envoie pas les tarifs vides : ce sont des brouillons.
         body: JSON.stringify({
           groupes: groupes.filter((g) => g.wilayas.length > 0),
-          parametres,
         }),
       });
       const data = await res.json();
@@ -121,7 +147,9 @@ export default function ConfigurationLivraison({
         <p className="mt-2 text-[15px] text-gray-500">{t("sousTitre")}</p>
       </header>
 
-      {/* ═══ Livraison gratuite ═════════════════════════════════════ */}
+      {/* ═══ Livraison gratuite — section autonome ══════════════════
+          Elle a son PROPRE bouton : l'admin enregistre ce réglage sans
+          emporter des tarifs encore en cours d'édition plus bas. */}
       <section className="mb-6 rounded-3xl bg-stone-50 p-6 sm:p-8">
         <div className="flex items-center gap-2.5">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
@@ -131,24 +159,49 @@ export default function ConfigurationLivraison({
             {t("seuilGratuite")}
           </span>
         </div>
-        <div className="mt-4 flex items-center gap-2">
-          <input
-            type="number"
-            min={0}
-            step={1}
-            inputMode="numeric"
-            value={parametres.seuilLivraisonGratuite ?? ""}
-            onChange={(e) => {
-              setParametres({
-                seuilLivraisonGratuite:
-                  e.target.value === "" ? null : Number(e.target.value),
-              });
-              setMessage(null);
-            }}
-            placeholder="—"
-            className="w-44 rounded-xl bg-white px-4 py-2.5 text-lg font-semibold tabular-nums text-gray-900 outline-none transition focus:ring-2 focus:ring-gray-900"
-          />
-          <span className="text-sm font-medium text-gray-500">DA</span>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              min={0}
+              step={1}
+              inputMode="numeric"
+              value={parametres.seuilLivraisonGratuite ?? ""}
+              onChange={(e) => {
+                setParametres({
+                  seuilLivraisonGratuite:
+                    e.target.value === "" ? null : Number(e.target.value),
+                });
+                setMessageParams(null);
+              }}
+              placeholder="—"
+              className="w-44 rounded-xl bg-white px-4 py-2.5 text-lg font-semibold tabular-nums text-gray-900 outline-none transition focus:ring-2 focus:ring-gray-900"
+            />
+            <span className="text-sm font-medium text-gray-500">DA</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={enregistrerParams}
+            disabled={envoiParams || !parametresModifies}
+            className="rounded-full bg-gray-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+          >
+            {envoiParams ? t("enregistrement") : t("enregistrerSection")}
+          </button>
+
+          {messageParams === "ok" && (
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-700">
+              <Check className="h-4 w-4" strokeWidth={2} />
+              {t("enregistre")}
+            </span>
+          )}
+          {messageParams && messageParams !== "ok" && (
+            <span className="text-sm font-medium text-red-600">
+              {t.has(`erreurs.${messageParams}`)
+                ? t(`erreurs.${messageParams}`)
+                : t("erreurs.erreur_serveur")}
+            </span>
+          )}
         </div>
         <p className="mt-2 text-xs text-gray-500">{t("seuilGratuiteAide")}</p>
       </section>
@@ -234,13 +287,20 @@ export default function ConfigurationLivraison({
           {t("ajouter")}
         </button>
 
-        {/* Rappel des wilayas non couvertes — information, pas alerte */}
+        {/* Rappel des wilayas non couvertes — information, pas alerte.
+            On ne liste PLUS les noms : à 55 wilayas, le pavé écrasait le reste
+            de la page pour une information qu'on retrouve dans le sélecteur. */}
         <p className="mt-4 text-xs text-gray-500">
-          {nonLivrees.length === 0
-            ? t("toutesLivrees")
-            : `${t("nonLivrees", { n: nonLivrees.length })} — ${nonLivrees
-                .map((w) => w.nom[locale])
-                .join(", ")}`}
+          {nonLivrees.length === 0 ? (
+            t("toutesLivrees")
+          ) : (
+            <>
+              <span className="font-medium text-gray-700">
+                {t("nonLivrees", { n: nonLivrees.length })}
+              </span>{" "}
+              {t("nonLivreesAide")}
+            </>
+          )}
         </p>
       </section>
 
@@ -272,7 +332,7 @@ export default function ConfigurationLivraison({
       )}
 
       {/* ═══ Barre de sauvegarde ════════════════════════════════════ */}
-      {(modifie || message || erreur) && (
+      {(groupesModifies || message || erreur) && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
             <p className="min-w-0 truncate text-sm">
@@ -294,7 +354,7 @@ export default function ConfigurationLivraison({
             <button
               type="button"
               onClick={enregistrer}
-              disabled={envoi || !modifie}
+              disabled={envoi || !groupesModifies}
               className="shrink-0 rounded-full bg-gray-900 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
             >
               {envoi ? t("enregistrement") : t("enregistrer")}
