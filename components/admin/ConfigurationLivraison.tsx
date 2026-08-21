@@ -292,7 +292,16 @@ export default function ConfigurationLivraison({
         ) : (
           <div className="mt-6 flex flex-col gap-3">
             {groupes.map((g, i) => {
-              const err = erreurs[i];
+              // Une erreur signalée n'est AFFICHÉE que si le défaut existe
+              // encore. On la recroise avec l'état courant plutôt que de
+              // compter sur un effacement manuel à chaque endroit qui modifie
+              // le tarif — c'est justement un oubli de ce genre qui laissait
+              // le message « sélectionnez les wilayas » après en avoir choisi.
+              const signale = erreurs[i];
+              const err = {
+                stopdesk: signale?.stopdesk && g.prixStopdesk === null,
+                wilayas: signale?.wilayas && g.wilayas.length === 0,
+              };
               return (
                 <article key={i} className="rounded-2xl bg-white p-5">
                   {/* Ligne 1 : wilayas du tarif + suppression */}
@@ -344,7 +353,7 @@ export default function ConfigurationLivraison({
                       aide={t("prixStopdeskAide")}
                       Icone={Store}
                       valeur={g.prixStopdesk}
-                      enErreur={!!err?.stopdesk}
+                      enErreur={!!err.stopdesk}
                       messageErreur={t("erreurStopdesk")}
                       onChange={(v) => majGroupe(i, "prixStopdesk", v)}
                     />
@@ -369,7 +378,7 @@ export default function ConfigurationLivraison({
                         type="button"
                         onClick={() => setEditionIndex(i)}
                         className={`inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-medium transition ${
-                          err?.wilayas
+                          err.wilayas
                             ? "border-red-400 text-red-700 hover:bg-red-50"
                             : "border-gray-300 text-gray-900 hover:bg-stone-100"
                         }`}
@@ -379,7 +388,7 @@ export default function ConfigurationLivraison({
                           ? t("ajouterWilayas")
                           : t("modifierWilayas")}
                       </button>
-                      {err?.wilayas && (
+                      {err.wilayas && (
                         <p className="mt-1.5 text-xs font-medium text-red-600">
                           {t("erreurWilayas")}
                         </p>
@@ -501,6 +510,7 @@ export default function ConfigurationLivraison({
                 .filter((g, idx) => idx === editionIndex || g.wilayas.length > 0)
             );
             setMessage(null);
+            setErreurs({});
             setEditionIndex(null);
           }}
         />
