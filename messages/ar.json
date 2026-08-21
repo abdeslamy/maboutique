@@ -262,7 +262,10 @@
       "enregistrerSection": "حفظ",
       "selecteurAide": "حدّد الولايات التي تأخذ هذا السعر، وأزل التحديد عن التي تريد استبعادها.",
       "dejaDansTarif": "حاليًا {stopdesk} دج إلى المكتب، {domicile} دج إلى المنزل",
-      "deplacementAide": "تحديد ولاية مستعملة ينقلها إلى هذا السعر."
+      "deplacementAide": "إذا اخترت ولاية مرتبطة بسعر آخر، سيتمّ نقلها إلى السعر الجديد.",
+      "tarifsTitre": "الأسعار:",
+      "reinitialiser": "إعادة ضبط التحديد",
+      "retour": "رجوع"
     }
   },
   "langue": {

@@ -1,7 +1,18 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Search, Check, Trash2, Pencil, Plus, Gift, X } from "lucide-react";
+import {
+  Search,
+  Check,
+  Trash2,
+  Pencil,
+  Plus,
+  Gift,
+  Store,
+  Home,
+  ArrowLeft,
+  RotateCcw,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { WILAYAS } from "@/lib/wilayas";
@@ -340,6 +351,8 @@ export default function ConfigurationLivraison({
       {editionIndex !== null && groupes[editionIndex] && (
         <SelecteurWilayas
           selection={groupes[editionIndex].wilayas}
+          prixDomicile={groupes[editionIndex].prixDomicile}
+          prixStopdesk={groupes[editionIndex].prixStopdesk}
           // Wilayas appartenant aux AUTRES tarifs, avec leur prix actuel.
           // Elles restent sélectionnables : la cocher la DÉPLACE ici, ce qui
           // évite d'obliger l'admin à aller la retirer de l'autre tarif d'abord.
@@ -433,12 +446,17 @@ function ChampPrix({
 function SelecteurWilayas({
   selection,
   tarifsAilleurs,
+  prixDomicile,
+  prixStopdesk,
   onValider,
   onAnnuler,
 }: {
   selection: string[];
   /** Wilayas déjà rattachées à un AUTRE tarif, avec les prix de ce tarif. */
   tarifsAilleurs: Map<string, { prixDomicile: number; prixStopdesk: number }>;
+  /** Prix du tarif en cours d'édition — affichés dans le titre. */
+  prixDomicile: number;
+  prixStopdesk: number;
   onValider: (codes: string[]) => void;
   onAnnuler: () => void;
 }) {
@@ -495,6 +513,13 @@ function SelecteurWilayas({
     });
   }
 
+  // `selection` ne change pas tant que la fenêtre est ouverte : c'est donc
+  // l'état d'origine, celui vers lequel « réinitialiser » ramène.
+  function reinitialiser() {
+    setChoisies(new Set(selection));
+    setRecherche("");
+  }
+
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center">
       <button
@@ -505,26 +530,33 @@ function SelecteurWilayas({
       />
 
       <div className="relative flex max-h-[85vh] w-full flex-col rounded-t-3xl bg-white sm:max-h-[80vh] sm:max-w-lg sm:rounded-3xl">
-        {/* En-tête */}
-        <div className="flex items-start justify-between gap-3 px-6 pt-6">
-          <div className="min-w-0">
-            <h2 className="text-lg font-semibold tracking-tight text-gray-900">
-              {t("choisirWilayas")}
-            </h2>
-            <p className="mt-1 text-sm text-gray-500">{t("selecteurAide")}</p>
-          </div>
-          <button
-            type="button"
-            onClick={onAnnuler}
-            aria-label={t("annuler")}
-            className="-me-2 flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition hover:bg-stone-100 hover:text-gray-900"
-          >
-            <X className="h-5 w-5" strokeWidth={1.75} />
-          </button>
+        {/* En-tête : le TITRE seul, comme la référence Klarna. Ni croix ni
+            lien — la sortie se fait par les commandes du bas, par Échap, ou
+            par un clic sur le voile. Les deux prix rappellent en permanence
+            quel tarif on est en train de composer. */}
+        <div className="px-6 pt-7">
+          <h2 className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[22px] font-semibold tracking-tight text-gray-900">
+            <span>{t("tarifsTitre")}</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Store
+                className="h-[18px] w-[18px] text-gray-400"
+                strokeWidth={1.75}
+              />
+              {prixStopdesk} DA
+            </span>
+            <span className="text-gray-300">|</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Home
+                className="h-[18px] w-[18px] text-gray-400"
+                strokeWidth={1.75}
+              />
+              {prixDomicile} DA
+            </span>
+          </h2>
         </div>
 
         {/* Recherche */}
-        <div className="relative mt-4 px-6">
+        <div className="relative mt-5 px-6">
           <Search
             className="pointer-events-none absolute start-9 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
             strokeWidth={1.75}
@@ -539,17 +571,28 @@ function SelecteurWilayas({
           />
         </div>
 
-        {/* Règle du déplacement + tout sélectionner */}
-        <div className="px-6 pt-3">
-          <p className="mb-1.5 text-xs text-gray-500">{t("deplacementAide")}</p>
-          <button
-            type="button"
-            onClick={basculerToutes}
-            disabled={selectionnables.length === 0}
-            className="text-xs font-medium text-gray-600 underline-offset-2 transition hover:text-gray-900 hover:underline disabled:opacity-40"
-          >
-            {toutesChoisies ? t("toutDeselectionner") : t("toutSelectionner")}
-          </button>
+        {/* Tout sélectionner : une VRAIE case à cocher, du même style que
+            celles de la liste. L'ancien lien souligné ne se lisait pas comme
+            une action. */}
+        <div className="px-6 pt-4">
+          <label className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 hover:bg-stone-50">
+            <input
+              type="checkbox"
+              checked={toutesChoisies}
+              onChange={basculerToutes}
+              disabled={selectionnables.length === 0}
+              className="h-4 w-4 shrink-0 accent-gray-900"
+            />
+            <span className="text-sm font-medium text-gray-900">
+              {toutesChoisies ? t("toutDeselectionner") : t("toutSelectionner")}
+            </span>
+          </label>
+
+          {/* La règle du déplacement vient APRÈS la case : on lit d'abord
+              l'action, ensuite sa conséquence. */}
+          <p className="mt-2 px-2 text-xs leading-relaxed text-gray-500">
+            {t("deplacementAide")}
+          </p>
         </div>
 
         {/* Liste */}
@@ -592,25 +635,41 @@ function SelecteurWilayas({
           </ul>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-between gap-3 border-t border-stone-100 px-6 py-4">
-          <span className="text-sm text-gray-500">
-            {t("wilayasDuGroupe", { n: choisies.size })}
-          </span>
-          <div className="flex items-center gap-2">
+        {/* Actions : « Valider » en pleine largeur, puis retour et
+            réinitialiser aux deux extrémités. L'action principale domine,
+            les secondaires restent atteignables au pouce. */}
+        <div className="border-t border-stone-100 px-6 pb-6 pt-4">
+          <button
+            type="button"
+            onClick={() => onValider([...choisies])}
+            className="w-full rounded-full bg-gray-900 py-3.5 text-[15px] font-medium text-white transition hover:bg-gray-700"
+          >
+            {t("valider")} ({choisies.size})
+          </button>
+
+          <div className="mt-3 flex items-center justify-between">
             <button
               type="button"
               onClick={onAnnuler}
-              className="rounded-full px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-stone-100"
+              aria-label={t("retour")}
+              title={t("retour")}
+              className="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 transition hover:bg-stone-100 hover:text-gray-900"
             >
-              {t("annuler")}
+              {/* Miroir en RTL : « retour » suit le sens de lecture. */}
+              <ArrowLeft
+                className="h-5 w-5 rtl:-scale-x-100"
+                strokeWidth={1.75}
+              />
             </button>
+
             <button
               type="button"
-              onClick={() => onValider([...choisies])}
-              className="rounded-full bg-gray-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
+              onClick={reinitialiser}
+              aria-label={t("reinitialiser")}
+              title={t("reinitialiser")}
+              className="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 transition hover:bg-stone-100 hover:text-gray-900"
             >
-              {t("valider")}
+              <RotateCcw className="h-5 w-5" strokeWidth={1.75} />
             </button>
           </div>
         </div>

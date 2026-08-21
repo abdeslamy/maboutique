@@ -262,7 +262,10 @@
       "enregistrerSection": "Enregistrer",
       "selecteurAide": "Cochez les wilayas qui doivent avoir ce tarif, décochez celles à en retirer.",
       "dejaDansTarif": "Actuellement à {stopdesk} DA au bureau, {domicile} DA à domicile",
-      "deplacementAide": "Cocher une wilaya déjà prise la déplace vers ce tarif."
+      "deplacementAide": "Si tu sélectionnes une wilaya déjà associée à un tarif, elle sera déplacée vers le nouveau.",
+      "tarifsTitre": "Tarifs :",
+      "reinitialiser": "Réinitialiser la sélection",
+      "retour": "Retour"
     }
   },
   "langue": {
