@@ -4,8 +4,23 @@
 // TypeScript impose qu'il ait bien tous les champs déclarés ici.
 // ──────────────────────────────────────────────────────────────────────────
 
-/** Catégories de produits supportées dans la boutique. */
-export type Categorie = "mode" | "electronique" | "maison" | "camping";
+/**
+ * Catégories de produits supportées dans la boutique.
+ *
+ * ⚠️ Source unique : le type est DÉDUIT du tableau. Ajouter une catégorie ici
+ * la rend valide partout (formulaire, filtres, validation serveur).
+ * Auparavant la liste de validation de l'API était recopiée à la main — et
+ * "camping" y avait été oublié, ce qui faisait échouer l'enregistrement.
+ * TypeScript ne peut pas repérer une liste incomplète, d'où ce regroupement.
+ */
+export const CATEGORIES = [
+  "mode",
+  "electronique",
+  "maison",
+  "camping",
+] as const;
+
+export type Categorie = (typeof CATEGORIES)[number];
 
 /** Un texte qui existe dans nos deux langues. */
 export type TexteBilingue = {
@@ -36,6 +51,8 @@ export type Produit = {
   emoji: string;
   /** Stock disponible. 0 = rupture → produit non commandable. */
   stock: number;
+  /** Délai annoncé : "48h" | "3_5j" | "1semaine" | "plus_1semaine". */
+  delaiLivraison: string;
 };
 
 /** Un article dans le panier : référence un produit par son id + une quantité. */

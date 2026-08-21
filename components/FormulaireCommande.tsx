@@ -49,10 +49,10 @@ export default function FormulaireCommande({
   const [wilaya, setWilaya] = useState("");
   const [modeLivraison, setModeLivraison] = useState<ModeLivraison>("domicile");
 
-  // Seules les wilayas desservies sont proposées.
-  const wilayasDisponibles = WILAYAS.filter((w) =>
-    tarifs.find((tr) => tr.wilaya === w.code)?.actif ?? true
-  );
+  // Seules les wilayas desservies sont proposées. Règle : une wilaya présente
+  // dans les tarifs est livrée, une wilaya absente ne l  est pas.
+  const codesDesservis = new Set(tarifs.map((tr) => tr.wilaya));
+  const wilayasDisponibles = WILAYAS.filter((w) => codesDesservis.has(w.code));
 
   const tarifChoisi = tarifs.find((tr) => tr.wilaya === wilaya);
   // Même fonction que le serveur → aucun écart possible entre le prix

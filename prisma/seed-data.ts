@@ -21,6 +21,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     images: ["bg-slate-100", "bg-slate-200", "bg-zinc-100", "bg-neutral-100"],
     emoji: "👕",
     stock: 20,
+    delaiLivraison: "3_5j",
   },
   {
     id: "sneakers-urbaines",
@@ -34,6 +35,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     images: ["bg-stone-200", "bg-stone-300", "bg-amber-100", "bg-stone-100"],
     emoji: "👟",
     stock: 20,
+    delaiLivraison: "3_5j",
   },
   {
     id: "sac-toile",
@@ -47,6 +49,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     images: ["bg-amber-200", "bg-amber-300", "bg-orange-200", "bg-yellow-200"],
     emoji: "🎒",
     stock: 20,
+    delaiLivraison: "3_5j",
   },
 
   // ── Électronique ───────────────────────────────────────────────────────
@@ -62,6 +65,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     images: ["bg-neutral-800", "bg-neutral-700", "bg-zinc-800", "bg-slate-800"],
     emoji: "🎧",
     stock: 20,
+    delaiLivraison: "3_5j",
   },
   {
     id: "chargeur-usb-c",
@@ -75,6 +79,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     images: ["bg-sky-100", "bg-sky-200", "bg-blue-100", "bg-cyan-100"],
     emoji: "🔌",
     stock: 20,
+    delaiLivraison: "3_5j",
   },
   {
     id: "montre-connectee",
@@ -88,6 +93,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     images: ["bg-slate-700", "bg-slate-800", "bg-zinc-700", "bg-gray-700"],
     emoji: "⌚",
     stock: 20,
+    delaiLivraison: "3_5j",
   },
 
   // ── Maison & déco ──────────────────────────────────────────────────────
@@ -103,6 +109,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     images: ["bg-rose-200", "bg-rose-300", "bg-pink-200", "bg-rose-100"],
     emoji: "🕯️",
     stock: 20,
+    delaiLivraison: "3_5j",
   },
   {
     id: "tapis-berbere",
@@ -116,6 +123,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     images: ["bg-orange-300", "bg-orange-400", "bg-amber-300", "bg-red-300"],
     emoji: "🧶",
     stock: 20,
+    delaiLivraison: "3_5j",
   },
   {
     id: "lampe-chevet",
@@ -129,6 +137,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     images: ["bg-yellow-100", "bg-yellow-200", "bg-amber-100", "bg-orange-100"],
     emoji: "💡",
     stock: 20,
+    delaiLivraison: "3_5j",
   },
   {
     id: "carafe-verre",
@@ -142,5 +151,6 @@ export const PRODUITS_INITIAUX: Produit[] = [
     images: ["bg-cyan-100", "bg-cyan-200", "bg-sky-100", "bg-blue-100"],
     emoji: "🫗",
     stock: 20,
+    delaiLivraison: "3_5j",
   },
 ];

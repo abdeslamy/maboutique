@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { getUtilisateurParId } from "@/lib/auth";
-import { enregistrerLivraison, type EntreeTarif } from "@/lib/livraison";
+import { enregistrerGroupes, type GroupeTarif } from "@/lib/livraison";
 
 /**
  * PUT /api/admin/livraison
- * Enregistre les tarifs par wilaya + les paramètres de livraison.
+ * Remplace l'intégralité des groupes de tarifs + le seuil de gratuité.
  *
  * Body : {
- *   tarifs: [{ wilaya, prixDomicile, prixStopdesk, actif }],
- *   parametres: { seuilLivraisonGratuite: number|null, delaiMin, delaiMax }
+ *   groupes: [{ wilayas: string[], prixDomicile: number, prixStopdesk: number }],
+ *   parametres: { seuilLivraisonGratuite: number|null }
  * }
  *
  * Garde admin explicite : les Route Handlers ne passent PAS par le layout
@@ -33,38 +33,33 @@ export async function PUT(request: Request) {
   }
 
   const brut = body as {
-    tarifs?: unknown;
-    parametres?: {
-      seuilLivraisonGratuite?: unknown;
-      delaiMin?: unknown;
-      delaiMax?: unknown;
-    };
+    groupes?: unknown;
+    parametres?: { seuilLivraisonGratuite?: unknown };
   };
 
-  if (!Array.isArray(brut.tarifs)) {
+  if (!Array.isArray(brut.groupes)) {
     return NextResponse.json({ erreur: "json_invalide" }, { status: 400 });
   }
 
-  const tarifs: EntreeTarif[] = brut.tarifs.map((t) => {
-    const o = t as Record<string, unknown>;
+  const groupes: GroupeTarif[] = brut.groupes.map((g) => {
+    const o = g as Record<string, unknown>;
     return {
-      wilaya: String(o.wilaya ?? ""),
+      wilayas: Array.isArray(o.wilayas)
+        ? o.wilayas.filter((w): w is string => typeof w === "string")
+        : [],
       prixDomicile: Number(o.prixDomicile),
       prixStopdesk: Number(o.prixStopdesk),
-      actif: Boolean(o.actif),
     };
   });
 
   const seuilBrut = brut.parametres?.seuilLivraisonGratuite;
-  const resultat = await enregistrerLivraison(tarifs, {
-    // Champ vidé ou absent → pas de gratuité (null), pas 0 (qui voudrait
-    // dire "gratuite dès le premier dinar").
+  const resultat = await enregistrerGroupes(groupes, {
+    // Champ vidé → pas de gratuité (null), et non 0 qui signifierait
+    // « offerte dès le premier dinar ».
     seuilLivraisonGratuite:
       seuilBrut === null || seuilBrut === "" || seuilBrut === undefined
         ? null
         : Number(seuilBrut),
-    delaiMin: Number(brut.parametres?.delaiMin ?? 3),
-    delaiMax: Number(brut.parametres?.delaiMax ?? 5),
   });
 
   if (!resultat.ok) {

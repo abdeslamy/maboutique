@@ -12,7 +12,12 @@
 
 import { prisma } from "@/lib/prisma";
 import { WILAYAS } from "@/lib/wilayas";
-import { TARIF_PAR_DEFAUT, type TarifWilaya, type ParametresLivraison } from "./livraison-calcul";
+import {
+  aplatirGroupes,
+  type TarifWilaya,
+  type GroupeTarif,
+  type ParametresLivraison,
+} from "./livraison-calcul";
 
 // Types et calcul vivent dans livraison-calcul.ts (sans Prisma, donc
 // importable côté client). On les ré-exporte pour que le code serveur n'ait
@@ -22,11 +27,18 @@ export {
   MODES_LIVRAISON,
   estModeValide,
   calculerLivraison,
+  grouperTarifs,
+  aplatirGroupes,
+  DELAIS_LIVRAISON,
+  DELAI_PAR_DEFAUT,
+  estDelaiValide,
 } from "./livraison-calcul";
 export type {
   ModeLivraison,
   TarifWilaya,
+  GroupeTarif,
   ParametresLivraison,
+  DelaiLivraison,
 } from "./livraison-calcul";
 
 // ──────────────────────────────────────────────────────────────────────
@@ -34,118 +46,105 @@ export type {
 // ──────────────────────────────────────────────────────────────────────
 
 /**
- * Renvoie les 58 tarifs, dans l'ordre des codes wilaya.
- *
- * Auto-réparation : si une wilaya n'a pas encore de ligne en base (première
- * utilisation, ou wilaya ajoutée après coup), on renvoie le tarif par défaut
- * plutôt que de la faire disparaître du site. La base est complétée au
- * premier enregistrement de l'admin.
+ * Wilayas DESSERVIES uniquement, triées par code.
+ * Une wilaya absente du résultat n'est pas livrée.
  */
 export async function getTarifsLivraison(): Promise<TarifWilaya[]> {
-  const lignes = await prisma.tarifLivraison.findMany();
-  const parCode = new Map(lignes.map((l) => [l.wilaya, l]));
-
-  return WILAYAS.map((w) => {
-    const t = parCode.get(w.code);
-    return {
-      wilaya: w.code,
-      prixDomicile: t?.prixDomicile ?? TARIF_PAR_DEFAUT,
-      prixStopdesk: t?.prixStopdesk ?? TARIF_PAR_DEFAUT,
-      actif: t?.actif ?? true,
-    };
+  const lignes = await prisma.tarifLivraison.findMany({
+    orderBy: { wilaya: "asc" },
   });
+  // On filtre sur WILAYAS pour ignorer un éventuel code obsolète en base.
+  const valides = new Set(WILAYAS.map((w) => w.code));
+  return lignes
+    .filter((l) => valides.has(l.wilaya))
+    .map((l) => ({
+      wilaya: l.wilaya,
+      prixDomicile: l.prixDomicile,
+      prixStopdesk: l.prixStopdesk,
+    }));
 }
 
-/** Paramètres globaux. Crée la ligne unique si elle n'existe pas encore. */
+/** Paramètres globaux de livraison. */
 export async function getParametresLivraison(): Promise<ParametresLivraison> {
   const p = await prisma.parametresBoutique.findUnique({
     where: { id: "boutique" },
   });
-  return {
-    seuilLivraisonGratuite: p?.seuilLivraisonGratuite ?? null,
-    delaiMin: p?.delaiMin ?? 3,
-    delaiMax: p?.delaiMax ?? 5,
-  };
+  return { seuilLivraisonGratuite: p?.seuilLivraisonGratuite ?? null };
 }
 
 // ──────────────────────────────────────────────────────────────────────
 // Écriture (admin)
 // ──────────────────────────────────────────────────────────────────────
 
-export type EntreeTarif = {
-  wilaya: string;
-  prixDomicile: number;
-  prixStopdesk: number;
-  actif: boolean;
-};
-
 /**
- * Enregistre les tarifs modifiés + les paramètres, en une seule transaction.
- * On n'écrit QUE les wilayas réellement transmises : l'admin peut donc
- * sauvegarder une modification partielle sans risquer d'écraser le reste.
+ * Remplace l'INTÉGRALITÉ des groupes de tarifs.
+ *
+ * L'admin envoie la liste complète des groupes : les wilayas qui n'y figurent
+ * plus voient leur ligne supprimée, donc ne sont plus desservies. C'est ce qui
+ * permet de se passer d'un booléen « actif » — retirer une wilaya d'un groupe
+ * suffit à cesser de la livrer.
+ *
+ * Tout se fait dans UNE transaction : jamais d'état intermédiaire où la
+ * boutique ne livrerait nulle part.
  */
-export async function enregistrerLivraison(
-  tarifs: EntreeTarif[],
+export async function enregistrerGroupes(
+  groupes: GroupeTarif[],
   parametres: ParametresLivraison
 ): Promise<{ ok: true } | { ok: false; erreur: string }> {
-  // Validation stricte : un prix négatif ou décimal est refusé.
-  for (const t of tarifs) {
-    if (!WILAYAS.some((w) => w.code === t.wilaya)) {
+  const codesValides = new Set(WILAYAS.map((w) => w.code));
+
+  for (const g of groupes) {
+    if (!Array.isArray(g.wilayas) || g.wilayas.length === 0) {
+      return { ok: false, erreur: "groupe_vide" };
+    }
+    if (g.wilayas.some((w) => !codesValides.has(w))) {
       return { ok: false, erreur: "wilaya_invalide" };
     }
     if (
-      !Number.isInteger(t.prixDomicile) ||
-      t.prixDomicile < 0 ||
-      !Number.isInteger(t.prixStopdesk) ||
-      t.prixStopdesk < 0
+      !Number.isInteger(g.prixDomicile) ||
+      g.prixDomicile < 0 ||
+      !Number.isInteger(g.prixStopdesk) ||
+      g.prixStopdesk < 0
     ) {
       return { ok: false, erreur: "prix_invalide" };
     }
   }
+
+  // Une wilaya ne peut pas être dans deux groupes : ce serait deux prix
+  // contradictoires pour la même destination.
+  const vues = new Set<string>();
+  for (const g of groupes) {
+    for (const w of g.wilayas) {
+      if (vues.has(w)) return { ok: false, erreur: "wilaya_en_double" };
+      vues.add(w);
+    }
+  }
+
   const seuil = parametres.seuilLivraisonGratuite;
   if (seuil !== null && (!Number.isInteger(seuil) || seuil < 0)) {
     return { ok: false, erreur: "seuil_invalide" };
   }
-  if (
-    !Number.isInteger(parametres.delaiMin) ||
-    !Number.isInteger(parametres.delaiMax) ||
-    parametres.delaiMin < 0 ||
-    parametres.delaiMax < parametres.delaiMin
-  ) {
-    return { ok: false, erreur: "delai_invalide" };
-  }
+
+  const tarifs = aplatirGroupes(groupes);
 
   try {
+    // ⚠️ On efface tout puis on réinsère en bloc, au lieu d'un upsert par
+    // wilaya. Raison : un upsert par wilaya faisait 58 allers-retours vers
+    // Neon (~120 ms chacun) dans une seule transaction, soit ~7 s — au-delà
+    // du délai maximum d'une transaction Prisma (5 s par défaut). L'écriture
+    // échouait donc dès qu'on sélectionnait beaucoup de wilayas, c'est-à-dire
+    // dans le cas d'usage le plus courant.
+    //
+    // Ici : 3 requêtes au total, quel que soit le nombre de wilayas.
+    // Le tout reste atomique — jamais d'instant où la boutique ne livre nulle
+    // part, puisque la suppression et l'insertion sont dans la même transaction.
     await prisma.$transaction([
-      ...tarifs.map((t) =>
-        prisma.tarifLivraison.upsert({
-          where: { wilaya: t.wilaya },
-          update: {
-            prixDomicile: t.prixDomicile,
-            prixStopdesk: t.prixStopdesk,
-            actif: t.actif,
-          },
-          create: {
-            wilaya: t.wilaya,
-            prixDomicile: t.prixDomicile,
-            prixStopdesk: t.prixStopdesk,
-            actif: t.actif,
-          },
-        })
-      ),
+      prisma.tarifLivraison.deleteMany({}),
+      prisma.tarifLivraison.createMany({ data: tarifs }),
       prisma.parametresBoutique.upsert({
         where: { id: "boutique" },
-        update: {
-          seuilLivraisonGratuite: seuil,
-          delaiMin: parametres.delaiMin,
-          delaiMax: parametres.delaiMax,
-        },
-        create: {
-          id: "boutique",
-          seuilLivraisonGratuite: seuil,
-          delaiMin: parametres.delaiMin,
-          delaiMax: parametres.delaiMax,
-        },
+        update: { seuilLivraisonGratuite: seuil },
+        create: { id: "boutique", seuilLivraisonGratuite: seuil },
       }),
     ]);
     return { ok: true };

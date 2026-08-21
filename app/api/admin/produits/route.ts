@@ -2,9 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getSession } from "@/lib/session";
 import { getUtilisateurParId } from "@/lib/auth";
 import { creerProduit, slugifier, type EntreeProduit } from "@/lib/products";
-import type { Categorie } from "@/lib/types";
-
-const CATEGORIES_VALIDES: Categorie[] = ["mode", "electronique", "maison"];
+import { estDelaiValide, DELAI_PAR_DEFAUT } from "@/lib/livraison";
+import { CATEGORIES, type Categorie } from "@/lib/types";
 
 /**
  * POST /api/admin/produits
@@ -73,7 +72,7 @@ export function validerEntree(
   }
 
   const categorie = String(body.categorie ?? "") as Categorie;
-  if (!CATEGORIES_VALIDES.includes(categorie)) {
+  if (!(CATEGORIES as readonly string[]).includes(categorie)) {
     return { erreur: "categorie_invalide" };
   }
 
@@ -82,6 +81,12 @@ export function validerEntree(
   const stockNum = Number(body.stock);
   if (!Number.isInteger(stockNum) || stockNum < 0) {
     return { erreur: "stock_invalide" };
+  }
+
+  // Délai : on n'accepte que les valeurs de la liste fermée.
+  const delaiBrut = String(body.delaiLivraison ?? DELAI_PAR_DEFAUT);
+  if (!estDelaiValide(delaiBrut)) {
+    return { erreur: "delai_invalide" };
   }
 
   const images = Array.isArray(body.images)
@@ -105,6 +110,7 @@ export function validerEntree(
     categorie,
     images,
     stock: stockNum,
+    delaiLivraison: delaiBrut,
     videoUrl,
   };
 }

@@ -5,16 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import ProductCard from "./ProductCard";
 import { useProducts } from "@/context/ProductsContext";
-import type { Categorie } from "@/lib/types";
+import { CATEGORIES, type Categorie } from "@/lib/types";
 import type { Locale } from "@/i18n/routing";
 
-const CATEGORIES: (Categorie | "tout")[] = [
-  "tout",
-  "mode",
-  "electronique",
-  "maison",
-  "camping",
-];
+// Derive de la source unique : une nouvelle categorie apparait ici seule.
+const FILTRES_CATEGORIES: (Categorie | "tout")[] = ["tout", ...CATEGORIES];
 
 /**
  * Composant CLIENT qui gère la recherche + le filtre par catégorie.
@@ -71,7 +66,7 @@ export default function CatalogueClient() {
         />
 
         <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((cat) => {
+          {FILTRES_CATEGORIES.map((cat) => {
             const actif = cat === categorie;
             return (
               <button

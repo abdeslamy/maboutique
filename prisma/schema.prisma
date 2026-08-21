@@ -73,6 +73,9 @@ model Produit {
   // Stock total disponible. 0 = rupture → le produit n'est plus commandable.
   // Décrémenté automatiquement à chaque commande (voir creerCommande).
   stock          Int             @default(0)
+  // Délai annoncé au client, PAR PRODUIT (il varie selon l'article).
+  // Valeurs : "48h" | "3_5j" | "1semaine" | "plus_1semaine".
+  delaiLivraison String          @default("3_5j")
   createdAt      DateTime        @default(now())
 
   lignesCommande LigneCommande[]
@@ -140,15 +143,19 @@ model Commande {
 // ══════════════════════════════════════════════════════════════════════
 // TarifLivraison — un tarif par wilaya
 // ══════════════════════════════════════════════════════════════════════
-// Une ligne par wilaya (code officiel "01" à "58"), créée au démarrage.
+// Une ligne par wilaya (code officiel "01" à "58").
 //  - prixDomicile : livraison à l'adresse du client
 //  - prixStopdesk : retrait au bureau du transporteur (toujours moins cher)
-//  - actif : permet de ne pas desservir une wilaya sans perdre son tarif
+//
+// ⚠️ Règle : PRÉSENCE DE LA LIGNE = wilaya desservie.
+// Une wilaya sans ligne n'est pas livrée — plus besoin d'un booléen `actif`.
+// L'admin manipule des GROUPES (plusieurs wilayas au même tarif) ; les groupes
+// sont déduits à la lecture en regroupant les wilayas de mêmes prix, ce qui
+// évite une table de jointure et garde la recherche de tarif immédiate.
 model TarifLivraison {
-  wilaya       String  @id
+  wilaya       String @id
   prixDomicile Int
   prixStopdesk Int
-  actif        Boolean @default(true)
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -161,9 +168,6 @@ model ParametresBoutique {
   id                     String @id @default("boutique")
   /// Montant à partir duquel la livraison est offerte. null = jamais.
   seuilLivraisonGratuite Int?
-  /// Délai annoncé au client, en jours.
-  delaiMin               Int    @default(3)
-  delaiMax               Int    @default(5)
 }
 
 model LigneCommande {

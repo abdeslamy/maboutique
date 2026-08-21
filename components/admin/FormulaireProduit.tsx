@@ -7,7 +7,13 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { slugifier } from "@/lib/slug";
 import BoutonRetour from "@/components/BoutonRetour";
-import type { Produit, Categorie } from "@/lib/types";
+import { CATEGORIES, type Produit, type Categorie } from "@/lib/types";
+// livraison-calcul est sans Prisma : importable cote client.
+import {
+  DELAIS_LIVRAISON,
+  DELAI_PAR_DEFAUT,
+  type DelaiLivraison,
+} from "@/lib/livraison-calcul";
 
 /**
  * Formulaire produit — sert à CRÉER et à MODIFIER.
@@ -35,6 +41,7 @@ export default function FormulaireProduit({
 }) {
   const t = useTranslations("admin.formulaireProduit");
   const tCat = useTranslations("categories");
+  const tDelais = useTranslations("produit.delais");
   const router = useRouter();
 
   // ── États des champs ─────────────────────────────────────────────────
@@ -50,6 +57,9 @@ export default function FormulaireProduit({
   );
   const [stock, setStock] = useState<string>(
     produit ? String(produit.stock) : "0"
+  );
+  const [delaiLivraison, setDelaiLivraison] = useState<DelaiLivraison>(
+    (produit?.delaiLivraison as DelaiLivraison) ?? DELAI_PAR_DEFAUT
   );
   const [images, setImages] = useState<string[]>(produit?.images ?? []);
   const [videoUrl, setVideoUrl] = useState(produit?.videoUrl ?? "");
@@ -108,6 +118,7 @@ export default function FormulaireProduit({
         categorie,
         images,
         stock: stockNum,
+        delaiLivraison,
         videoUrl: videoUrl || undefined,
       };
 
@@ -290,10 +301,11 @@ export default function FormulaireProduit({
                 onChange={(e) => setCategorie(e.target.value as Categorie)}
                 className="rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none"
               >
-                <option value="mode">{tCat("mode")}</option>
-                <option value="electronique">{tCat("electronique")}</option>
-                <option value="maison">{tCat("maison")}</option>
-                <option value="camping">{tCat("camping")}</option>
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {tCat(c)}
+                  </option>
+                ))}
               </select>
             </label>
 
@@ -309,6 +321,28 @@ export default function FormulaireProduit({
                 className="rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none"
               />
               <span className="text-xs text-gray-500">{t("stockAide")}</span>
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="font-medium text-gray-700">
+                {t("delaiLivraison")}
+              </span>
+              <select
+                value={delaiLivraison}
+                onChange={(e) =>
+                  setDelaiLivraison(e.target.value as DelaiLivraison)
+                }
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none"
+              >
+                {DELAIS_LIVRAISON.map((d) => (
+                  <option key={d} value={d}>
+                    {tDelais(d)}
+                  </option>
+                ))}
+              </select>
+              <span className="text-xs text-gray-500">
+                {t("delaiLivraisonAide")}
+              </span>
             </label>
 
             <label className="flex flex-col gap-1 text-sm">

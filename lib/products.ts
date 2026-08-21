@@ -30,6 +30,7 @@ function dbToProduit(p: ProduitModel): Produit {
     videoUrl: p.videoUrl ?? undefined,
     emoji: p.emoji,
     stock: p.stock,
+    delaiLivraison: p.delaiLivraison,
   };
 }
 
@@ -75,6 +76,8 @@ export type EntreeProduit = {
   images: string[];
   /** Stock initial / mis à jour. Entier >= 0. */
   stock: number;
+  /** Délai annoncé au client pour ce produit. */
+  delaiLivraison: string;
   /** Optionnel : n'est plus saisi dans le formulaire (repli legacy). */
   emoji?: string;
   videoUrl?: string;
@@ -110,6 +113,7 @@ export async function creerProduit(
         categorie: input.categorie,
         images: input.images,
         stock: input.stock,
+        delaiLivraison: input.delaiLivraison,
         // Sans valeur fournie, le schéma applique son défaut ("📦").
         ...(input.emoji ? { emoji: input.emoji } : {}),
         videoUrl: input.videoUrl || null,
@@ -141,6 +145,7 @@ export async function mettreAJourProduit(
         categorie: input.categorie,
         images: input.images,
         stock: input.stock,
+        delaiLivraison: input.delaiLivraison,
         // L'emoji n'est plus modifiable depuis le formulaire : on laisse
         // intacte la valeur existante en base plutôt que de l'écraser.
         videoUrl: input.videoUrl || null,

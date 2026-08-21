@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getProduitParId, getAllProduits } from "@/lib/products";
-import { getParametresLivraison } from "@/lib/livraison";
 import { formatPrix } from "@/lib/format";
 import type { Locale } from "@/i18n/routing";
 import BoutonAjouterPanier from "@/components/BoutonAjouterPanier";
@@ -24,17 +23,15 @@ export default async function PageProduitDetail({
   const { locale, id } = await params;
   const localeTypee = locale as Locale;
 
-  // Lecture asynchrone depuis la base (produit et réglages en parallèle).
-  const [produit, parametres] = await Promise.all([
-    getProduitParId(id),
-    getParametresLivraison(),
-  ]);
+  // Lecture asynchrone depuis la base.
+  const produit = await getProduitParId(id);
   if (!produit) {
     notFound();
   }
 
   const t = await getTranslations("produit");
   const tCat = await getTranslations("categories");
+  const tDelais = await getTranslations("produit.delais");
 
   const nom = produit.nom[localeTypee];
   const description = produit.description[localeTypee];
@@ -87,11 +84,8 @@ export default async function PageProduitDetail({
             </p>
           ) : (
             <p className="text-sm font-medium text-green-700">
-              {/* Délai issu des réglages admin, plus codé dans la traduction. */}
-              {t("enStock", {
-                min: parametres.delaiMin,
-                max: parametres.delaiMax,
-              })}
+              {/* Le délai est propre au produit, réglé dans le formulaire admin. */}
+              {t("enStock", { delai: tDelais(produit.delaiLivraison) })}
             </p>
           )}
 

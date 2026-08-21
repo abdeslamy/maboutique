@@ -502,8 +502,9 @@ export async function creerCommande(input: {
     getTarifsLivraison(),
     getParametresLivraison(),
   ]);
+  // Pas de tarif pour cette wilaya = elle n est pas desservie.
   const tarifWilaya = tarifs.find((t) => t.wilaya === wilaya);
-  if (tarifWilaya && !tarifWilaya.actif) {
+  if (!tarifWilaya) {
     return { ok: false, erreur: "wilaya_non_desservie" };
   }
   const livraison = calculerLivraison(
