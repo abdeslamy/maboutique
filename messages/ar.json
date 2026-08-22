@@ -272,6 +272,36 @@
       "erreurStopdesk": "يرجى إدخال سعر التوصيل إلى المكتب",
       "erreurWilayas": "يرجى اختيار ولايات هذا السعر",
       "nonRenseigne": "--"
+    },
+    "nouvelleCommande": {
+      "nouvelle": "طلب جديد",
+      "nouvelleTitre": "طلب جديد",
+      "nouvelleSousTitre": "سجّل طلبًا وردك عبر الهاتف أو الشبكات الاجتماعية.",
+      "sectionClient": "الزبون",
+      "sectionArticles": "المنتجات",
+      "sectionLivraison": "التوصيل",
+      "ajouterArticle": "إضافة منتج",
+      "choisirProduit": "اختر منتجًا",
+      "retirer": "إزالة",
+      "quantite": "الكمية",
+      "creer": "حفظ الطلب",
+      "creation": "جارٍ الحفظ…",
+      "aucunArticle": "أضف منتجًا واحدًا على الأقل.",
+      "stockDispo": "{n} متوفّر",
+      "erreurs": {
+        "panier_vide": "أضف منتجًا واحدًا على الأقل.",
+        "nom_court": "يجب أن يحتوي الاسم على حرفين على الأقل.",
+        "telephone_format_dz": "رقم جزائري غير صالح (10 أرقام تبدأ بـ 0).",
+        "adresse_courte": "يجب أن يحتوي العنوان على 5 أحرف على الأقل.",
+        "wilaya_invalide": "اختر ولاية.",
+        "wilaya_non_desservie": "لا يتمّ التوصيل إلى هذه الولاية.",
+        "mode_livraison_indisponible": "طريقة التوصيل هذه غير متوفّرة لهذه الولاية.",
+        "quantite_invalide": "كمية غير صالحة.",
+        "produit_introuvable": "المنتج غير موجود.",
+        "rupture_stock": "« {produit} » نفدت كميته.",
+        "stock_insuffisant": "الكمية غير كافية لـ « {produit} ».",
+        "erreur_serveur": "حدث خطأ، حاول مجدّدًا."
+      }
     }
   },
   "langue": {

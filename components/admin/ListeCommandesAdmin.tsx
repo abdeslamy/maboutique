@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, StickyNote } from "lucide-react";
+import { Search, StickyNote, Plus } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { formatPrix } from "@/lib/format";
@@ -33,6 +33,7 @@ export default function ListeCommandesAdmin({
   commandes: Commande[];
 }) {
   const t = useTranslations("admin.commandes");
+  const tNouvelle = useTranslations("admin.nouvelleCommande");
   const locale = useLocale() as Locale;
 
   const [filtre, setFiltre] = useState<FiltreStatut>("tout");
@@ -66,13 +67,24 @@ export default function ListeCommandesAdmin({
 
   return (
     <section>
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-          {t("titre")}
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">
-          {t("total", { count: commandes.length })}
-        </p>
+      {/* Titre a gauche, action principale a droite — meme schema que la
+          page Produits. */}
+      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+            {t("titre")}
+          </h1>
+          <p className="mt-1 text-sm text-gray-600">
+            {t("total", { count: commandes.length })}
+          </p>
+        </div>
+        <Link
+          href="/admin/commandes/nouvelle"
+          className="inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
+        >
+          <Plus className="h-4 w-4" strokeWidth={2} />
+          {tNouvelle("nouvelle")}
+        </Link>
       </header>
 
       {/* Recherche */}

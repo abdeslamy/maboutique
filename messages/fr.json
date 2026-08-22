@@ -272,6 +272,36 @@
       "erreurStopdesk": "Veuillez remplir le prix de livraison au bureau",
       "erreurWilayas": "Veuillez sélectionner les wilayas de ce tarif",
       "nonRenseigne": "--"
+    },
+    "nouvelleCommande": {
+      "nouvelle": "Nouvelle commande",
+      "nouvelleTitre": "Nouvelle commande",
+      "nouvelleSousTitre": "Enregistrez une commande reçue par téléphone ou sur les réseaux sociaux.",
+      "sectionClient": "Client",
+      "sectionArticles": "Articles",
+      "sectionLivraison": "Livraison",
+      "ajouterArticle": "Ajouter un article",
+      "choisirProduit": "Choisir un produit",
+      "retirer": "Retirer",
+      "quantite": "Quantité",
+      "creer": "Enregistrer la commande",
+      "creation": "Enregistrement…",
+      "aucunArticle": "Ajoutez au moins un article.",
+      "stockDispo": "{n} en stock",
+      "erreurs": {
+        "panier_vide": "Ajoutez au moins un article.",
+        "nom_court": "Le nom doit contenir au moins 2 caractères.",
+        "telephone_format_dz": "Numéro algérien invalide (10 chiffres, commence par 0).",
+        "adresse_courte": "L’adresse doit contenir au moins 5 caractères.",
+        "wilaya_invalide": "Choisissez une wilaya.",
+        "wilaya_non_desservie": "Cette wilaya n’est pas livrée.",
+        "mode_livraison_indisponible": "Ce mode de livraison n’est pas disponible pour cette wilaya.",
+        "quantite_invalide": "Quantité invalide.",
+        "produit_introuvable": "Produit introuvable.",
+        "rupture_stock": "« {produit} » est en rupture de stock.",
+        "stock_insuffisant": "Stock insuffisant pour « {produit} ».",
+        "erreur_serveur": "Une erreur est survenue. Réessayez."
+      }
     }
   },
   "langue": {
