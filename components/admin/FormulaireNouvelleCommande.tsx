@@ -45,6 +45,7 @@ export default function FormulaireNouvelleCommande({
 }) {
   const t = useTranslations("admin.nouvelleCommande");
   const tCmd = useTranslations("commande");
+  const tPanier = useTranslations("panier");
   const locale = useLocale() as Locale;
   const router = useRouter();
 
@@ -365,11 +366,11 @@ export default function FormulaireNouvelleCommande({
         {/* ─── Total ───────────────────────────────────────────────── */}
         <div className={carte}>
           <Ligne
-            libelle={tCmd("sousTotal")}
+            libelle={tPanier("sousTotal")}
             valeur={formatPrix(sousTotal, locale)}
           />
           <Ligne
-            libelle={tCmd("livraison")}
+            libelle={tPanier("livraison")}
             valeur={
               livraison === null
                 ? tCmd("livraisonSelonWilaya")
@@ -380,7 +381,7 @@ export default function FormulaireNouvelleCommande({
           />
           <div className="my-2 h-px bg-stone-200" />
           <Ligne
-            libelle={tCmd("total")}
+            libelle={tPanier("total")}
             valeur={formatPrix(total, locale)}
             enGras
           />
