@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Trash2, Store, Home } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import BoutonRetour from "@/components/BoutonRetour";
 import { WILAYAS } from "@/lib/wilayas";
 import { formatPrix } from "@/lib/format";
 // livraison-calcul est sans Prisma : importable côté client.
@@ -36,10 +35,13 @@ export default function FormulaireNouvelleCommande({
   produits,
   tarifs,
   parametres,
+  onFermer,
 }: {
   produits: Produit[];
   tarifs: TarifWilaya[];
   parametres: ParametresLivraison;
+  /** Ferme la fenêtre sans enregistrer. */
+  onFermer: () => void;
 }) {
   const t = useTranslations("admin.nouvelleCommande");
   const tCmd = useTranslations("commande");
@@ -55,6 +57,20 @@ export default function FormulaireNouvelleCommande({
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [produitEnCause, setProduitEnCause] = useState<string | null>(null);
+
+  // Échap ferme, et le fond ne défile plus tant que la fenêtre est ouverte.
+  useEffect(() => {
+    function surTouche(e: KeyboardEvent) {
+      if (e.key === "Escape") onFermer();
+    }
+    document.addEventListener("keydown", surTouche);
+    const initial = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", surTouche);
+      document.body.style.overflow = initial;
+    };
+  }, [onFermer]);
 
   // Seules les wilayas desservies sont proposées.
   const codesDesservis = new Set(tarifs.map((x) => x.wilaya));
@@ -110,7 +126,7 @@ export default function FormulaireNouvelleCommande({
         setErreur(data.erreur ?? "erreur_serveur");
         return;
       }
-      router.push("/admin/commandes");
+      onFermer();
       router.refresh();
     } catch {
       setErreur("erreur_serveur");
@@ -125,21 +141,35 @@ export default function FormulaireNouvelleCommande({
   const label = "mb-1.5 block text-xs font-medium text-gray-700";
 
   return (
-    <section className="mx-auto max-w-2xl pb-8">
-      <div className="mb-6">
-        <BoutonRetour href="/admin/commandes" />
-      </div>
+    // Même gabarit que la fenêtre de choix des wilayas : feuille collée en bas
+    // sur mobile, panneau centré à partir de `sm`.
+    <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center">
+      <button
+        type="button"
+        aria-label={t("fermer")}
+        onClick={onFermer}
+        className="absolute inset-0 h-full w-full cursor-default bg-gray-900/40"
+      />
 
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-          {t("nouvelleTitre")}
-        </h1>
-        <p className="mt-1.5 text-[15px] text-gray-500">
-          {t("nouvelleSousTitre")}
-        </p>
-      </header>
+      <div className="relative flex max-h-[92vh] w-full flex-col rounded-t-3xl bg-white sm:max-h-[88vh] sm:max-w-2xl sm:rounded-3xl">
+        {/* En-tête : le titre seul. La sortie passe par les commandes du bas,
+            par Échap ou par un clic sur le voile. */}
+        <div className="px-5 pt-7 sm:px-6">
+          <h2 className="text-[22px] font-semibold tracking-tight text-gray-900">
+            {t("nouvelleTitre")}
+          </h2>
+          <p className="mt-1.5 text-[15px] text-gray-500">
+            {t("nouvelleSousTitre")}
+          </p>
+        </div>
 
-      <form onSubmit={soumettre} className="flex flex-col gap-4">
+        {/* Corps défilant : seule cette zone bouge, l'en-tête et les actions
+            restent visibles. */}
+        <form
+          id="form-nouvelle-commande"
+          onSubmit={soumettre}
+          className="mt-5 flex flex-1 flex-col gap-4 overflow-y-auto px-5 pb-4 sm:px-6"
+        >
         {/* ─── Client ──────────────────────────────────────────────── */}
         <div className={carte}>
           <h2 className="mb-4 text-[15px] font-semibold text-gray-900">
@@ -369,15 +399,30 @@ export default function FormulaireNouvelleCommande({
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={envoi}
-          className="w-full rounded-full bg-gray-900 py-3.5 text-[15px] font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
-        >
-          {envoi ? t("creation") : t("creer")}
-        </button>
-      </form>
-    </section>
+        </form>
+
+        {/* Actions ancrées en bas, hors de la zone qui défile : l'action
+            principale reste sous le pouce quelle que soit la longueur du
+            formulaire. */}
+        <div className="border-t border-stone-100 px-5 pb-6 pt-4 sm:px-6">
+          <button
+            type="submit"
+            form="form-nouvelle-commande"
+            disabled={envoi}
+            className="w-full rounded-full bg-gray-900 py-3.5 text-[15px] font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+          >
+            {envoi ? t("creation") : t("creer")}
+          </button>
+          <button
+            type="button"
+            onClick={onFermer}
+            className="mt-2 w-full rounded-full py-2.5 text-sm font-medium text-gray-600 transition hover:bg-stone-100"
+          >
+            {t("annuler")}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

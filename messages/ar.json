@@ -301,7 +301,9 @@
         "rupture_stock": "« {produit} » نفدت كميته.",
         "stock_insuffisant": "الكمية غير كافية لـ « {produit} ».",
         "erreur_serveur": "حدث خطأ، حاول مجدّدًا."
-      }
+      },
+      "fermer": "إغلاق",
+      "annuler": "إلغاء"
     }
   },
   "langue": {

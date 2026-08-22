@@ -301,7 +301,9 @@
         "rupture_stock": "« {produit} » est en rupture de stock.",
         "stock_insuffisant": "Stock insuffisant pour « {produit} ».",
         "erreur_serveur": "Une erreur est survenue. Réessayez."
-      }
+      },
+      "fermer": "Fermer",
+      "annuler": "Annuler"
     }
   },
   "langue": {

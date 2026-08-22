@@ -6,7 +6,12 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { formatPrix } from "@/lib/format";
 import { WILAYAS } from "@/lib/wilayas";
-import type { Commande, StatutCommande } from "@/lib/types";
+import type { Commande, Produit, StatutCommande } from "@/lib/types";
+import type {
+  TarifWilaya,
+  ParametresLivraison,
+} from "@/lib/livraison-calcul";
+import FormulaireNouvelleCommande from "./FormulaireNouvelleCommande";
 import type { Locale } from "@/i18n/routing";
 import PastilleStatut from "./PastilleStatut";
 import IconeEtatAppel from "./IconeEtatAppel";
@@ -29,14 +34,22 @@ const FILTRES: FiltreStatut[] = [
  */
 export default function ListeCommandesAdmin({
   commandes,
+  produits,
+  tarifs,
+  parametres,
 }: {
   commandes: Commande[];
+  produits: Produit[];
+  tarifs: TarifWilaya[];
+  parametres: ParametresLivraison;
 }) {
   const t = useTranslations("admin.commandes");
   const tNouvelle = useTranslations("admin.nouvelleCommande");
   const locale = useLocale() as Locale;
 
   const [filtre, setFiltre] = useState<FiltreStatut>("tout");
+  // Fenêtre de saisie manuelle.
+  const [saisieOuverte, setSaisieOuverte] = useState(false);
   const [recherche, setRecherche] = useState("");
 
   // Compteurs par statut (pour l'affichage sur les onglets)
@@ -78,13 +91,14 @@ export default function ListeCommandesAdmin({
             {t("total", { count: commandes.length })}
           </p>
         </div>
-        <Link
-          href="/admin/commandes/nouvelle"
+        <button
+          type="button"
+          onClick={() => setSaisieOuverte(true)}
           className="inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
         >
           <Plus className="h-4 w-4" strokeWidth={2} />
           {tNouvelle("nouvelle")}
-        </Link>
+        </button>
       </header>
 
       {/* Recherche */}
@@ -215,6 +229,15 @@ export default function ListeCommandesAdmin({
             );
           })}
         </ul>
+      )}
+
+      {saisieOuverte && (
+        <FormulaireNouvelleCommande
+          produits={produits}
+          tarifs={tarifs}
+          parametres={parametres}
+          onFermer={() => setSaisieOuverte(false)}
+        />
       )}
     </section>
   );
