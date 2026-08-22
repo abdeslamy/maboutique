@@ -328,7 +328,8 @@
       "3_5j": "3 à 5 jours",
       "1semaine": "Une semaine",
       "plus_1semaine": "Plus d'une semaine"
-    }
+    },
+    "commander": "Commander maintenant"
   },
   "panier": {
     "titre": "Mon panier",
