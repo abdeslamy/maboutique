@@ -330,7 +330,13 @@
         "json_invalide": "Données invalides.",
         "non_connecte": "Vous devez être connecté.",
         "acces_refuse": "Accès refusé."
-      }
+      },
+      "suppressionImpossible": "Suppression impossible",
+      "contientProduits": "Cette catégorie contient {n} produit(s). Vous ne pouvez pas la retirer tant qu’ils y sont rattachés.",
+      "quoiFaire": "Changez la catégorie de ces produits, puis revenez ici.",
+      "voirProduits": "Voir les produits",
+      "compris": "Compris",
+      "nbProduits": "{n} produit(s)"
     }
   },
   "langue": {
@@ -357,7 +363,9 @@
     "titre": "Nos produits",
     "sousTitre": "Sélection de produits livrés partout en Algérie.",
     "placeholderRecherche": "Rechercher un produit…",
-    "aucunResultat": "Aucun produit ne correspond à votre recherche."
+    "aucunResultat": "Aucun produit ne correspond à votre recherche.",
+    "voirPlus": "Voir plus",
+    "voirMoins": "Voir moins"
   },
   "categories": {
     "tout": "Tout",

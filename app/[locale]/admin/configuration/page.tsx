@@ -5,7 +5,7 @@ import {
 } from "@/lib/livraison";
 import ConfigurationLivraison from "@/components/admin/ConfigurationLivraison";
 import SectionCategories from "@/components/admin/SectionCategories";
-import { getCategories } from "@/lib/categories";
+import { getCategoriesAvecCompteur } from "@/lib/categories";
 import { getTranslations } from "next-intl/server";
 
 /**
@@ -21,7 +21,7 @@ export default async function AdminConfigurationPage() {
   const [tarifs, parametres, categories] = await Promise.all([
     getTarifsLivraison(),
     getParametresLivraison(),
-    getCategories(),
+    getCategoriesAvecCompteur(),
   ]);
 
   return (
@@ -33,7 +33,12 @@ export default async function AdminConfigurationPage() {
         <p className="mt-2 text-[15px] text-gray-500">{t("sousTitre")}</p>
       </header>
 
-      <SectionCategories categoriesInitiales={categories.map((c) => c.id)} />
+      <SectionCategories
+        categoriesInitiales={categories.map((c) => c.id)}
+        compteurs={Object.fromEntries(
+          categories.map((c) => [c.id, c.nbProduits])
+        )}
+      />
       <ConfigurationLivraison
         groupesInitiaux={grouperTarifs(tarifs)}
         parametresInitiaux={parametres}

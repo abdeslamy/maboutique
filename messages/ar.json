@@ -330,7 +330,13 @@
         "json_invalide": "بيانات غير صالحة.",
         "non_connecte": "يجب تسجيل الدخول.",
         "acces_refuse": "الوصول مرفوض."
-      }
+      },
+      "suppressionImpossible": "لا يمكن الحذف",
+      "contientProduits": "تحتوي هذه الفئة على {n} منتج. لا يمكنك إزالتها ما دامت مرتبطة بها.",
+      "quoiFaire": "غيّر فئة هذه المنتجات ثم عد إلى هنا.",
+      "voirProduits": "عرض المنتجات",
+      "compris": "فهمت",
+      "nbProduits": "{n} منتج"
     }
   },
   "langue": {
@@ -357,7 +363,9 @@
     "titre": "منتجاتنا",
     "sousTitre": "تشكيلة من المنتجات مع التوصيل إلى جميع ولايات الجزائر.",
     "placeholderRecherche": "ابحث عن منتج…",
-    "aucunResultat": "لا يوجد منتج يطابق بحثك."
+    "aucunResultat": "لا يوجد منتج يطابق بحثك.",
+    "voirPlus": "عرض المزيد",
+    "voirMoins": "عرض أقل"
   },
   "categories": {
     "tout": "الكل",

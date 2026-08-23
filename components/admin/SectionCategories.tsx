@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, Check, Search } from "lucide-react";
+import { Plus, Trash2, Check, Search, PackageSearch } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 // categories-catalogue est sans Prisma : importable côté client.
 import {
   CATALOGUE_CATEGORIES,
@@ -24,9 +24,12 @@ import type { Locale } from "@/i18n/routing";
 
 export default function SectionCategories({
   categoriesInitiales,
+  compteurs,
 }: {
   /** Slugs déjà retenus par la boutique, dans l'ordre d'affichage. */
   categoriesInitiales: string[];
+  /** Nombre de produits par rayon, pour prévenir avant un retrait. */
+  compteurs: Record<string, number>;
 }) {
   const t = useTranslations("admin.categories");
   const locale = useLocale() as Locale;
@@ -34,6 +37,8 @@ export default function SectionCategories({
 
   const [choisies, setChoisies] = useState<string[]>(categoriesInitiales);
   const [fenetreOuverte, setFenetreOuverte] = useState(false);
+  // Rayon dont on a tenté le retrait alors qu il contient des produits.
+  const [blocage, setBlocage] = useState<{ id: string; nb: number } | null>(null);
   const [envoi, setEnvoi] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -90,9 +95,21 @@ export default function SectionCategories({
                 className="inline-flex items-center gap-1.5 rounded-full bg-white py-1.5 ps-3.5 pe-1.5 text-sm text-gray-900"
               >
                 {c ? nom(c) : id}
+                {(compteurs[id] ?? 0) > 0 && (
+                  <span className="text-xs tabular-nums text-gray-400">
+                    {compteurs[id]}
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => {
+                    // On previent AVANT : decouvrir le refus au moment
+                    // d enregistrer obligerait a refaire toute la saisie.
+                    const nb = compteurs[id] ?? 0;
+                    if (nb > 0) {
+                      setBlocage({ id, nb });
+                      return;
+                    }
                     setChoisies((prev) => prev.filter((x) => x !== id));
                     setMessage(null);
                   }}
@@ -142,6 +159,13 @@ export default function SectionCategories({
           </button>
         </div>
       </div>
+
+      {blocage && (
+        <FenetreBlocage
+          nb={blocage.nb}
+          onFermer={() => setBlocage(null)}
+        />
+      )}
 
       {fenetreOuverte && (
         <SelecteurCategories
@@ -303,6 +327,87 @@ function SelecteurCategories({
             {t("annuler")}
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Fenêtre de blocage — retrait impossible tant qu'il reste des produits
+// ────────────────────────────────────────────────────────────────────
+
+/**
+ * Volontairement SANS bouton de suppression forcée.
+ *
+ * Retirer un rayon occupé laisserait ses produits rattachés à une catégorie
+ * inexistante : ils disparaîtraient des filtres du catalogue sans que rien
+ * ne le signale. Un « supprimer quand même » ne ferait que déplacer le
+ * problème plus loin, là où il serait bien plus dur à comprendre.
+ *
+ * On explique donc, et on offre le chemin de sortie : aller reclasser les
+ * produits concernés.
+ */
+function FenetreBlocage({
+  nb,
+  onFermer,
+}: {
+  nb: number;
+  onFermer: () => void;
+}) {
+  const t = useTranslations("admin.categories");
+
+  useEffect(() => {
+    function surTouche(e: KeyboardEvent) {
+      if (e.key === "Escape") onFermer();
+    }
+    document.addEventListener("keydown", surTouche);
+    const initial = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", surTouche);
+      document.body.style.overflow = initial;
+    };
+  }, [onFermer]);
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center">
+      <button
+        type="button"
+        aria-label={t("compris")}
+        onClick={onFermer}
+        className="absolute inset-0 h-full w-full cursor-default bg-gray-900/40"
+      />
+
+      <div className="relative w-full rounded-t-3xl bg-white px-6 pb-6 pt-7 sm:max-w-sm sm:rounded-3xl">
+        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-stone-100">
+          <PackageSearch
+            className="h-5 w-5 text-gray-700"
+            strokeWidth={1.75}
+            aria-hidden="true"
+          />
+        </span>
+
+        <h2 className="mt-4 text-[19px] font-semibold tracking-tight text-gray-900">
+          {t("suppressionImpossible")}
+        </h2>
+        <p className="mt-2 text-[15px] leading-relaxed text-gray-600">
+          {t("contientProduits", { n: nb })}
+        </p>
+        <p className="mt-1.5 text-sm text-gray-500">{t("quoiFaire")}</p>
+
+        <Link
+          href="/admin/produits"
+          className="mt-5 block w-full rounded-full bg-gray-900 py-3.5 text-center text-[15px] font-medium text-white transition hover:bg-gray-700"
+        >
+          {t("voirProduits")}
+        </Link>
+        <button
+          type="button"
+          onClick={onFermer}
+          className="mt-2 w-full rounded-full py-2.5 text-sm font-medium text-gray-600 transition hover:bg-stone-100"
+        >
+          {t("compris")}
+        </button>
       </div>
     </div>
   );

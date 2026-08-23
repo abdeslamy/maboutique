@@ -17,6 +17,33 @@ export type CategorieBoutique = {
   ordre: number;
 };
 
+export type CategorieAvecCompteur = CategorieBoutique & {
+  /** Nombre de produits actuellement rattachés à ce rayon. */
+  nbProduits: number;
+};
+
+/**
+ * Catégories + nombre de produits de chacune.
+ * Sert à prévenir l'admin AVANT qu'il tente de retirer un rayon occupé,
+ * plutôt que de le laisser découvrir le refus au moment d'enregistrer.
+ */
+export async function getCategoriesAvecCompteur(): Promise<
+  CategorieAvecCompteur[]
+> {
+  // Deux requêtes indépendantes → lancées ensemble.
+  const [categories, comptes] = await Promise.all([
+    getCategories(),
+    prisma.produit.groupBy({ by: ["categorie"], _count: { _all: true } }),
+  ]);
+  const parCategorie = new Map(
+    comptes.map((c) => [c.categorie, c._count._all])
+  );
+  return categories.map((c) => ({
+    ...c,
+    nbProduits: parCategorie.get(c.id) ?? 0,
+  }));
+}
+
 /** Catégories de la boutique, dans l'ordre d'affichage. */
 export async function getCategories(): Promise<CategorieBoutique[]> {
   return prisma.categorie.findMany({ orderBy: [{ ordre: "asc" }, { nomFr: "asc" }] });

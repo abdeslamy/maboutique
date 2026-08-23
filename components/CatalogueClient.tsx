@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { ChevronDown } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import ProductCard from "./ProductCard";
@@ -8,6 +9,9 @@ import { useProducts } from "@/context/ProductsContext";
 import type { Categorie } from "@/lib/types";
 import type { Locale } from "@/i18n/routing";
 
+
+/** Nombre de pastilles affichées avant repli (« Tout » compris). */
+const LIMITE_FILTRES = 4;
 
 /**
  * Composant CLIENT qui gère la recherche + le filtre par catégorie.
@@ -35,6 +39,20 @@ export default function CatalogueClient({
   // États : chaîne de recherche + catégorie active
   const [recherche, setRecherche] = useState(rechercheInitiale);
   const [categorie, setCategorie] = useState<Categorie | "tout">("tout");
+  // Au-delà de quelques rayons, la rangée de filtres devient un mur de
+  // pastilles qui repousse les produits hors de l'écran. On en montre 4,
+  // le reste se déplie à la demande.
+  const [deplie, setDeplie] = useState(false);
+
+  const tousLesFiltres = useMemo(
+    () => [{ id: "tout", nomFr: "", nomAr: "" }, ...categories],
+    [categories]
+  );
+  // La catégorie active reste TOUJOURS visible, même repliée : sinon le
+  // filtre en cours disparaîtrait de l'écran une fois sélectionné.
+  const filtresVisibles = deplie
+    ? tousLesFiltres
+    : tousLesFiltres.filter((c, i) => i < LIMITE_FILTRES || c.id === categorie);
 
   // Liste filtrée : on la recalcule seulement quand recherche, categorie, locale
   // ou la liste de produits changent.
@@ -68,8 +86,8 @@ export default function CatalogueClient({
           aria-label={t("placeholderRecherche")}
         />
 
-        <div className="flex flex-wrap gap-2">
-          {[{ id: "tout", nomFr: "", nomAr: "" }, ...categories].map((cat) => {
+        <div className="flex flex-wrap items-center gap-2">
+          {filtresVisibles.map((cat) => {
             const actif = cat.id === categorie;
             return (
               <button
@@ -89,6 +107,24 @@ export default function CatalogueClient({
               </button>
             );
           })}
+
+          {/* Le bouton n'apparaît que s'il reste vraiment des rayons cachés. */}
+          {tousLesFiltres.length > LIMITE_FILTRES && (
+            <button
+              type="button"
+              onClick={() => setDeplie((v) => !v)}
+              className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-sm font-medium text-gray-600 underline-offset-2 transition hover:text-gray-900 hover:underline"
+            >
+              {deplie ? t("voirMoins") : t("voirPlus")}
+              <ChevronDown
+                className={`h-3.5 w-3.5 transition-transform ${
+                  deplie ? "rotate-180" : ""
+                }`}
+                strokeWidth={2}
+                aria-hidden="true"
+              />
+            </button>
+          )}
         </div>
       </div>
 
