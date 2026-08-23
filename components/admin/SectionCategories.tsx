@@ -378,36 +378,52 @@ function FenetreBlocage({
         className="absolute inset-0 h-full w-full cursor-default bg-gray-900/40"
       />
 
-      <div className="relative w-full rounded-t-3xl bg-white px-6 pb-6 pt-7 sm:max-w-sm sm:rounded-3xl">
-        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-stone-100">
-          <PackageSearch
-            className="h-5 w-5 text-gray-700"
-            strokeWidth={1.75}
-            aria-hidden="true"
-          />
-        </span>
+      {/* max-w-md (448 px) plutôt que sm : à 384 px le texte cassait sur un
+          mot isolé en fin de paragraphe. */}
+      <div className="relative w-full rounded-t-3xl bg-white px-6 pb-6 pt-7 sm:max-w-md sm:rounded-3xl sm:px-7 sm:pb-7">
+        {/* Sur desktop, icône et texte côte à côte : l'œil balaie
+            horizontalement, la fenêtre reste basse et lisible. Sur mobile
+            tout s'empile, comme dans la référence. */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-stone-100">
+            <PackageSearch
+              className="h-5 w-5 text-gray-700"
+              strokeWidth={1.75}
+              aria-hidden="true"
+            />
+          </span>
 
-        <h2 className="mt-4 text-[19px] font-semibold tracking-tight text-gray-900">
-          {t("suppressionImpossible")}
-        </h2>
-        <p className="mt-2 text-[15px] leading-relaxed text-gray-600">
-          {t("contientProduits", { n: nb })}
-        </p>
-        <p className="mt-1.5 text-sm text-gray-500">{t("quoiFaire")}</p>
+          <div className="min-w-0">
+            <h2 className="text-[19px] font-semibold tracking-tight text-gray-900">
+              {t("suppressionImpossible")}
+            </h2>
+            <p className="mt-2 text-[15px] leading-relaxed text-gray-600">
+              {t("contientProduits", { n: nb })}
+            </p>
+            <p className="mt-1.5 text-sm leading-relaxed text-gray-500">
+              {t("quoiFaire")}
+            </p>
+          </div>
+        </div>
 
-        <Link
-          href="/admin/produits"
-          className="mt-5 block w-full rounded-full bg-gray-900 py-3.5 text-center text-[15px] font-medium text-white transition hover:bg-gray-700"
-        >
-          {t("voirProduits")}
-        </Link>
-        <button
-          type="button"
-          onClick={onFermer}
-          className="mt-2 w-full rounded-full py-2.5 text-sm font-medium text-gray-600 transition hover:bg-stone-100"
-        >
-          {t("compris")}
-        </button>
+        {/* Mobile : empilés en pleine largeur, principale en haut (le pouce
+            y arrive). Desktop : sur une ligne, alignés à droite, dans l'ordre
+            de lecture « annuler puis confirmer ». */}
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row-reverse sm:justify-start sm:gap-3">
+          <Link
+            href="/admin/produits"
+            className="block rounded-full bg-gray-900 px-6 py-3 text-center text-[15px] font-medium text-white transition hover:bg-gray-700"
+          >
+            {t("voirProduits")}
+          </Link>
+          <button
+            type="button"
+            onClick={onFermer}
+            className="rounded-full px-6 py-3 text-center text-sm font-medium text-gray-600 transition hover:bg-stone-100"
+          >
+            {t("compris")}
+          </button>
+        </div>
       </div>
     </div>
   );
