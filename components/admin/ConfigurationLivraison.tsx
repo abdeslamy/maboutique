@@ -210,13 +210,6 @@ export default function ConfigurationLivraison({
 
   return (
     <div className="pb-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
-          {t("titre")}
-        </h1>
-        <p className="mt-2 text-[15px] text-gray-500">{t("sousTitre")}</p>
-      </header>
-
       {/* ═══ Livraison gratuite — section autonome ══════════════════
           Elle a son PROPRE bouton : l'admin enregistre ce réglage sans
           emporter des tarifs encore en cours d'édition plus bas. */}

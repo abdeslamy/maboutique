@@ -3,7 +3,8 @@ import { getSession } from "@/lib/session";
 import { getUtilisateurParId } from "@/lib/auth";
 import { creerProduit, slugifier, type EntreeProduit } from "@/lib/products";
 import { estDelaiValide, DELAI_PAR_DEFAUT } from "@/lib/livraison";
-import { CATEGORIES, type Categorie } from "@/lib/types";
+import type { Categorie } from "@/lib/types";
+import { getCategories } from "@/lib/categories";
 
 /**
  * POST /api/admin/produits
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ erreur: "json_invalide" }, { status: 400 });
   }
 
-  const donnees = validerEntree(body);
+  const donnees = await validerEntree(body);
   if ("erreur" in donnees) {
     return NextResponse.json({ erreur: donnees.erreur }, { status: 400 });
   }
@@ -53,9 +54,9 @@ export async function POST(req: NextRequest) {
 // Validation
 // ────────────────────────────────────────────────────────────────────────
 
-export function validerEntree(
+export async function validerEntree(
   body: Record<string, unknown>
-): EntreeProduit | { erreur: string } {
+): Promise<EntreeProduit | { erreur: string }> {
   const nomFr = String(body.nomFr ?? "").trim();
   const nomAr = String(body.nomAr ?? "").trim();
   const descriptionFr = String(body.descriptionFr ?? "").trim();
@@ -71,8 +72,11 @@ export function validerEntree(
     return { erreur: "prix_invalide" };
   }
 
+  // Les rayons sont désormais des DONNÉES : on valide contre la base, pas
+  // contre une liste figée dans le code.
   const categorie = String(body.categorie ?? "") as Categorie;
-  if (!(CATEGORIES as readonly string[]).includes(categorie)) {
+  const rayons = await getCategories();
+  if (!rayons.some((r) => r.id === categorie)) {
     return { erreur: "categorie_invalide" };
   }
 
@@ -111,6 +115,7 @@ export function validerEntree(
     images,
     stock: stockNum,
     delaiLivraison: delaiBrut,
+    livraisonGratuite: Boolean(body.livraisonGratuite),
     videoUrl,
   };
 }

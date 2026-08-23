@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { CldUploadWidget } from "next-cloudinary";
 import { Upload, Trash2, ImageIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { slugifier } from "@/lib/slug";
 import BoutonRetour from "@/components/BoutonRetour";
-import { CATEGORIES, type Produit, type Categorie } from "@/lib/types";
+import type { Produit, Categorie } from "@/lib/types";
 // livraison-calcul est sans Prisma : importable cote client.
 import {
   DELAIS_LIVRAISON,
@@ -35,12 +35,15 @@ type Mode = "creer" | "modifier";
 export default function FormulaireProduit({
   mode,
   produit,
+  categories,
 }: {
   mode: Mode;
   produit?: Produit;
+  /** Rayons de la boutique, lus en base par la page parente. */
+  categories: { id: string; nomFr: string; nomAr: string }[];
 }) {
   const t = useTranslations("admin.formulaireProduit");
-  const tCat = useTranslations("categories");
+  const locale = useLocale();
   const tDelais = useTranslations("produit.delais");
   const router = useRouter();
 
@@ -53,7 +56,10 @@ export default function FormulaireProduit({
     produit ? String(produit.prix) : ""
   );
   const [categorie, setCategorie] = useState<Categorie>(
-    produit?.categorie ?? "mode"
+    produit?.categorie ?? categories[0]?.id ?? ""
+  );
+  const [livraisonGratuite, setLivraisonGratuite] = useState(
+    produit?.livraisonGratuite ?? false
   );
   const [stock, setStock] = useState<string>(
     produit ? String(produit.stock) : "0"
@@ -119,6 +125,7 @@ export default function FormulaireProduit({
         images,
         stock: stockNum,
         delaiLivraison,
+        livraisonGratuite,
         videoUrl: videoUrl || undefined,
       };
 
@@ -301,9 +308,9 @@ export default function FormulaireProduit({
                 onChange={(e) => setCategorie(e.target.value as Categorie)}
                 className="rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none"
               >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {tCat(c)}
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {locale === "ar" ? c.nomAr : c.nomFr}
                   </option>
                 ))}
               </select>
@@ -344,6 +351,36 @@ export default function FormulaireProduit({
                 {t("delaiLivraisonAide")}
               </span>
             </label>
+
+            {/* Interrupteur : desactive par defaut. On evite une case a cocher
+                pour que l etat actif se lise d un coup d oeil. */}
+            <div className="sm:col-span-2">
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-gray-50 p-4">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={livraisonGratuite}
+                  onClick={() => setLivraisonGratuite((v) => !v)}
+                  className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors ${
+                    livraisonGratuite ? "bg-gray-900" : "bg-gray-300"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${
+                      livraisonGratuite ? "start-[22px]" : "start-0.5"
+                    }`}
+                  />
+                </button>
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-gray-900">
+                    {t("livraisonGratuite")}
+                  </span>
+                  <span className="mt-0.5 block text-xs text-gray-500">
+                    {t("livraisonGratuiteAide")}
+                  </span>
+                </span>
+              </label>
+            </div>
 
             <label className="flex flex-col gap-1 text-sm">
               <span className="font-medium text-gray-700">

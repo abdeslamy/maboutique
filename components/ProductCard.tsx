@@ -47,6 +47,13 @@ export default function ProductCard({ produit }: { produit: Produit }) {
               produit.stock <= 0 ? "opacity-50" : ""
             }`}
           />
+          {/* Livraison offerte : information commerciale forte, on la met
+              en evidence sans crier — pastille sombre, texte court. */}
+          {produit.livraisonGratuite && produit.stock > 0 && (
+            <span className="absolute end-2 top-2 rounded-full bg-gray-900 px-2.5 py-1 text-[11px] font-medium text-white">
+              {t("livraisonGratuite")}
+            </span>
+          )}
           {produit.stock <= 0 && (
             <span className="absolute start-2 top-2 rounded-full bg-gray-900/85 px-2.5 py-1 text-xs font-medium text-white">
               {t("ruptureCourt")}

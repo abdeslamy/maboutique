@@ -1,6 +1,8 @@
+import { Truck } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getProduitParId, getAllProduits } from "@/lib/products";
+import { getCategories } from "@/lib/categories";
 import { formatPrix } from "@/lib/format";
 import type { Locale } from "@/i18n/routing";
 import BoutonAjouterPanier from "@/components/BoutonAjouterPanier";
@@ -24,13 +26,15 @@ export default async function PageProduitDetail({
   const localeTypee = locale as Locale;
 
   // Lecture asynchrone depuis la base.
-  const produit = await getProduitParId(id);
+  const [produit, categories] = await Promise.all([
+    getProduitParId(id),
+    getCategories(),
+  ]);
   if (!produit) {
     notFound();
   }
 
   const t = await getTranslations("produit");
-  const tCat = await getTranslations("categories");
   const tDelais = await getTranslations("produit.delais");
 
   const nom = produit.nom[localeTypee];
@@ -54,16 +58,32 @@ export default async function PageProduitDetail({
         {/* Infos produit */}
         <div className="flex flex-col gap-5">
           <span className="inline-block w-fit rounded-full bg-gray-100 px-3 py-1 text-xs font-medium uppercase tracking-wide text-gray-700">
-            {tCat(produit.categorie)}
+            {(() => {
+              // Le rayon est une donnée : son libellé vient de la base.
+              const rayon = categories.find((c) => c.id === produit.categorie);
+              return rayon
+                ? localeTypee === "ar"
+                  ? rayon.nomAr
+                  : rayon.nomFr
+                : produit.categorie;
+            })()}
           </span>
 
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             {nom}
           </h1>
 
-          <p className="text-3xl font-semibold text-black">
-            {formatPrix(produit.prix, localeTypee)}
-          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-3xl font-semibold text-black">
+              {formatPrix(produit.prix, localeTypee)}
+            </p>
+            {produit.livraisonGratuite && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-900 px-3 py-1 text-xs font-medium text-white">
+                <Truck className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
+                {t("livraisonGratuite")}
+              </span>
+            )}
+          </div>
 
           <div className="flex flex-col gap-2">
             <h2 className="text-sm font-medium uppercase tracking-wide text-gray-500">

@@ -5,11 +5,9 @@ import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import ProductCard from "./ProductCard";
 import { useProducts } from "@/context/ProductsContext";
-import { CATEGORIES, type Categorie } from "@/lib/types";
+import type { Categorie } from "@/lib/types";
 import type { Locale } from "@/i18n/routing";
 
-// Derive de la source unique : une nouvelle categorie apparait ici seule.
-const FILTRES_CATEGORIES: (Categorie | "tout")[] = ["tout", ...CATEGORIES];
 
 /**
  * Composant CLIENT qui gère la recherche + le filtre par catégorie.
@@ -19,7 +17,12 @@ const FILTRES_CATEGORIES: (Categorie | "tout")[] = ["tout", ...CATEGORIES];
  *  - useMemo : recalcule une valeur seulement quand ses dépendances changent
  *              (évite de re-filtrer les produits à chaque frappe inutile).
  */
-export default function CatalogueClient() {
+export default function CatalogueClient({
+  categories,
+}: {
+  /** Rayons de la boutique, lus en base par la page parente. */
+  categories: { id: string; nomFr: string; nomAr: string }[];
+}) {
   const locale = useLocale() as Locale;
   const t = useTranslations("catalogue");
   const tCat = useTranslations("categories");
@@ -66,19 +69,23 @@ export default function CatalogueClient() {
         />
 
         <div className="flex flex-wrap gap-2">
-          {FILTRES_CATEGORIES.map((cat) => {
-            const actif = cat === categorie;
+          {[{ id: "tout", nomFr: "", nomAr: "" }, ...categories].map((cat) => {
+            const actif = cat.id === categorie;
             return (
               <button
-                key={cat}
-                onClick={() => setCategorie(cat)}
+                key={cat.id}
+                onClick={() => setCategorie(cat.id)}
                 className={`rounded-full border px-3 py-1 text-sm transition ${
                   actif
                     ? "border-black bg-black text-white"
                     : "border-gray-300 bg-white text-gray-700 hover:border-gray-500"
                 }`}
               >
-                {tCat(cat)}
+                {cat.id === "tout"
+                  ? tCat("tout")
+                  : locale === "ar"
+                  ? cat.nomAr
+                  : cat.nomFr}
               </button>
             );
           })}

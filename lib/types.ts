@@ -5,22 +5,12 @@
 // ──────────────────────────────────────────────────────────────────────────
 
 /**
- * Catégories de produits supportées dans la boutique.
- *
- * ⚠️ Source unique : le type est DÉDUIT du tableau. Ajouter une catégorie ici
- * la rend valide partout (formulaire, filtres, validation serveur).
- * Auparavant la liste de validation de l'API était recopiée à la main — et
- * "camping" y avait été oublié, ce qui faisait échouer l'enregistrement.
- * TypeScript ne peut pas repérer une liste incomplète, d'où ce regroupement.
+ * Catégorie d'un produit : le SLUG d'une ligne de la table Categorie
+ * ("mode", "beaute"...). Ce n'est plus une union figée — l'admin compose sa
+ * propre liste depuis le catalogue prédéfini (lib/categories-catalogue.ts).
+ * La validité est donc vérifiée EN BASE, plus par le compilateur.
  */
-export const CATEGORIES = [
-  "mode",
-  "electronique",
-  "maison",
-  "camping",
-] as const;
-
-export type Categorie = (typeof CATEGORIES)[number];
+export type Categorie = string;
 
 /** Un texte qui existe dans nos deux langues. */
 export type TexteBilingue = {
@@ -53,6 +43,8 @@ export type Produit = {
   stock: number;
   /** Délai annoncé : "48h" | "3_5j" | "1semaine" | "plus_1semaine". */
   delaiLivraison: string;
+  /** Livraison offerte sur ce produit, quel que soit le tarif de la wilaya. */
+  livraisonGratuite: boolean;
 };
 
 /** Un article dans le panier : référence un produit par son id + une quantité. */

@@ -22,6 +22,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     emoji: "👕",
     stock: 20,
     delaiLivraison: "3_5j",
+    livraisonGratuite: false,
   },
   {
     id: "sneakers-urbaines",
@@ -36,6 +37,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     emoji: "👟",
     stock: 20,
     delaiLivraison: "3_5j",
+    livraisonGratuite: false,
   },
   {
     id: "sac-toile",
@@ -50,6 +52,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     emoji: "🎒",
     stock: 20,
     delaiLivraison: "3_5j",
+    livraisonGratuite: false,
   },
 
   // ── Électronique ───────────────────────────────────────────────────────
@@ -66,6 +69,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     emoji: "🎧",
     stock: 20,
     delaiLivraison: "3_5j",
+    livraisonGratuite: false,
   },
   {
     id: "chargeur-usb-c",
@@ -80,6 +84,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     emoji: "🔌",
     stock: 20,
     delaiLivraison: "3_5j",
+    livraisonGratuite: false,
   },
   {
     id: "montre-connectee",
@@ -94,6 +99,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     emoji: "⌚",
     stock: 20,
     delaiLivraison: "3_5j",
+    livraisonGratuite: false,
   },
 
   // ── Maison & déco ──────────────────────────────────────────────────────
@@ -110,6 +116,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     emoji: "🕯️",
     stock: 20,
     delaiLivraison: "3_5j",
+    livraisonGratuite: false,
   },
   {
     id: "tapis-berbere",
@@ -124,6 +131,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     emoji: "🧶",
     stock: 20,
     delaiLivraison: "3_5j",
+    livraisonGratuite: false,
   },
   {
     id: "lampe-chevet",
@@ -138,6 +146,7 @@ export const PRODUITS_INITIAUX: Produit[] = [
     emoji: "💡",
     stock: 20,
     delaiLivraison: "3_5j",
+    livraisonGratuite: false,
   },
   {
     id: "carafe-verre",
@@ -152,5 +161,6 @@ export const PRODUITS_INITIAUX: Produit[] = [
     emoji: "🫗",
     stock: 20,
     delaiLivraison: "3_5j",
+    livraisonGratuite: false,
   },
 ];

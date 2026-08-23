@@ -35,7 +35,7 @@ export async function PATCH(
 
   // On force l'id de l'URL — pas modifiable par l'admin en édition.
   body.id = id;
-  const donnees = validerEntree(body);
+  const donnees = await validerEntree(body);
   if ("erreur" in donnees) {
     return NextResponse.json({ erreur: donnees.erreur }, { status: 400 });
   }

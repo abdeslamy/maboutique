@@ -1,0 +1,76 @@
+// ============================================================================
+// Catégories — lecture/écriture en base.
+// ⚠️ Fonctions SERVEUR uniquement (Prisma). Le catalogue des choix possibles
+// vit dans lib/categories-catalogue.ts, sans Prisma, importable côté client.
+// ============================================================================
+
+import { prisma } from "@/lib/prisma";
+import { CATALOGUE_CATEGORIES } from "./categories-catalogue";
+
+export type { CategorieCatalogue } from "./categories-catalogue";
+export { CATALOGUE_CATEGORIES } from "./categories-catalogue";
+
+export type CategorieBoutique = {
+  id: string;
+  nomFr: string;
+  nomAr: string;
+  ordre: number;
+};
+
+/** Catégories de la boutique, dans l'ordre d'affichage. */
+export async function getCategories(): Promise<CategorieBoutique[]> {
+  return prisma.categorie.findMany({ orderBy: [{ ordre: "asc" }, { nomFr: "asc" }] });
+}
+
+/**
+ * Remplace la liste des catégories par celle transmise.
+ *
+ * Les ids proviennent OBLIGATOIREMENT du catalogue prédéfini : on ne fait pas
+ * confiance aux noms envoyés par le client, on les relit dans le catalogue.
+ * C'est ce qui garantit des traductions correctes et des slugs propres.
+ */
+export async function enregistrerCategories(
+  ids: string[]
+): Promise<{ ok: true } | { ok: false; erreur: string }> {
+  const connus = new Map(CATALOGUE_CATEGORIES.map((c) => [c.id, c]));
+  const uniques = [...new Set(ids)];
+  if (uniques.some((id) => !connus.has(id))) {
+    return { ok: false, erreur: "categorie_inconnue" };
+  }
+  if (uniques.length === 0) {
+    return { ok: false, erreur: "aucune_categorie" };
+  }
+
+  // Une catégorie encore portée par des produits ne peut pas disparaître :
+  // ces produits deviendraient introuvables dans les filtres.
+  const utilisees = await prisma.produit.findMany({
+    select: { categorie: true },
+    distinct: ["categorie"],
+  });
+  const orphelines = utilisees
+    .map((p) => p.categorie)
+    .filter((c) => !uniques.includes(c));
+  if (orphelines.length > 0) {
+    return { ok: false, erreur: "categorie_utilisee" };
+  }
+
+  const lignes = uniques.map((id, i) => {
+    const c = connus.get(id)!;
+    return { id: c.id, nomFr: c.nomFr, nomAr: c.nomAr, ordre: i };
+  });
+
+  try {
+    // Remplacement en bloc : 2 requêtes quel que soit le nombre de rayons.
+    await prisma.$transaction(
+      [
+        prisma.categorie.deleteMany({}),
+        prisma.categorie.createMany({ data: lignes }),
+      ],
+      { timeout: 20_000 }
+    );
+    return { ok: true };
+  } catch (e) {
+    console.error("[categories] echec enregistrerCategories :", e);
+    return { ok: false, erreur: "erreur_serveur" };
+  }
+}

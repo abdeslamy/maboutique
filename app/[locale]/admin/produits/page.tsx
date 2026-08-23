@@ -1,4 +1,5 @@
 import { getAllProduits } from "@/lib/products";
+import { getCategories } from "@/lib/categories";
 import ListeProduitsAdmin from "@/components/admin/ListeProduitsAdmin";
 
 /**
@@ -6,6 +7,11 @@ import ListeProduitsAdmin from "@/components/admin/ListeProduitsAdmin";
  * La garde admin est appliquée automatiquement par le layout parent.
  */
 export default async function AdminProduitsPage() {
-  const produits = await getAllProduits();
-  return <ListeProduitsAdmin produitsInitiaux={produits} />;
+  const [produits, categories] = await Promise.all([
+    getAllProduits(),
+    getCategories(),
+  ]);
+  return (
+    <ListeProduitsAdmin produitsInitiaux={produits} categories={categories} />
+  );
 }

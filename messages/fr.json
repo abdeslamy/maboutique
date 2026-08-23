@@ -84,7 +84,7 @@
     },
     "configuration": {
       "titre": "Configuration",
-      "sousTitre": "Paramètres de la boutique.",
+      "sousTitre": "Catégories, livraison et réglages de la boutique.",
       "aVenir": "Bientôt disponible",
       "description": "Cette section permettra de personnaliser le fonctionnement de la boutique.",
       "prevu": {
@@ -215,7 +215,9 @@
       "stock": "Quantité en stock",
       "stockAide": "0 = produit en rupture, non commandable",
       "delaiLivraison": "Délai de livraison",
-      "delaiLivraisonAide": "Affiché au client sur la fiche produit."
+      "delaiLivraisonAide": "Affiché au client sur la fiche produit.",
+      "livraisonGratuite": "Livraison gratuite",
+      "livraisonGratuiteAide": "La livraison est offerte sur ce produit, quelle que soit la wilaya."
     },
     "livraison": {
       "titre": "Livraison",
@@ -304,6 +306,31 @@
       },
       "fermer": "Fermer",
       "annuler": "Annuler"
+    },
+    "categories": {
+      "titre": "Catégories",
+      "aide": "Les rayons de votre boutique. Ils apparaissent dans le formulaire produit et dans les filtres du catalogue.",
+      "ajouter": "Ajouter une catégorie",
+      "aucune": "Aucune catégorie. Ajoutez-en pour classer vos produits.",
+      "retirer": "Retirer",
+      "enregistrer": "Enregistrer",
+      "enregistre": "C’est enregistré.",
+      "choisir": "Choisir des catégories",
+      "choisirAide": "Cochez les rayons de votre boutique. La liste est fermée pour garantir une traduction correcte en arabe.",
+      "rechercher": "Rechercher une catégorie…",
+      "dejaAjoutee": "Déjà dans votre boutique",
+      "valider": "Valider",
+      "annuler": "Annuler",
+      "aucunResultat": "Aucune catégorie ne correspond.",
+      "erreurs": {
+        "categorie_inconnue": "Catégorie inconnue.",
+        "aucune_categorie": "Gardez au moins une catégorie.",
+        "categorie_utilisee": "Impossible : des produits utilisent une catégorie que vous retirez. Changez-les d’abord.",
+        "erreur_serveur": "Une erreur est survenue. Réessayez.",
+        "json_invalide": "Données invalides.",
+        "non_connecte": "Vous devez être connecté.",
+        "acces_refuse": "Accès refusé."
+      }
     }
   },
   "langue": {
@@ -361,7 +388,8 @@
       "1semaine": "Une semaine",
       "plus_1semaine": "Plus d'une semaine"
     },
-    "commander": "Commander maintenant"
+    "commander": "Commander maintenant",
+    "livraisonGratuite": "Livraison gratuite"
   },
   "panier": {
     "titre": "Mon panier",

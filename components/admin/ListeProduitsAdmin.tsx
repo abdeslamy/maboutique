@@ -21,12 +21,14 @@ import { useLocale } from "next-intl";
  */
 export default function ListeProduitsAdmin({
   produitsInitiaux,
+  categories,
 }: {
   produitsInitiaux: Produit[];
+  /** Rayons de la boutique, pour afficher leur libellé. */
+  categories: { id: string; nomFr: string; nomAr: string }[];
 }) {
   const t = useTranslations("admin.produits");
   const tProd = useTranslations("produit");
-  const tCat = useTranslations("categories");
   const locale = useLocale() as Locale;
   const router = useRouter();
 
@@ -130,7 +132,10 @@ export default function ListeProduitsAdmin({
                   </p>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
-                      {tCat(p.categorie)}
+                      {(() => {
+                        const r = categories.find((c) => c.id === p.categorie);
+                        return r ? (locale === "ar" ? r.nomAr : r.nomFr) : p.categorie;
+                      })()}
                     </span>
                     {/* Stock : rouge en rupture, ambre si le seuil approche. */}
                     <span

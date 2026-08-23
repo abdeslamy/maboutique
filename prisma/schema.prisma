@@ -76,6 +76,8 @@ model Produit {
   // Délai annoncé au client, PAR PRODUIT (il varie selon l'article).
   // Valeurs : "48h" | "3_5j" | "1semaine" | "plus_1semaine".
   delaiLivraison String          @default("3_5j")
+  // Livraison offerte sur CE produit, quel que soit le tarif de la wilaya.
+  livraisonGratuite Boolean      @default(false)
   createdAt      DateTime        @default(now())
 
   lignesCommande LigneCommande[]
@@ -183,4 +185,22 @@ model LigneCommande {
 
   produitId    String?
   produit      Produit?  @relation(fields: [produitId], references: [id], onDelete: SetNull)
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// Categorie — catalogue des rayons de la boutique
+// ══════════════════════════════════════════════════════════════════════
+// Auparavant une union TypeScript figée : ajouter un rayon imposait un
+// déploiement. Désormais une table, alimentée par l'admin depuis une liste
+// prédéfinie (jamais de saisie libre, pour éviter les doublons et garantir
+// une traduction correcte dans les deux langues).
+//
+// L'id est le slug ("mode", "beaute"), celui-là même stocké dans
+// Produit.categorie — la relation reste donc implicite et sans jointure.
+model Categorie {
+  id     String @id
+  nomFr  String
+  nomAr  String
+  /// Ordre d affichage dans les filtres. Plus petit = plus haut.
+  ordre  Int    @default(0)
 }

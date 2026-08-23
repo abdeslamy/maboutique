@@ -84,7 +84,7 @@
     },
     "configuration": {
       "titre": "الإعدادات",
-      "sousTitre": "إعدادات المتجر.",
+      "sousTitre": "الفئات، التوصيل وإعدادات المتجر.",
       "aVenir": "قريبًا",
       "description": "سيتيح لك هذا القسم تخصيص طريقة عمل المتجر.",
       "prevu": {
@@ -215,7 +215,9 @@
       "stock": "الكمية المتوفّرة",
       "stockAide": "0 = نفدت الكمية، لا يمكن طلب المنتج",
       "delaiLivraison": "مدّة التوصيل",
-      "delaiLivraisonAide": "تظهر للزبون في صفحة المنتج."
+      "delaiLivraisonAide": "تظهر للزبون في صفحة المنتج.",
+      "livraisonGratuite": "توصيل مجاني",
+      "livraisonGratuiteAide": "التوصيل مجاني لهذا المنتج مهما كانت الولاية."
     },
     "livraison": {
       "titre": "التوصيل",
@@ -304,6 +306,31 @@
       },
       "fermer": "إغلاق",
       "annuler": "إلغاء"
+    },
+    "categories": {
+      "titre": "الفئات",
+      "aide": "أقسام متجرك. تظهر في نموذج المنتج وفي مرشّحات الكتالوج.",
+      "ajouter": "إضافة فئة",
+      "aucune": "لا توجد فئة. أضف فئات لتصنيف منتجاتك.",
+      "retirer": "إزالة",
+      "enregistrer": "حفظ",
+      "enregistre": "تمّ الحفظ.",
+      "choisir": "اختيار الفئات",
+      "choisirAide": "حدّد أقسام متجرك. القائمة مغلقة لضمان ترجمة صحيحة بالعربية.",
+      "rechercher": "ابحث عن فئة…",
+      "dejaAjoutee": "موجودة في متجرك",
+      "valider": "تأكيد",
+      "annuler": "إلغاء",
+      "aucunResultat": "لا توجد فئة مطابقة.",
+      "erreurs": {
+        "categorie_inconnue": "فئة غير معروفة.",
+        "aucune_categorie": "احتفظ بفئة واحدة على الأقل.",
+        "categorie_utilisee": "غير ممكن: هناك منتجات تستعمل فئة تريد إزالتها. غيّرها أولًا.",
+        "erreur_serveur": "حدث خطأ، حاول مجدّدًا.",
+        "json_invalide": "بيانات غير صالحة.",
+        "non_connecte": "يجب تسجيل الدخول.",
+        "acces_refuse": "الوصول مرفوض."
+      }
     }
   },
   "langue": {
@@ -361,7 +388,8 @@
       "1semaine": "أسبوع واحد",
       "plus_1semaine": "أكثر من أسبوع"
     },
-    "commander": "اطلب الآن"
+    "commander": "اطلب الآن",
+    "livraisonGratuite": "توصيل مجاني"
   },
   "panier": {
     "titre": "سلّتي",
