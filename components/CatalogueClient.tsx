@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { ChevronDown } from "lucide-react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { ChevronDown, Check } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import ProductCard from "./ProductCard";
@@ -39,20 +39,44 @@ export default function CatalogueClient({
   // États : chaîne de recherche + catégorie active
   const [recherche, setRecherche] = useState(rechercheInitiale);
   const [categorie, setCategorie] = useState<Categorie | "tout">("tout");
-  // Au-delà de quelques rayons, la rangée de filtres devient un mur de
-  // pastilles qui repousse les produits hors de l'écran. On en montre 4,
-  // le reste se déplie à la demande.
-  const [deplie, setDeplie] = useState(false);
+  // Menu des rayons supplémentaires.
+  const [menuOuvert, setMenuOuvert] = useState(false);
+  const refMenu = useRef<HTMLDivElement | null>(null);
+
+  // Fermeture au clic en dehors et à la touche Échap.
+  useEffect(() => {
+    if (!menuOuvert) return;
+    function clicExterieur(e: MouseEvent) {
+      if (refMenu.current && !refMenu.current.contains(e.target as Node)) {
+        setMenuOuvert(false);
+      }
+    }
+    function toucheEchap(e: KeyboardEvent) {
+      if (e.key === "Escape") setMenuOuvert(false);
+    }
+    document.addEventListener("mousedown", clicExterieur);
+    document.addEventListener("keydown", toucheEchap);
+    return () => {
+      document.removeEventListener("mousedown", clicExterieur);
+      document.removeEventListener("keydown", toucheEchap);
+    };
+  }, [menuOuvert]);
 
   const tousLesFiltres = useMemo(
     () => [{ id: "tout", nomFr: "", nomAr: "" }, ...categories],
     [categories]
   );
-  // La catégorie active reste TOUJOURS visible, même repliée : sinon le
-  // filtre en cours disparaîtrait de l'écran une fois sélectionné.
-  const filtresVisibles = deplie
-    ? tousLesFiltres
-    : tousLesFiltres.filter((c, i) => i < LIMITE_FILTRES || c.id === categorie);
+  // Les premiers rayons restent en pastilles ; le reste passe dans un menu.
+  // Déplier en ligne faisait déborder les filtres sur deux ou trois rangées
+  // et repoussait les produits hors de l'écran.
+  const enPastilles = tousLesFiltres.slice(0, LIMITE_FILTRES);
+  const dansMenu = tousLesFiltres.slice(LIMITE_FILTRES);
+  // Si le rayon actif est dans le menu, le bouton porte son nom : sans ça,
+  // le filtre en cours serait invisible une fois le menu refermé.
+  const actifDansMenu = dansMenu.find((c) => c.id === categorie);
+
+  const libelle = (c: { id: string; nomFr: string; nomAr: string }) =>
+    c.id === "tout" ? tCat("tout") : locale === "ar" ? c.nomAr : c.nomFr;
 
   // Liste filtrée : on la recalcule seulement quand recherche, categorie, locale
   // ou la liste de produits changent.
@@ -87,7 +111,7 @@ export default function CatalogueClient({
         />
 
         <div className="flex flex-wrap items-center gap-2">
-          {filtresVisibles.map((cat) => {
+          {enPastilles.map((cat) => {
             const actif = cat.id === categorie;
             return (
               <button
@@ -99,31 +123,76 @@ export default function CatalogueClient({
                     : "border-gray-300 bg-white text-gray-700 hover:border-gray-500"
                 }`}
               >
-                {cat.id === "tout"
-                  ? tCat("tout")
-                  : locale === "ar"
-                  ? cat.nomAr
-                  : cat.nomFr}
+                {libelle(cat)}
               </button>
             );
           })}
 
-          {/* Le bouton n'apparaît que s'il reste vraiment des rayons cachés. */}
-          {tousLesFiltres.length > LIMITE_FILTRES && (
-            <button
-              type="button"
-              onClick={() => setDeplie((v) => !v)}
-              className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-sm font-medium text-gray-600 underline-offset-2 transition hover:text-gray-900 hover:underline"
-            >
-              {deplie ? t("voirMoins") : t("voirPlus")}
-              <ChevronDown
-                className={`h-3.5 w-3.5 transition-transform ${
-                  deplie ? "rotate-180" : ""
+          {/* Menu des rayons restants — une seule pastille, quel que soit
+              leur nombre : la rangée de filtres garde toujours sa hauteur. */}
+          {dansMenu.length > 0 && (
+            <div ref={refMenu} className="relative">
+              <button
+                type="button"
+                onClick={() => setMenuOuvert((v) => !v)}
+                aria-haspopup="menu"
+                aria-expanded={menuOuvert}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition ${
+                  actifDansMenu
+                    ? "border-black bg-black text-white"
+                    : "border-gray-300 bg-white text-gray-700 hover:border-gray-500"
                 }`}
-                strokeWidth={2}
-                aria-hidden="true"
-              />
-            </button>
+              >
+                {actifDansMenu
+                  ? libelle(actifDansMenu)
+                  : `${t("plusCategories")} (${dansMenu.length})`}
+                <ChevronDown
+                  className={`h-3.5 w-3.5 transition-transform ${
+                    menuOuvert ? "rotate-180" : ""
+                  }`}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
+              </button>
+
+              {menuOuvert && (
+                <div
+                  role="menu"
+                  // end-0 : le menu se colle au bord « fin » du bouton —
+                  // à droite en français, à gauche en arabe.
+                  className="absolute end-0 top-full z-40 mt-2 max-h-72 w-56 overflow-y-auto rounded-2xl border border-gray-200 bg-white py-1.5 shadow-lg"
+                >
+                  {dansMenu.map((cat) => {
+                    const actif = cat.id === categorie;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setCategorie(cat.id);
+                          setMenuOuvert(false);
+                        }}
+                        className={`flex w-full items-center gap-2 px-4 py-2 text-start text-sm transition ${
+                          actif
+                            ? "font-medium text-gray-900"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <span className="flex-1">{libelle(cat)}</span>
+                        {actif && (
+                          <Check
+                            className="h-4 w-4 shrink-0"
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

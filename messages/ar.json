@@ -316,7 +316,7 @@
       "enregistrer": "حفظ",
       "enregistre": "تمّ الحفظ.",
       "choisir": "اختيار الفئات",
-      "choisirAide": "حدّد أقسام متجرك. القائمة مغلقة لضمان ترجمة صحيحة بالعربية.",
+      "choisirAide": "حدّد أقسام متجرك. اخترها من القائمة لتفادي التكرار.",
       "rechercher": "ابحث عن فئة…",
       "dejaAjoutee": "موجودة في متجرك",
       "valider": "تأكيد",
@@ -364,8 +364,7 @@
     "sousTitre": "تشكيلة من المنتجات مع التوصيل إلى جميع ولايات الجزائر.",
     "placeholderRecherche": "ابحث عن منتج…",
     "aucunResultat": "لا يوجد منتج يطابق بحثك.",
-    "voirPlus": "عرض المزيد",
-    "voirMoins": "عرض أقل"
+    "plusCategories": "المزيد"
   },
   "categories": {
     "tout": "الكل",

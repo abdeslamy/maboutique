@@ -316,7 +316,7 @@
       "enregistrer": "Enregistrer",
       "enregistre": "C’est enregistré.",
       "choisir": "Choisir des catégories",
-      "choisirAide": "Cochez les rayons de votre boutique. La liste est fermée pour garantir une traduction correcte en arabe.",
+      "choisirAide": "Cochez les rayons de votre boutique. Choisissez-les dans la liste pour éviter les doublons.",
       "rechercher": "Rechercher une catégorie…",
       "dejaAjoutee": "Déjà dans votre boutique",
       "valider": "Valider",
@@ -364,8 +364,7 @@
     "sousTitre": "Sélection de produits livrés partout en Algérie.",
     "placeholderRecherche": "Rechercher un produit…",
     "aucunResultat": "Aucun produit ne correspond à votre recherche.",
-    "voirPlus": "Voir plus",
-    "voirMoins": "Voir moins"
+    "plusCategories": "Plus"
   },
   "categories": {
     "tout": "Tout",
