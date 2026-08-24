@@ -111,3 +111,30 @@ select:disabled,
     stroke-dashoffset: 0;
   }
 }
+
+/* ── Overlay de recherche ────────────────────────────────────────────
+   Le voile porte le flou. La variable --flou-recherche est posee en
+   inline par le composant : 8px en mobile, 5px au-dela. */
+.voile-recherche {
+  -webkit-backdrop-filter: blur(var(--flou-recherche, 8px));
+  backdrop-filter: blur(var(--flou-recherche, 8px));
+}
+
+/* Repli exige par la specification : sur les navigateurs sans
+   backdrop-filter (Android d entree de gamme, vieux Firefox), un voile
+   opaque plutot qu un rectangle noir a 18 % sur une page nette. */
+@supports not (backdrop-filter: blur(1px)) {
+  .voile-recherche {
+    background: rgba(251, 250, 248, 0.92) !important;
+  }
+}
+
+/* Barre de chargement de l overlay : indicateur de 38 % qui traverse. */
+@keyframes om-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(363%);
+  }
+}

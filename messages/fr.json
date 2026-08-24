@@ -565,5 +565,27 @@
       "erreur_serveur": "Une erreur est survenue. Réessayez dans un instant.",
       "json_invalide": "Données invalides."
     }
+  },
+  "recherche": {
+    "dialogue": "Recherche",
+    "placeholder": "Rechercher un produit, une catégorie",
+    "fermer": "Fermer",
+    "fermerRecherche": "Fermer la recherche",
+    "effacer": "Effacer",
+    "supprimer": "Supprimer",
+    "recentes": "Recherches récentes",
+    "toutEffacer": "Tout effacer",
+    "categories": "Catégories",
+    "rayons": "Catégories",
+    "qualificatifRayon": "catégorie",
+    "suggestions": "Suggestions",
+    "produits": "Produits",
+    "populaires": "Populaires cette semaine",
+    "bestSellers": "Nos best-sellers",
+    "aucunResultat": "Aucun résultat pour « {requete} »",
+    "aucunResultatAide": "Vérifiez l'orthographe ou essayez un terme plus court.",
+    "essayer": "Essayer",
+    "categoriesPopulaires": "Catégories populaires",
+    "voirTousResultats": "{n, plural, one {Voir le # résultat} other {Voir les # résultats}}"
   }
 }

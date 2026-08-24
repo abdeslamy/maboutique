@@ -1,10 +1,11 @@
-import { Search, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import SelecteurLangue from "./SelecteurLangue";
 import PanierCompteur from "./PanierCompteur";
 import MenuCompte from "./MenuCompte";
+import BoutonRechercheNavbar from "./BoutonRechercheNavbar";
 
 /**
  * Barre de navigation principale, affichée sur toutes les pages.
@@ -62,15 +63,8 @@ export default async function Navbar({ locale }: { locale: Locale }) {
           <div className="flex items-center gap-0.5 rounded-full bg-white p-0.5 shadow-[0_1px_6px_rgba(0,0,0,0.10)]">
             <SelecteurLangue localeActive={locale} />
 
-            {/* La loupe mène au catalogue, où vit la vraie recherche. */}
-            <Link
-              href="/produits"
-              className={pastille}
-              aria-label={t("rechercher")}
-              title={t("rechercher")}
-            >
-              <Search className="h-[18px] w-[18px]" strokeWidth={2.25} />
-            </Link>
+            {/* La loupe ouvre l'overlay de recherche (⌘K / Ctrl+K / « / »). */}
+            <BoutonRechercheNavbar className={pastille} />
 
             {/* `relative` porte la pastille du compteur. */}
             <Link

@@ -13,6 +13,7 @@ import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import ProductCard from "./ProductCard";
 import { useProducts } from "@/context/ProductsContext";
+import { contient } from "@/lib/recherche";
 import type { Categorie } from "@/lib/types";
 import type { Locale } from "@/i18n/routing";
 
@@ -161,16 +162,23 @@ export default function CatalogueClient({
   // Liste filtrée : on la recalcule seulement quand recherche, categorie, locale
   // ou la liste de produits changent.
   const produitsFiltres = useMemo(() => {
-    const requete = recherche.trim().toLowerCase();
+    const requete = recherche.trim();
     return produits.filter((p) => {
       // Filtre par catégorie
       if (categorie !== "tout" && p.categorie !== categorie) return false;
-      // Filtre par texte : on cherche dans le nom traduit dans la langue active
-      if (requete && !p.nom[locale].toLowerCase().includes(requete))
-        return false;
+      // Filtre par texte : nom traduit ET nom du rayon, insensible aux
+      // accents. Même règle que l'overlay de recherche — sans quoi celui-ci
+      // annoncerait « 5 résultats » et le catalogue n'en montrerait aucun.
+      if (requete) {
+        const rayon = categories.find((c) => c.id === p.categorie);
+        const cible = `${p.nom[locale]} ${
+          rayon ? (locale === "ar" ? rayon.nomAr : rayon.nomFr) : ""
+        }`;
+        if (!contient(cible, requete)) return false;
+      }
       return true;
     });
-  }, [recherche, categorie, locale, produits]);
+  }, [recherche, categorie, locale, produits, categories]);
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10">

@@ -13,6 +13,9 @@ import { ProductsProvider } from "@/context/ProductsContext";
 import { getSession } from "@/lib/session";
 import { getUtilisateurParId } from "@/lib/auth";
 import { getAllProduits } from "@/lib/products";
+import { getCategories } from "@/lib/categories";
+import { RechercheProvider } from "@/context/RechercheContext";
+import ContenuPage from "@/components/recherche/ContenuPage";
 import "../globals.css";
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -102,6 +105,10 @@ export default async function LocaleLayout({
   // on passerait au chargement à la demande.
   const produits = await getAllProduits();
 
+  // Rayons de la boutique — l'overlay de recherche en a besoin sur toutes
+  // les pages, pas seulement sur le catalogue.
+  const categories = await getCategories();
+
   // RTL si arabe, LTR sinon. C'est cette ligne qui retourne toute la mise en page.
   const dir = locale === "ar" ? "rtl" : "ltr";
 
@@ -128,6 +135,12 @@ export default async function LocaleLayout({
             {/* ProductsProvider expose la liste des produits aux composants client. */}
             <ProductsProvider produits={produits}>
               <CartProvider>
+                {/* RechercheProvider rend l'overlay APRÈS le contenu de page,
+                    et donc hors de l'enveloppe qui recule pendant qu'il est
+                    ouvert. Les rayons lui sont passés ici : un composant
+                    client ne peut pas interroger Prisma. */}
+                <RechercheProvider categories={categories}>
+                  <ContenuPage>
                 {/* Navigation DESKTOP : masquee sous 640 px, ou la
                     navigation mobile flottante prend le relais. */}
                 <div className="hidden sm:block">
@@ -149,7 +162,13 @@ export default async function LocaleLayout({
                   {children}
                 </main>
                 <Footer />
-                <NavigationMobile />
+                  </ContenuPage>
+
+                  {/* Hors de l'enveloppe : les barres flottantes sont en
+                      position fixed et doivent le rester par rapport au
+                      viewport, pas par rapport au conteneur transformé. */}
+                  <NavigationMobile />
+                </RechercheProvider>
               </CartProvider>
             </ProductsProvider>
           </AuthProvider>

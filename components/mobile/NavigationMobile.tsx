@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
+import { useRecherche } from "@/context/RechercheContext";
 import {
   AccueilOutline,
   AccueilFilled,
@@ -85,14 +86,10 @@ export default function NavigationMobile() {
         }}
       >
         <BoutonLangue />
-        {/* La loupe mène au catalogue, où vit la recherche. */}
-        <Link
-          href="/produits"
-          aria-label={t("rechercher")}
-          className={`flex h-[44px] w-[44px] items-center justify-center rounded-[22px] bg-white text-[#111111] transition-opacity duration-[120ms] ease-[ease] active:opacity-45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111111] ${OMBRE}`}
-        >
-          <RechercheOutline className="h-[30px] w-[30px]" />
-        </Link>
+        {/* La loupe ouvre l'overlay de recherche. Elle s'efface à
+            l'ouverture — 200 ms, scale(.85) : le panneau doit sembler
+            sortir d'elle. */}
+        <BoutonRecherche />
       </div>
 
       {/* ═══ Bottom tab bar ══════════════════════════════════════════
@@ -137,6 +134,32 @@ export default function NavigationMobile() {
         </div>
       </nav>
     </>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Bouton Recherche — ouvre l'overlay et s'efface derrière lui
+// ────────────────────────────────────────────────────────────────────
+
+function BoutonRecherche() {
+  const t = useTranslations("navigation");
+  const { ouvert, ouvrir } = useRecherche();
+
+  return (
+    <button
+      type="button"
+      onClick={ouvrir}
+      aria-label={t("rechercher")}
+      // Le bouton s'escamote pendant que le panneau grandit depuis lui :
+      // 200 ms, scale(.85) + opacité 0. `pointer-events:none` évite qu'il
+      // reste cliquable une fois invisible.
+      className={`flex h-[44px] w-[44px] items-center justify-center rounded-[22px] bg-white text-[#111111] transition-[transform,opacity] duration-200 ease-[cubic-bezier(.2,.8,.2,1)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111111] motion-reduce:transition-none ${
+        ouvert ? "scale-[.85] opacity-0" : "opacity-100 active:opacity-45"
+      } ${OMBRE}`}
+      style={{ pointerEvents: ouvert ? "none" : undefined }}
+    >
+      <RechercheOutline className="h-[30px] w-[30px]" />
+    </button>
   );
 }
 

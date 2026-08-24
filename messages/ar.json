@@ -565,5 +565,27 @@
       "erreur_serveur": "حدث خطأ، يرجى المحاولة مرّة أخرى.",
       "json_invalide": "بيانات غير صالحة."
     }
+  },
+  "recherche": {
+    "dialogue": "البحث",
+    "placeholder": "ابحث عن منتج أو فئة",
+    "fermer": "إغلاق",
+    "fermerRecherche": "إغلاق البحث",
+    "effacer": "مسح",
+    "supprimer": "حذف",
+    "recentes": "عمليات البحث الأخيرة",
+    "toutEffacer": "مسح الكل",
+    "categories": "الفئات",
+    "rayons": "الفئات",
+    "qualificatifRayon": "فئة",
+    "suggestions": "اقتراحات",
+    "produits": "المنتجات",
+    "populaires": "الأكثر رواجًا هذا الأسبوع",
+    "bestSellers": "الأكثر مبيعًا",
+    "aucunResultat": "لا توجد نتائج لـ « {requete} »",
+    "aucunResultatAide": "تحقق من الإملاء أو جرّب كلمة أقصر.",
+    "essayer": "جرّب",
+    "categoriesPopulaires": "فئات شائعة",
+    "voirTousResultats": "عرض كل النتائج ({n})"
   }
 }
