@@ -14,7 +14,9 @@
     "parametres": "Paramètres du profil",
     "mesCommandes": "Mes commandes",
     "admin": "Espace admin",
-    "rechercher": "Rechercher un produit"
+    "rechercher": "Rechercher un produit",
+    "langue": "Langue",
+    "navigationPrincipale": "Navigation principale"
   },
   "timeline": {
     "commandeAnnulee": "Commande annulée",

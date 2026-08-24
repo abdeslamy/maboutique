@@ -5,6 +5,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import Navbar from "@/components/Navbar";
+import NavigationMobile from "@/components/mobile/NavigationMobile";
 import Footer from "@/components/Footer";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
@@ -127,9 +128,28 @@ export default async function LocaleLayout({
             {/* ProductsProvider expose la liste des produits aux composants client. */}
             <ProductsProvider produits={produits}>
               <CartProvider>
-                <Navbar locale={locale as Locale} />
-                <main className="flex-1">{children}</main>
+                {/* Navigation DESKTOP : masquee sous 640 px, ou la
+                    navigation mobile flottante prend le relais. */}
+                <div className="hidden sm:block">
+                  <Navbar locale={locale as Locale} />
+                </div>
+
+                {/* Navigation MOBILE : deux barres flottantes, sous 640 px.
+                    Les paddings compensent leur position fixe pour que le
+                    contenu ne passe jamais dessous.
+                      haut : 132 px = status bar 52 + titre/boutons + 16
+                      bas  :  95 px = 26 (offset) + 53 (hauteur) + 16 + safe area */}
+                <main
+                  id="contenu-principal"
+                  // Classes Tailwind plutot qu un style inline : le padding
+                  // doit disparaitre a partir de sm, et un style inline ne
+                  // peut pas etre conditionne par une media query.
+                  className="flex-1 pt-[132px] pb-[calc(95px+env(safe-area-inset-bottom,0px))] sm:pt-0 sm:pb-0"
+                >
+                  {children}
+                </main>
                 <Footer />
+                <NavigationMobile />
               </CartProvider>
             </ProductsProvider>
           </AuthProvider>

@@ -14,7 +14,9 @@
     "parametres": "إعدادات الحساب",
     "mesCommandes": "طلباتي",
     "admin": "لوحة الإدارة",
-    "rechercher": "البحث عن منتج"
+    "rechercher": "البحث عن منتج",
+    "langue": "اللغة",
+    "navigationPrincipale": "التنقّل الرئيسي"
   },
   "timeline": {
     "commandeAnnulee": "تمّ إلغاء الطلب",
