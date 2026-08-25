@@ -93,14 +93,36 @@ clavier. Le clavier rétrécit le viewport visuel, donc la formule du document
 
 ### Bouton de fermeture
 
-Même dessin sur les trois formats — pastille circulaire de **36 px**, fond
-`#F4F3F0` (celui du champ voisin), croix de 13 px, trait 2,
-`rgba(17,17,17,.72)`. Survol `#E7E4DF`, pressé `#E0DCD5`.
+Pastille circulaire, calée sur la hauteur du champ voisin dont elle reprend
+le remplissage. Les deux commandes de la rangée se lisent comme une paire.
 
-Sur mobile la **cible tactile fait 44 px**, la pastille reste à 36 : l'écart
-est absorbé par la boîte du bouton. Le mot « Fermer » qui occupait cette
-place a disparu — il était relu à chaque ouverture sans rien apprendre, et
-volait une trentaine de pixels au champ, qui passe de 245 à 275 px.
+| | Mobile | Desktop / tablette |
+|---|---|---|
+| Champ | 48 px | 56 px |
+| **Pastille** | **44 px** | **48 px** |
+| Fond | `#F4F3F0` | `#F4F3F0` |
+| Survol / pressé | — | `#E7E4DF` / `#E0DCD5` |
+
+Le X mesure **18 px** — un peu plus du tiers du disque, la proportion des
+croix d'iOS — trait de **2 px** à l'écran, extrémités arrondies, couleur
+`rgba(17,17,17,.62)`.
+
+⚠️ Le tracé de `Croix` n'occupe que **la moitié** de son viewBox de 24. Pour
+obtenir un X de 18 px il faut donc un SVG de **36 px**, et une épaisseur de
+**1,35** dans le repère du viewBox pour un trait de 2 px rendu
+(`2 × 24 / 36`). Ne pas confondre la taille du SVG et celle du glyphe.
+
+La pastille de 44 px sur mobile est elle-même la cible tactile — pas besoin
+d'une boîte plus grande autour.
+
+Le mot « Fermer » qui occupait cette place a disparu — il était relu à chaque
+ouverture sans rien apprendre, et volait une trentaine de pixels au champ,
+qui passe de 245 à 275 px.
+
+**Pas de badge « Esc ».** La spécification d'origine en plaçait un au bord du
+champ desktop. Retiré : il annonçait un raccourci que la pastille de
+fermeture, juste à côté, rend déjà évident. La touche Échap fonctionne
+toujours — le badge n'était que son affichage.
 
 ### Recherches récentes — chips (mobile / tablette)
 
@@ -116,8 +138,14 @@ par la gouttière de 8 px entre deux rangées de chips.
 
 ### Colonne gauche (desktop)
 
-Récentes et catégories y sont des **lignes de 40 px**, pas des chips — le
+Récentes et catégories y sont des **lignes de 44 px**, pas des chips — le
 défilement horizontal n'a pas de sens à la souris.
+
+**Barre de survol** : `#F4F3F0`, rayon 12, et elle **déborde de 8 px dans la
+gouttière de la colonne** (`-mx-[8px]`, compensé par un padding horizontal de
+20 px pour que le libellé ne bouge pas). À 40 px de haut et calée sur le
+texte, elle se lisait comme un liseré plutôt que comme une cible.
+Croix de suppression révélée au survol : 28 px, X de 13 px.
 
 Un **filet de séparation** les sépare : `1px solid rgba(0,0,0,.07)`, 18 px de
 marge au-dessus et de padding en dessous, même teinte que le séparateur de

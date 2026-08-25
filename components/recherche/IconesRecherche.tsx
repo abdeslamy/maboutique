@@ -1,5 +1,7 @@
 "use client";
 
+import type { CSSProperties } from "react";
+
 /**
  * Icônes de l'overlay de recherche.
  *
@@ -55,6 +57,8 @@ type PropsCroix = {
   className?: string;
   trait?: number;
   couleur?: string;
+  /** Dimensions en pixels — nécessaires quand la taille est calculée. */
+  style?: CSSProperties;
 };
 
 /**
@@ -67,9 +71,10 @@ export function Croix({
   className,
   trait = 2.4,
   couleur = "currentColor",
+  style,
 }: PropsCroix) {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} style={style}>
       <path
         d="M6 6 L18 18 M18 6 L6 18"
         fill="none"

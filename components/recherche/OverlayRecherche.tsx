@@ -626,21 +626,10 @@ export default function OverlayRecherche({
               </span>
             </button>
 
-            {/* Badge Échap — desktop et tablette. */}
-            {!estMobile && (
-              <span
-                className="flex-none rounded-[6px] bg-[#F4F3F0] font-mono text-[rgba(0,0,0,0.45)]"
-                style={{
-                  height: 22,
-                  padding: "0 6px",
-                  fontSize: 11,
-                  lineHeight: "22px",
-                }}
-                aria-hidden="true"
-              >
-                Esc
-              </span>
-            )}
+            {/* Le badge « Esc » de la spécification a été retiré : il occupait
+                le bord du champ pour annoncer un raccourci que la pastille de
+                fermeture, juste à côté, rend déjà évident. Échap fonctionne
+                toujours — le badge n'était que son affichage. */}
           </div>
 
           <BoutonFermeture
@@ -822,14 +811,19 @@ type Traduire = ReturnType<typeof useTranslations>;
  * Un mot à cet endroit est lu à chaque ouverture alors qu'il ne dit rien de
  * neuf, et il volait une trentaine de pixels au champ de saisie.
  *
- * Le remplissage `#F4F3F0` est celui du champ voisin : les deux commandes de
- * la rangée appartiennent visiblement à la même famille, séparées par les
- * 8 px de gouttière.
+ * La pastille est calée sur la hauteur du champ voisin — 48 px face à un
+ * champ de 56, 44 face à un champ de 48 — et en reprend le remplissage
+ * `#F4F3F0` : les deux commandes de la rangée se lisent comme une paire, pas
+ * comme un bouton perdu à côté d'une barre.
  *
- * La cible tactile fait 44 px en mobile, la pastille visible 36. L'écart est
- * absorbé par la boîte du bouton, pas par la pastille — réduire la cible
- * pour la faire coïncider avec le dessin passerait sous le minimum tactile.
+ * Le X occupe 18 px, soit un peu plus du tiers du disque, avec des extrémités
+ * arrondies : c'est la proportion des croix d'iOS. Comme le tracé ne remplit
+ * que la moitié de son viewBox, il faut un SVG de 36 px pour obtenir ces
+ * 18 px — et une épaisseur de 1,35 dans le repère du viewBox pour un trait de
+ * 2 px à l'écran.
  */
+const TAILLE_SVG_CROIX = 36;
+
 function BoutonFermeture({
   onClick,
   label,
@@ -839,25 +833,21 @@ function BoutonFermeture({
   label: string;
   mobile: boolean;
 }) {
+  const diametre = mobile ? 44 : 48;
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="grid flex-none place-items-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111111]"
-      style={{ width: mobile ? 44 : 36, height: mobile ? 44 : 36 }}
+      className="grid flex-none place-items-center rounded-full bg-[#F4F3F0] transition-colors duration-[120ms] hover:bg-[#E7E4DF] active:bg-[#E0DCD5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111111]"
+      style={{ width: diametre, height: diametre }}
     >
-      <span
-        className="grid place-items-center rounded-full bg-[#F4F3F0] transition-colors duration-[120ms] hover:bg-[#E7E4DF] active:bg-[#E0DCD5]"
-        style={{ width: 36, height: 36 }}
-      >
-        <Croix
-          className="h-[13px] w-[13px]"
-          trait={2}
-          couleur="rgba(17,17,17,0.72)"
-        />
-      </span>
+      <Croix
+        style={{ width: TAILLE_SVG_CROIX, height: TAILLE_SVG_CROIX }}
+        trait={1.35}
+        couleur="rgba(17,17,17,0.62)"
+      />
     </button>
   );
 }
@@ -1421,11 +1411,15 @@ function LigneListe({
   labelSupprimer?: string;
 }) {
   return (
-    <div className="group relative flex items-center rounded-[10px] hover:bg-[#F7F6F3]">
+    // La barre de survol déborde de 8 px dans la gouttière de la colonne
+    // (`-mx-[8px]`, compensé par un padding de 20) et monte à 44 px : à 40 px
+    // et calée sur le texte, elle passait pour un liseré plutôt que pour une
+    // cible. Le libellé, lui, ne bouge pas d'un pixel.
+    <div className="group relative -mx-[8px] flex items-center rounded-[12px] transition-colors duration-[120ms] hover:bg-[#F4F3F0]">
       <button
         type="button"
         onClick={onClick}
-        className="flex h-[40px] min-w-0 flex-1 items-center px-[12px] text-start text-[#111111]"
+        className="flex h-[44px] min-w-0 flex-1 items-center px-[20px] text-start text-[#111111]"
         style={{ fontSize: 14, fontWeight: 400 }}
       >
         <span className="truncate">{libelle}</span>
@@ -1437,9 +1431,9 @@ function LigneListe({
           aria-label={labelSupprimer}
           // Révélée au survol seulement — à la souris, une croix sur chaque
           // ligne transformerait la liste en champ de mines.
-          className="me-[8px] grid h-[24px] w-[24px] flex-none place-items-center rounded-full opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+          className="me-[14px] grid h-[28px] w-[28px] flex-none place-items-center rounded-full opacity-0 transition-opacity group-hover:opacity-100 hover:bg-[rgba(0,0,0,0.06)] focus-visible:opacity-100"
         >
-          <Croix className="h-[11px] w-[11px]" trait={2.4} couleur="rgba(0,0,0,0.40)" />
+          <Croix className="h-[13px] w-[13px]" trait={2.2} couleur="rgba(0,0,0,0.45)" />
         </button>
       )}
     </div>
