@@ -735,18 +735,27 @@ export default function OverlayRecherche({
                   indexActif={indexActif}
                   clavierActif={clavierActif}
                   locale={locale}
-                  rayonDe={rayonDe}
                   onProduit={ouvrirProduit}
                   onTous={() => allerVersCatalogue(q)}
                   t={t}
                 />
               ) : (
-                <VitrineDesktop
-                  produits={vitrine}
-                  titre={premierUsage ? t("bestSellers") : t("populaires")}
-                  locale={locale}
-                  onProduit={ouvrirProduit}
-                />
+                <>
+                  <TitreSection desktop className="mb-[8px]">
+                    {premierUsage ? t("bestSellers") : t("populaires")}
+                  </TitreSection>
+                  <div className="flex flex-col">
+                    {vitrine.map((p) => (
+                      <LigneProduit
+                        key={p.id}
+                        produit={p}
+                        locale={locale}
+                        desktop
+                        onClick={(nouvelOnglet) => ouvrirProduit(p, nouvelOnglet)}
+                      />
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -774,7 +783,6 @@ export default function OverlayRecherche({
                 chips={chipsRayons}
                 libelleCategorie={libelleCategorie}
                 locale={locale}
-                rayonDe={rayonDe}
                 onSuggestion={(s) => {
                   setRequete(s);
                   refChamp.current?.focus();
@@ -791,7 +799,6 @@ export default function OverlayRecherche({
                 libelleCategorie={libelleCategorie}
                 vitrine={vitrine}
                 locale={locale}
-                grilleVignettes={format === "tablette"}
                 onUtiliser={setRequete}
                 onSupprimer={(r) => {
                   const suivante = recentes.filter((x) => x !== r);
@@ -852,16 +859,15 @@ function Image({
   locale,
 }: {
   produit: Produit;
-  taille: number | "100%";
+  taille: number;
   rayon: number;
   locale: Locale;
 }) {
   const source = produit.images[0];
   const estUrl = !!source && /^https?:\/\//.test(source);
   const style: CSSProperties = {
-    width: taille === "100%" ? "100%" : taille,
-    height: taille === "100%" ? undefined : taille,
-    aspectRatio: taille === "100%" ? "1 / 1" : undefined,
+    width: taille,
+    height: taille,
     borderRadius: rayon,
     background: RAYURES,
   };
@@ -960,11 +966,27 @@ function ChipRecente({
   );
 }
 
-/** Ligne de résultat produit — 68 px de haut. */
+/**
+ * Ligne de résultat produit — variante B, « nom respiré ».
+ *
+ * Le nom occupe toute la largeur sur deux lignes, le prix se pose juste en
+ * dessous. Ce choix vient des noms réels du catalogue : « Ruban Adhésif
+ * Antidérapant Réutilisable 12 pièces » se faisait couper avant le mot qui
+ * distingue le produit dès qu'une colonne de prix lui mangeait la droite.
+ *
+ * Contrepartie assumée : les prix ne forment plus une colonne alignée. Dans
+ * une recherche on cherche un objet, on ne compare pas des tarifs.
+ *
+ * Hauteur : 76 px quand le nom passe à la ligne, 72 px sinon (l'image de
+ * 56 px et ses marges posent alors le plancher). Le padding vertical est à
+ * 8 px et non 10 : à 10, la ligne à deux lignes montait à 80 px et faisait
+ * tomber le nombre de produits visibles au-dessus du clavier de 3 à 2.
+ * Le rayon n'est plus affiché ici — il vit dans les chips de la section
+ * « Catégories », juste en dessous des résultats.
+ */
 function LigneProduit({
   produit,
   locale,
-  rayon,
   onClick,
   id,
   actif,
@@ -973,7 +995,6 @@ function LigneProduit({
 }: {
   produit: Produit;
   locale: Locale;
-  rayon: string;
   onClick: (nouvelOnglet: boolean) => void;
   id?: string;
   actif?: boolean;
@@ -1001,29 +1022,29 @@ function LigneProduit({
       )}
       <Image
         produit={produit}
-        taille={desktop ? 48 : 52}
+        taille={desktop ? 48 : 56}
         rayon={desktop ? 12 : 14}
         locale={locale}
       />
-      <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+      <span className="flex min-w-0 flex-1 flex-col gap-[4px]">
         <span
-          className="truncate text-[#111111]"
-          style={{ fontSize: 14.5, fontWeight: 400, lineHeight: 1.2 }}
+          // line-clamp plutôt que truncate : deux lignes, puis les points de
+          // suspension. C'est tout l'objet de la variante.
+          className="line-clamp-2 text-[#111111]"
+          style={{ fontSize: 14.5, fontWeight: 400, lineHeight: 1.3 }}
         >
           {produit.nom[locale]}
         </span>
         <span
-          className="truncate text-[rgba(0,0,0,0.45)]"
-          style={{ fontSize: 12.5, fontWeight: 400, lineHeight: 1.2 }}
+          className="text-[#111111]"
+          style={{
+            fontSize: desktop ? 14.5 : 15,
+            fontWeight: 600,
+            lineHeight: 1.2,
+          }}
         >
-          {rayon}
+          {formatPrix(produit.prix, locale)}
         </span>
-      </span>
-      <span
-        className="flex-none text-[#111111]"
-        style={{ fontSize: 14.5, fontWeight: 500, lineHeight: 1.2 }}
-      >
-        {formatPrix(produit.prix, locale)}
       </span>
     </button>
   );
@@ -1097,7 +1118,6 @@ function EtatVide({
   libelleCategorie,
   vitrine,
   locale,
-  grilleVignettes,
   onUtiliser,
   onSupprimer,
   onToutEffacer,
@@ -1111,7 +1131,6 @@ function EtatVide({
   libelleCategorie: (c: { nomFr: string; nomAr: string }) => string;
   vitrine: Produit[];
   locale: Locale;
-  grilleVignettes: boolean;
   onUtiliser: (r: string) => void;
   onSupprimer: (r: string) => void;
   onToutEffacer: () => void;
@@ -1168,88 +1187,28 @@ function EtatVide({
           </div>
         </div>
 
-        <div className="flex flex-col gap-[12px]">
+        {/* Vitrine en lignes, comme les résultats : c'est le même objet, il
+            n'y a aucune raison qu'il change de forme selon l'état. Le
+            défilement horizontal de vignettes a disparu avec la variante B —
+            il ramenait la mise en page de la grille du catalogue dans un
+            endroit où l'on cherche au lieu de parcourir. */}
+        <div className="flex flex-col gap-[6px]">
           <TitreSection className="px-[20px]">
             {premierUsage ? t("bestSellers") : t("populaires")}
           </TitreSection>
-          {grilleVignettes ? (
-            <div
-              className="grid gap-[12px]"
-              style={{
-                gridTemplateColumns: "repeat(4, 1fr)",
-                padding: "0 20px 4px",
-              }}
-            >
-              {vitrine.map((p) => (
-                <Vignette
-                  key={p.id}
-                  produit={p}
-                  locale={locale}
-                  pleine
-                  onClick={() => onProduit(p)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div
-              className="flex gap-[12px] overflow-x-auto"
-              style={{ padding: "0 20px 4px", scrollbarWidth: "none" }}
-            >
-              {vitrine.map((p) => (
-                <Vignette
-                  key={p.id}
-                  produit={p}
-                  locale={locale}
-                  onClick={() => onProduit(p)}
-                />
-              ))}
-            </div>
-          )}
+          <div className="flex flex-col">
+            {vitrine.map((p) => (
+              <LigneProduit
+                key={p.id}
+                produit={p}
+                locale={locale}
+                onClick={() => onProduit(p)}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </>
-  );
-}
-
-function Vignette({
-  produit,
-  locale,
-  onClick,
-  pleine = false,
-}: {
-  produit: Produit;
-  locale: Locale;
-  onClick: () => void;
-  pleine?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex flex-none flex-col gap-[8px] text-start"
-      style={{ width: pleine ? "100%" : 118 }}
-    >
-      <Image
-        produit={produit}
-        taille={pleine ? "100%" : 118}
-        rayon={16}
-        locale={locale}
-      />
-      <span className="flex flex-col gap-[2px]">
-        <span
-          className="text-[#111111] [text-wrap:pretty]"
-          style={{ fontSize: 13, fontWeight: 400, lineHeight: 1.25 }}
-        >
-          {produit.nom[locale]}
-        </span>
-        <span
-          className="text-[rgba(0,0,0,0.55)]"
-          style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.25 }}
-        >
-          {formatPrix(produit.prix, locale)}
-        </span>
-      </span>
-    </button>
   );
 }
 
@@ -1260,7 +1219,6 @@ function EtatResultats({
   chips,
   libelleCategorie,
   locale,
-  rayonDe,
   onSuggestion,
   onProduit,
   onRayon,
@@ -1272,7 +1230,6 @@ function EtatResultats({
   chips: { id: string; nomFr: string; nomAr: string }[];
   libelleCategorie: (c: { nomFr: string; nomAr: string }) => string;
   locale: Locale;
-  rayonDe: (p: Produit) => string;
   onSuggestion: (s: string) => void;
   onProduit: (p: Produit, nouvelOnglet: boolean) => void;
   onRayon: (c: { nomFr: string; nomAr: string }) => void;
@@ -1302,7 +1259,6 @@ function EtatResultats({
                 key={p.id}
                 produit={p}
                 locale={locale}
-                rayon={rayonDe(p)}
                 onClick={(nouvelOnglet) => onProduit(p, nouvelOnglet)}
               />
             ))}
@@ -1587,7 +1543,6 @@ function ColonneResultats({
   indexActif,
   clavierActif,
   locale,
-  rayonDe,
   onProduit,
   onTous,
   t,
@@ -1598,7 +1553,6 @@ function ColonneResultats({
   indexActif: number;
   clavierActif: boolean;
   locale: Locale;
-  rayonDe: (p: Produit) => string;
   onProduit: (p: Produit, nouvelOnglet: boolean) => void;
   onTous: () => void;
   t: Traduire;
@@ -1615,7 +1569,6 @@ function ColonneResultats({
             key={p.id}
             produit={p}
             locale={locale}
-            rayon={rayonDe(p)}
             desktop
             id={`recherche-option-${decalage + i}`}
             actif={indexActif === decalage + i}
@@ -1639,55 +1592,6 @@ function ColonneResultats({
           {t("voirTousResultats", { n: total })}
         </button>
       )}
-    </>
-  );
-}
-
-function VitrineDesktop({
-  produits,
-  titre,
-  locale,
-  onProduit,
-}: {
-  produits: Produit[];
-  titre: string;
-  locale: Locale;
-  onProduit: (p: Produit, nouvelOnglet: boolean) => void;
-}) {
-  return (
-    <>
-      <TitreSection desktop className="mb-[8px]">
-        {titre}
-      </TitreSection>
-      <div
-        className="grid gap-[16px]"
-        style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
-      >
-        {produits.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            onClick={(e) => onProduit(p, e.metaKey || e.ctrlKey)}
-            className="flex flex-col gap-[8px] text-start"
-          >
-            <Image produit={p} taille="100%" rayon={12} locale={locale} />
-            <span className="flex flex-col gap-[2px]">
-              <span
-                className="text-[#111111] [text-wrap:pretty]"
-                style={{ fontSize: 13, fontWeight: 400, lineHeight: 1.25 }}
-              >
-                {p.nom[locale]}
-              </span>
-              <span
-                className="text-[rgba(0,0,0,0.55)]"
-                style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.25 }}
-              >
-                {formatPrix(p.prix, locale)}
-              </span>
-            </span>
-          </button>
-        ))}
-      </div>
     </>
   );
 }

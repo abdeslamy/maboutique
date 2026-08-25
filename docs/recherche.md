@@ -150,60 +150,61 @@ artificiel n'a été ajouté. Elle s'allumera si la recherche passe côté serve
 
 ---
 
-## 6. Lignes produit dans l'overlay
+## 6. Lignes produit dans l'overlay — variante B
 
-⚠️ **Décision en attente.** Trois variantes proposées, aucune n'est encore
-appliquée — le code utilise toujours le gabarit d'origine (68 px, image 52,
-rayon sous le nom, prix à droite).
+Retenue après comparaison de trois variantes. Un seul gabarit partout dans
+l'overlay : résultats de recherche **et** vitrine, mobile, tablette et
+desktop. Le composant est `LigneProduit`.
 
-Communes aux trois : format en ligne, un produit par rangée, toute la rangée
-cliquable, `padding` horizontal de 20 px, gap de 12 px, pressé `#F7F6F3`.
+Format en ligne, un produit par rangée, toute la rangée cliquable.
 
-### Variante A — Ligne dense · 58 px
-
-- Image 44 × 44, rayon 12
-- Nom 14,5 / 400, **une ligne**, ellipsis
-- Prix 14,5 / 600, colonne droite
-- Pas de rayon affiché
-
-Privilégie la densité et la comparaison des prix, alignés en colonne.
-Coupe les noms longs tôt.
-
-### Variante B — Nom respiré · 76 px
-
-- Image 56 × 56, rayon 14
-- Nom 14,5 / 400, `line-height 1.3`, **deux lignes** max
-- Prix 15 / 600, **sous le nom**, gap 4
-- Pas de colonne droite
-
-Privilégie la lisibilité du nom. Les prix ne s'alignent plus verticalement.
-
-### Variante C — Vignette et rayon · 84 px
-
-- Image 60 × 60, rayon 16
-- Nom 14,5 / 400, deux lignes max
-- Tag rayon : hauteur 20, rayon 10, fond `#F4F3F0`, 11 / 500 `rgba(0,0,0,.55)`, padding `0 8`
-- Prix 14,5 / 600, colonne droite, aligné en bas
-
-Privilégie la reconnaissance visuelle et le repérage du rayon. La plus
-gourmande en hauteur.
-
-### Place disponible
-
-Sur 390 × 844, clavier ouvert : panneau 518 px, moins 84 px de chrome
-(poignée 22 + rangée du champ 60 + barre de chargement 2) = **418 px** de
-contenu. Trois suggestions de complétion en consomment 138, plus 36 de titre
-et d'écarts → **238 px pour les produits**.
-
-| Variante | Avec 3 suggestions | Sans suggestion |
+| | Mobile / tablette | Desktop |
 |---|---|---|
-| A · 58 px | 4 | 6 |
-| B · 76 px | 3 | 5 |
-| C · 84 px | 2 | 4 |
+| Padding | `8px 20px` | `8px 12px` |
+| Gap | 12 px | 12 px |
+| Image | 56 × 56, rayon 14 | 48 × 48, rayon 12 |
+| Nom | 14,5 / 400, `line-height 1.3`, **2 lignes** max | idem |
+| Prix | 15 / 600, **sous le nom**, gap 4 | 14,5 / 600, sous le nom |
+| Coin de la rangée | droit | rayon 10 |
+| Survol | `#F7F6F3` | `#F7F6F3` |
+| Sélection clavier | — | `#F4F3F0` + barre 2 px |
+| **Hauteur mesurée** | **76 px** (nom sur 2 lignes) · **72 px** (1 ligne) | **64 px** |
 
-L'objectif de trois à cinq produits visibles n'est atteint par aucune variante
-tant que trois suggestions occupent le haut. Piste : descendre à deux
-suggestions sur mobile (46 px récupérés, B passe à quatre).
+Le rayon du produit n'apparaît plus dans la ligne : il vit dans les chips de
+la section « Catégories », juste sous les résultats.
+
+**Padding vertical à 8 px et non 10.** À 10, la rangée à deux lignes montait à
+80 px, ce qui faisait tomber le nombre de produits visibles au-dessus du
+clavier de 3 à 2. Le plancher de 72 px vient de l'image de 56 px et de ses
+marges, pas du texte.
+
+### Pourquoi B
+
+Les noms du catalogue sont longs — « Ruban Adhésif Antidérapant Réutilisable
+12 pièces », « Apple AirPods Max – Casque sans fil à réduction de bruit
+active ». Une colonne de prix à droite volait la largeur nécessaire et coupait
+le nom avant le mot distinctif. Contrepartie assumée : les prix ne forment
+plus une colonne alignée, la comparaison de tarifs est moins immédiate.
+
+Les deux autres variantes, écartées : **A** (58 px, image 44, prix à droite)
+plus dense mais tronque les noms ; **C** (84 px, image 60, tag rayon) plus
+lisible visuellement mais tombe à 2 produits visibles.
+
+### Place disponible — mesuré
+
+Sur 390 × 844, clavier ouvert : panneau **518 px**, moins **84 px** de chrome
+(poignée 22 + rangée du champ 60 + barre de chargement 2) = **434 px** de zone
+de défilement. Avec trois suggestions de complétion au-dessus :
+
+**3 produits entiers + un quatrième partiellement visible**, ce dernier
+servant d'indice de défilement. Sans suggestion, 5 produits entiers.
+
+### Vitrine
+
+Même gabarit que les résultats — le défilement horizontal de vignettes de
+118 px a disparu avec la variante B. Il ramenait la mise en page de la grille
+du catalogue à l'endroit précis où l'on cherche au lieu de parcourir.
+4 produits sur mobile, 6 sur tablette et desktop.
 
 ---
 
@@ -237,12 +238,11 @@ suggestions sur mobile (46 px récupérés, B passe à quatre).
 ## 9. Points ouverts
 
 1. **Vitrine mensongère** — « Populaires » / « best-sellers » sans donnée de popularité.
-2. **Variante de ligne produit** — A, B ou C ; recommandation : B.
-3. **Champ « marque »** — absent du modèle, remplacé par le rayon.
-4. **Barre du catalogue** — `/produits` garde son champ de filtrage en place,
+2. **Champ « marque »** — absent du modèle, remplacé par le rayon.
+3. **Barre du catalogue** — `/produits` garde son champ de filtrage en place,
    qui n'ouvre pas l'overlay. Volontaire (il filtre la liste affichée, il ne
    cherche pas), mais à trancher.
-5. **Paliers** — l'overlay bascule à 768 / 1024, la navigation du site à 640.
+4. **Paliers** — l'overlay bascule à 768 / 1024, la navigation du site à 640.
    Entre 640 et 768, navbar desktop et overlay mobile cohabitent.
-6. **`prefers-reduced-motion`** — implémenté, jamais vérifié en conditions
+5. **`prefers-reduced-motion`** — implémenté, jamais vérifié en conditions
    réelles.
