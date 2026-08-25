@@ -14,34 +14,64 @@ import {
   ProfilFilled,
   LangueOutline,
   RechercheOutline,
+  RechercheFilled,
+  FiltreOutline,
 } from "./IconesNav";
 
 /**
- * Navigation mobile — Variante B.
+ * Navigation mobile — Variante B, version 2.
  *
  * Deux éléments flottants, tous deux `position: fixed`, z-index 20 :
- *  - en haut à droite, deux cercles de 44 px (Langue, Recherche) ;
- *  - en bas, un pill de 238 × 53 px (Accueil, Panier, Profil).
+ *  - en haut à droite, deux cercles de 36 px (Langue, Filtres) ;
+ *  - en bas, une tab bar de 210 × 38 px (Accueil, Panier, Recherche, Profil).
  *
- * Le filtre n'est PAS ici : il vit dans le contenu de page (voir la note
- * dans le résumé — la spécification le laisse à concevoir, et notre catalogue
- * possède déjà ses propres filtres en page).
+ * Ce qui change par rapport à la version 1 : la recherche descend dans la tab
+ * bar et les filtres prennent sa place en haut ; la tab bar passe de 3 à
+ * 4 items, rétrécit et cesse d'occuper toute la largeur.
  *
  * Visible en dessous de 640 px uniquement (`sm:hidden`) ; au-delà, la barre
  * de navigation existante reprend la main.
  *
  * Les valeurs chiffrées viennent toutes du document de spécification et sont
- * écrites en dur (`h-[44px]`, `bottom-[26px]`…) plutôt que traduites dans
+ * écrites en dur (`h-[38px]`, `bottom-[26px]`…) plutôt que traduites dans
  * l'échelle Tailwind : arrondir au pas de 4 px casserait les alignements
  * optiques calculés dans le document.
+ *
+ * ⚠️ Zones tactiles. Le document descend les cercles à 36 px et les items à
+ * 42 × 38, sous le minimum de 44 px, et propose lui-même de « corriger en
+ * élargissant la zone de touche au-delà de la surface visible ». C'est ce que
+ * fait `ZONE_TACTILE` : un pseudo-élément qui déborde le dessin sans le
+ * modifier d'un pixel.
  */
 
-/** Ombre unique, partagée par les trois éléments flottants. */
+/** Ombre unique, partagée par les deux éléments flottants. */
 const OMBRE = "shadow-[0_8px_26px_rgba(17,17,17,0.16)]";
+
+/**
+ * Étend la cible tactile au-delà du dessin, via `::after`.
+ *  - cercles de 36 px  → `-4px` de tous côtés = 44 × 44 ;
+ *  - items de 42 × 38  → `-3px` de tous côtés = 48 × 44, et les 3 px latéraux
+ *    consomment exactement la moitié du gap de 6 px : aucun recouvrement
+ *    entre deux onglets voisins.
+ */
+const ZONE_TACTILE =
+  "after:absolute after:content-[''] after:-inset-[4px]";
+const ZONE_TACTILE_ONGLET =
+  "after:absolute after:content-[''] after:-inset-[3px]";
+
+/** Décalages de centrage optique — en px, calés sur des icônes de 28 px. */
+const CALAGE = {
+  accueil: "-translate-y-[0.25px]",
+  panier: "-translate-y-[0.9px]",
+  // La loupe porte son calage dans le viewBox, pas en CSS : voir IconesNav.
+  recherche: "",
+  profil: "-translate-y-[0.6px]",
+} as const;
 
 export default function NavigationMobile() {
   const t = useTranslations("navigation");
   const pathname = usePathname();
+  const { ouvert: rechercheOuverte, ouvrir: ouvrirRecherche } = useRecherche();
 
   // Un seul onglet actif à la fois. Les sous-pages comptent pour leur onglet
   // (une fiche produit garde « Accueil » actif, par exemple).
@@ -53,6 +83,7 @@ export default function NavigationMobile() {
       Outline: AccueilOutline,
       Filled: AccueilFilled,
       label: t("accueil"),
+      calage: CALAGE.accueil,
     },
     {
       cle: "panier",
@@ -61,6 +92,17 @@ export default function NavigationMobile() {
       Outline: PanierOutline,
       Filled: PanierFilled,
       label: t("panier"),
+      calage: CALAGE.panier,
+    },
+    {
+      // Seul onglet qui n'est pas un lien : il ouvre l'overlay de recherche.
+      cle: "recherche",
+      actif: rechercheOuverte,
+      Outline: RechercheOutline,
+      Filled: RechercheFilled,
+      label: t("rechercher"),
+      calage: CALAGE.recherche,
+      action: ouvrirRecherche,
     },
     {
       cle: "profil",
@@ -70,6 +112,7 @@ export default function NavigationMobile() {
       Outline: ProfilOutline,
       Filled: ProfilFilled,
       label: t("compte"),
+      calage: CALAGE.profil,
     },
   ] as const;
 
@@ -86,16 +129,12 @@ export default function NavigationMobile() {
         }}
       >
         <BoutonLangue />
-        {/* La loupe ouvre l'overlay de recherche. Elle s'efface à
-            l'ouverture — 200 ms, scale(.85) : le panneau doit sembler
-            sortir d'elle. */}
-        <BoutonRecherche />
+        <BoutonFiltres />
       </div>
 
       {/* ═══ Bottom tab bar ══════════════════════════════════════════
-          238 px de large (61 % de 390), 53 px de haut, pill parfait à 26,5.
-          Grille de 3 colonnes égales sans gap : toute la colonne est la zone
-          tactile (79,33 × 53 px), bien au-delà des 44 px requis en largeur. */}
+          210 px de large — largeur intrinsèque : 4 × 42 + 3 × 6 + 2 × 12.
+          38 px de haut, pill parfait à 19. */}
       <nav
         aria-label={t("navigationPrincipale")}
         className="fixed inset-x-0 z-20 flex justify-center sm:hidden"
@@ -103,34 +142,64 @@ export default function NavigationMobile() {
       >
         <div
           role="tablist"
-          className={`grid h-[53px] w-[238px] grid-cols-3 rounded-[26.5px] bg-white ${OMBRE}`}
+          className={`flex h-[38px] items-center gap-[6px] rounded-[19px] bg-white px-[12px] ${OMBRE}`}
         >
-          {onglets.map(({ cle, href, actif, Outline, Filled, label }) => (
-            <Link
-              key={cle}
-              href={href}
-              role="tab"
-              aria-selected={actif}
-              aria-controls="contenu-principal"
-              aria-label={label}
-              className="flex items-center justify-center rounded-[26.5px] text-[#111111] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111111]"
-            >
-              {/* Les deux états sont superposés et croisent leur opacité :
-                  aucun remplacement de nœud, donc aucun ressaut de layout. */}
-              <span className="relative block h-[30px] w-[30px]">
+          {onglets.map((onglet) => {
+            const { cle, actif, Outline, Filled, label, calage } = onglet;
+            const contenu = (
+              /* Les deux états sont superposés et croisent leur opacité :
+                 aucun remplacement de nœud, donc aucun ressaut de layout. */
+              <span className="relative block h-[28px] w-[28px]">
                 <Outline
-                  className={`absolute inset-0 h-full w-full transition-opacity duration-[180ms] ease-[ease] ${
+                  className={`absolute inset-0 h-full w-full transition-opacity duration-[180ms] ease-[ease] ${calage} ${
                     actif ? "opacity-0" : "opacity-100"
                   }`}
                 />
                 <Filled
-                  className={`absolute inset-0 h-full w-full transition-opacity duration-[180ms] ease-[ease] ${
+                  className={`absolute inset-0 h-full w-full transition-opacity duration-[180ms] ease-[ease] ${calage} ${
                     actif ? "opacity-100" : "opacity-0"
                   }`}
                 />
               </span>
-            </Link>
-          ))}
+            );
+
+            const classes = `relative flex h-[38px] w-[42px] items-center justify-center rounded-[19px] text-[#111111] ${ZONE_TACTILE_ONGLET} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111111]`;
+
+            // L'onglet Recherche est un bouton : il ouvre un panneau, il ne
+            // mène pas à une page. Le dire au navigateur évite d'annoncer un
+            // lien qui ne navigue nulle part.
+            if ("action" in onglet) {
+              return (
+                <button
+                  key={cle}
+                  type="button"
+                  onClick={onglet.action}
+                  role="tab"
+                  aria-selected={actif}
+                  aria-haspopup="dialog"
+                  aria-expanded={actif}
+                  aria-label={label}
+                  className={classes}
+                >
+                  {contenu}
+                </button>
+              );
+            }
+
+            return (
+              <Link
+                key={cle}
+                href={onglet.href}
+                role="tab"
+                aria-selected={actif}
+                aria-controls="contenu-principal"
+                aria-label={label}
+                className={classes}
+              >
+                {contenu}
+              </Link>
+            );
+          })}
         </div>
       </nav>
     </>
@@ -138,30 +207,20 @@ export default function NavigationMobile() {
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Bouton Recherche — ouvre l'overlay et s'efface derrière lui
+// Bouton Filtres — cercle haut droit, à la place de l'ancienne loupe
 // ────────────────────────────────────────────────────────────────────
 
-function BoutonRecherche() {
+function BoutonFiltres() {
   const t = useTranslations("navigation");
-  const { ouvert, ouvrir } = useRecherche();
 
   return (
-    <button
-      type="button"
-      onClick={ouvrir}
-      aria-label={t("rechercher")}
-      aria-haspopup="dialog"
-      aria-expanded={ouvert}
-      // Le bouton s'escamote pendant que le panneau grandit depuis lui :
-      // 200 ms, scale(.85) + opacité 0. `pointer-events:none` évite qu'il
-      // reste cliquable une fois invisible.
-      className={`flex h-[44px] w-[44px] items-center justify-center rounded-[22px] bg-white text-[#111111] transition-[transform,opacity] duration-200 ease-[cubic-bezier(.2,.8,.2,1)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111111] motion-reduce:transition-none ${
-        ouvert ? "scale-[.85] opacity-0" : "opacity-100 active:opacity-45"
-      } ${OMBRE}`}
-      style={{ pointerEvents: ouvert ? "none" : undefined }}
+    <Link
+      href="/produits"
+      aria-label={t("filtres")}
+      className={`relative flex h-[36px] w-[36px] items-center justify-center rounded-[18px] bg-white text-[#111111] transition-opacity duration-[120ms] ease-[ease] active:opacity-45 ${ZONE_TACTILE} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111111] ${OMBRE}`}
     >
-      <RechercheOutline className="h-[30px] w-[30px]" />
-    </button>
+      <FiltreOutline className="h-[28px] w-[28px]" />
+    </Link>
   );
 }
 
@@ -211,7 +270,7 @@ function BoutonLangue() {
         aria-label={t("langue")}
         // Pas de `scale` au pressed : sur un cercle porteur d'ombre, une
         // réduction d'échelle fait décoller l'ombre et trahit la superposition.
-        className={`flex h-[44px] w-[44px] items-center justify-center rounded-[22px] bg-white text-[#111111] transition-opacity duration-[120ms] ease-[ease] active:opacity-45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111111] ${OMBRE}`}
+        className={`relative flex h-[36px] w-[36px] items-center justify-center rounded-[18px] bg-white text-[#111111] transition-opacity duration-[120ms] ease-[ease] active:opacity-45 ${ZONE_TACTILE} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111111] ${OMBRE}`}
       >
         <LangueOutline className="h-[29px] w-[29px]" />
       </button>

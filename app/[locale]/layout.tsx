@@ -151,13 +151,15 @@ export default async function LocaleLayout({
                     Les paddings compensent leur position fixe pour que le
                     contenu ne passe jamais dessous.
                       haut : 132 px = status bar 52 + titre/boutons + 16
-                      bas  :  95 px = 26 (offset) + 53 (hauteur) + 16 + safe area */}
+                    La reserve du BAS est portee par le pied de page, qui suit
+                    <main> : c est lui qui touche le bas du document, donc lui
+                    que la tab bar flottante recouvrirait. */}
                 <main
                   id="contenu-principal"
                   // Classes Tailwind plutot qu un style inline : le padding
                   // doit disparaitre a partir de sm, et un style inline ne
                   // peut pas etre conditionne par une media query.
-                  className="flex-1 pt-[132px] pb-[calc(95px+env(safe-area-inset-bottom,0px))] sm:pt-0 sm:pb-0"
+                  className="flex-1 pt-[132px] sm:pt-0"
                 >
                   {children}
                 </main>

@@ -16,7 +16,8 @@
     "admin": "لوحة الإدارة",
     "rechercher": "البحث عن منتج",
     "langue": "اللغة",
-    "navigationPrincipale": "التنقّل الرئيسي"
+    "navigationPrincipale": "التنقّل الرئيسي",
+    "filtres": "الفلاتر"
   },
   "timeline": {
     "commandeAnnulee": "تمّ إلغاء الطلب",

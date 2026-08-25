@@ -17,7 +17,7 @@ animation.
 |---|---|---|
 | Barre du hero | Page d'accueil | `components/BarreRechercheHome.tsx` |
 | Loupe de la capsule | Barre de navigation, ≥ 640 px | `components/BoutonRechercheNavbar.tsx` |
-| Cercle haut-droit | Navigation mobile, < 640 px | `BoutonRecherche` dans `components/mobile/NavigationMobile.tsx` |
+| Onglet Recherche | Tab bar mobile, < 640 px | 3ᵉ onglet de `components/mobile/NavigationMobile.tsx` |
 | `⌘K` / `Ctrl+K` | Partout | `context/RechercheContext.tsx` |
 | `/` | Partout, sauf focus dans un champ de saisie | idem |
 

@@ -127,7 +127,7 @@ export function ProfilFilled({ className }: Props) {
 }
 
 // ── Langue ──────────────────────────────────────────────────────────
-// stroke 1,76 et rendu 29 px : le globe est un cercle dans un cercle, il
+// stroke 1,75 et rendu 29 px : le globe est un cercle dans un cercle, il
 // paraît plus grand que la loupe à dimension égale.
 
 export function LangueOutline({ className }: Props) {
@@ -137,7 +137,7 @@ export function LangueOutline({ className }: Props) {
       className={className}
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.76"
+      strokeWidth="1.75"
       strokeLinecap="round"
       strokeLinejoin="round"
     >
@@ -181,6 +181,13 @@ export function LangueFilled({ className }: Props) {
 }
 
 // ── Recherche ───────────────────────────────────────────────────────
+// Devenue un onglet de la tab bar en version 2. Son décalage optique n'est
+// plus fondu dans les coordonnées mais porté par un `transform` sur le <g>,
+// comme le veut la spécification : `translate(0.36,0.77) scale(1.03)`.
+// C'est cette écriture qui rend la valeur relisible quand elle change.
+
+/** Décalage optique de la loupe dans la tab bar — unités du viewBox. */
+const CALAGE_LOUPE = "translate(0.36,0.77) scale(1.03)";
 
 export function RechercheOutline({ className }: Props) {
   return (
@@ -192,32 +199,33 @@ export function RechercheOutline({ className }: Props) {
       strokeWidth="1.7"
       strokeLinecap="round"
     >
-      <circle cx="10.72" cy="11.64" r="7.62" />
-      <path d="M16.09 16.79L19.58 19.68" />
+      <g transform={CALAGE_LOUPE}>
+        <circle cx="10.7" cy="10.7" r="7.4" />
+        <path d="M16.2 15.7 L19.3 18.5" />
+      </g>
     </svg>
   );
 }
 
 /**
- * Anneau épais, lentille vide — même silhouette et même taille optique que
- * l'outline, seul le poids change.
+ * État actif : lentille pleine, manche épaissi à 2,4.
  *
- * ⚠️ N'est PAS l'état pressed (qui joue sur l'opacité). Réservé au cas d'une
- * recherche active. Non utilisé pour l'instant : conservé pour ne pas avoir à
- * le redessiner le jour où l'état existera.
+ * Le disque est un `fill` et non un anneau épais — à 28 px, un anneau de
+ * 3,3 fermait la lentille en une tache illisible tout en gardant l'aspect
+ * d'un contour raté.
  */
 export function RechercheFilled({ className }: Props) {
   return (
-    <svg
-      {...commun}
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3.3"
-      strokeLinecap="round"
-    >
-      <circle cx="10.72" cy="11.64" r="7.62" />
-      <path d="M16.09 16.79L19.58 19.68" />
+    <svg {...commun} className={className} fill="none">
+      <g transform={CALAGE_LOUPE}>
+        <circle cx="10.7" cy="10.7" r="7.4" fill="currentColor" />
+        <path
+          d="M16.2 15.7 L19.3 18.5"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+        />
+      </g>
     </svg>
   );
 }
@@ -231,7 +239,7 @@ export function FiltreOutline({ className }: Props) {
       className={className}
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.7"
+      strokeWidth="1.72"
       strokeLinecap="round"
     >
       <path d="M4.6 7.7H19.4" />

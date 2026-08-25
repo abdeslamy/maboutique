@@ -16,7 +16,8 @@
     "admin": "Espace admin",
     "rechercher": "Rechercher un produit",
     "langue": "Langue",
-    "navigationPrincipale": "Navigation principale"
+    "navigationPrincipale": "Navigation principale",
+    "filtres": "Filtres"
   },
   "timeline": {
     "commandeAnnulee": "Commande annulée",
