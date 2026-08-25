@@ -84,12 +84,46 @@ Trois formats, aux paliers du document de design d'origine.
 | Hauteur max | `visualViewport.height − 56 − 12` | `min(620, vh − 124)` | `min(620, vh − 124)` |
 | Origine | `88% -12px` (`12%` en RTL) | `50% -8px` | `50% -8px` |
 | Poignée | 22 px, barre 36 × 4 | — | — |
-| Fermeture | poignée, « Fermer », voile, Échap, glissement | croix, voile, Échap | croix, voile, Échap |
+| Fermeture | poignée, pastille ✕, voile, Échap, glissement | pastille ✕, voile, Échap | pastille ✕, voile, Échap |
 | Colonnes | 1 | 1 | 2 — `320px 1fr` |
 
 **Hauteur max mobile** : lue sur `visualViewport`, jamais sur une constante de
 clavier. Le clavier rétrécit le viewport visuel, donc la formule du document
 (844 − 56 − 258 − 12 = 518) en découle sans être écrite.
+
+### Bouton de fermeture
+
+Même dessin sur les trois formats — pastille circulaire de **36 px**, fond
+`#F4F3F0` (celui du champ voisin), croix de 13 px, trait 2,
+`rgba(17,17,17,.72)`. Survol `#E7E4DF`, pressé `#E0DCD5`.
+
+Sur mobile la **cible tactile fait 44 px**, la pastille reste à 36 : l'écart
+est absorbé par la boîte du bouton. Le mot « Fermer » qui occupait cette
+place a disparu — il était relu à chaque ouverture sans rien apprendre, et
+volait une trentaine de pixels au champ, qui passe de 245 à 275 px.
+
+### Recherches récentes — chips (mobile / tablette)
+
+Hauteur **36 px**, rayon 18, `ps-14 pe-4`, gap 6, texte 14 px. Les chips de
+catégories restent à 44 px : l'historique est un raccourci, les rayons sont
+la vraie porte d'entrée quand on n'a rien à retaper, et l'écart de hauteur
+dit cette hiérarchie.
+
+Les deux boutons internes conservent une hauteur de 44 px et débordent la
+pastille par des marges négatives de 4 px : le dessin rétrécit, la cible
+tactile non. Le débordement de 4 px de part et d'autre est exactement absorbé
+par la gouttière de 8 px entre deux rangées de chips.
+
+### Colonne gauche (desktop)
+
+Récentes et catégories y sont des **lignes de 40 px**, pas des chips — le
+défilement horizontal n'a pas de sens à la souris.
+
+Un **filet de séparation** les sépare : `1px solid rgba(0,0,0,.07)`, 18 px de
+marge au-dessus et de padding en dessous, même teinte que le séparateur de
+colonnes. Sans lui, les deux blocs — mêmes lignes, même graisse — se lisaient
+comme une seule liste dont le second titre passait pour un intitulé de plus.
+Il disparaît en premier usage, où le bloc « récentes » n'existe pas.
 
 ### Voile
 

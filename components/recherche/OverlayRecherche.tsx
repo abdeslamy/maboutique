@@ -643,24 +643,11 @@ export default function OverlayRecherche({
             )}
           </div>
 
-          {estMobile ? (
-            <button
-              type="button"
-              onClick={fermer}
-              className="grid h-[44px] flex-none place-items-center px-[6px] text-[15px] font-medium text-[#111111] transition-opacity duration-[120ms] active:opacity-45"
-            >
-              {t("fermer")}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={fermer}
-              aria-label={t("fermerRecherche")}
-              className="grid h-[36px] w-[36px] flex-none place-items-center rounded-[18px] transition hover:bg-[#F4F3F0]"
-            >
-              <Croix className="h-[14px] w-[14px]" trait={2} couleur="#111" />
-            </button>
-          )}
+          <BoutonFermeture
+            onClick={fermer}
+            label={t("fermerRecherche")}
+            mobile={estMobile}
+          />
         </div>
 
         {/* ── Barre de chargement ─────────────────────────────────────
@@ -827,6 +814,54 @@ export default function OverlayRecherche({
 
 type Traduire = ReturnType<typeof useTranslations>;
 
+/**
+ * Bouton de fermeture du panneau — pastille circulaire, même dessin en
+ * mobile et en desktop.
+ *
+ * Remplace le mot « Fermer » qui occupait la droite de la rangée sur mobile.
+ * Un mot à cet endroit est lu à chaque ouverture alors qu'il ne dit rien de
+ * neuf, et il volait une trentaine de pixels au champ de saisie.
+ *
+ * Le remplissage `#F4F3F0` est celui du champ voisin : les deux commandes de
+ * la rangée appartiennent visiblement à la même famille, séparées par les
+ * 8 px de gouttière.
+ *
+ * La cible tactile fait 44 px en mobile, la pastille visible 36. L'écart est
+ * absorbé par la boîte du bouton, pas par la pastille — réduire la cible
+ * pour la faire coïncider avec le dessin passerait sous le minimum tactile.
+ */
+function BoutonFermeture({
+  onClick,
+  label,
+  mobile,
+}: {
+  onClick: () => void;
+  label: string;
+  mobile: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      className="grid flex-none place-items-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111111]"
+      style={{ width: mobile ? 44 : 36, height: mobile ? 44 : 36 }}
+    >
+      <span
+        className="grid place-items-center rounded-full bg-[#F4F3F0] transition-colors duration-[120ms] hover:bg-[#E7E4DF] active:bg-[#E0DCD5]"
+        style={{ width: 36, height: 36 }}
+      >
+        <Croix
+          className="h-[13px] w-[13px]"
+          trait={2}
+          couleur="rgba(17,17,17,0.72)"
+        />
+      </span>
+    </button>
+  );
+}
+
 /** Titre de section — 12,5 px en mobile, 12 px en desktop. */
 function TitreSection({
   children,
@@ -945,12 +980,19 @@ function ChipRecente({
   t: Traduire;
 }) {
   return (
-    <div className="flex h-[44px] items-center gap-[8px] rounded-[22px] bg-[#F4F3F0] ps-[15px] pe-[6px]">
+    // 36 px de haut au lieu de 44 : l'historique est un raccourci, pas une
+    // navigation. À 44 il pesait autant que les chips de catégories, qui sont
+    // la vraie porte d'entrée quand on n'a rien à retaper.
+    //
+    // Les deux boutons internes gardent une hauteur de 44 px, débordant la
+    // pastille par des marges négatives : le dessin rétrécit, la cible
+    // tactile non.
+    <div className="flex h-[36px] items-center gap-[6px] overflow-visible rounded-[18px] bg-[#F4F3F0] ps-[14px] pe-[4px]">
       <button
         type="button"
         onClick={onUtiliser}
-        className="text-[#111111]"
-        style={{ fontSize: 14.5, fontWeight: 400, lineHeight: 1 }}
+        className="grid h-[44px] place-items-center text-[#111111]"
+        style={{ fontSize: 14, fontWeight: 400, lineHeight: 1, margin: "-4px 0" }}
       >
         {libelle}
       </button>
@@ -958,9 +1000,10 @@ function ChipRecente({
         type="button"
         onClick={onSupprimer}
         aria-label={`${t("supprimer")} : ${libelle}`}
-        className="grid h-[44px] w-[30px] place-items-center"
+        className="grid h-[44px] w-[28px] place-items-center"
+        style={{ margin: "-4px 0" }}
       >
-        <Croix className="h-[12px] w-[12px]" trait={2.4} couleur="rgba(0,0,0,0.40)" />
+        <Croix className="h-[11px] w-[11px]" trait={2.4} couleur="rgba(0,0,0,0.40)" />
       </button>
     </div>
   );
@@ -1451,17 +1494,26 @@ function ColonneParDefaut({
         </>
       )}
 
-      <TitreSection desktop className={premierUsage ? "mb-[8px]" : "mb-[8px] mt-[20px]"}>
-        {t("categories")}
-      </TitreSection>
-      <div className="flex flex-col">
-        {categories.map((c) => (
-          <LigneListe
-            key={c.id}
-            libelle={libelleCategorie(c)}
-            onClick={() => onUtiliser(libelleCategorie(c))}
-          />
-        ))}
+      {/* Filet de séparation : les deux blocs sont faits des mêmes lignes de
+          40 px, et un simple écart vertical ne suffisait pas à les distinguer
+          — ils se lisaient comme une seule liste dont le second titre passait
+          pour un intitulé de plus. Le filet reprend la teinte du séparateur
+          de colonnes, à 24 px de la gouttière de chaque côté. */}
+      <div
+        className={premierUsage ? "" : "mt-[18px] border-t border-[rgba(0,0,0,0.07)] pt-[18px]"}
+      >
+        <TitreSection desktop className="mb-[8px]">
+          {t("categories")}
+        </TitreSection>
+        <div className="flex flex-col">
+          {categories.map((c) => (
+            <LigneListe
+              key={c.id}
+              libelle={libelleCategorie(c)}
+              onClick={() => onUtiliser(libelleCategorie(c))}
+            />
+          ))}
+        </div>
       </div>
     </>
   );
