@@ -93,27 +93,22 @@ clavier. Le clavier rétrécit le viewport visuel, donc la formule du document
 
 ### Bouton de fermeture
 
-Pastille circulaire, calée sur la hauteur du champ voisin dont elle reprend
-le remplissage. Les deux commandes de la rangée se lisent comme une paire.
+Pastille circulaire de **36 px**, identique sur les trois formats, reprenant
+le remplissage `#F4F3F0` du champ voisin : les deux commandes de la rangée se
+lisent comme une paire. Survol `#E7E4DF`, pressé `#E0DCD5`.
 
-| | Mobile | Desktop / tablette |
-|---|---|---|
-| Champ | 48 px | 56 px |
-| **Pastille** | **44 px** | **48 px** |
-| Fond | `#F4F3F0` | `#F4F3F0` |
-| Survol / pressé | — | `#E7E4DF` / `#E0DCD5` |
+Le X mesure **14 px**, soit 39 % du disque — trait de **2 px** à l'écran,
+extrémités arrondies, couleur `rgba(17,17,17,.62)`.
 
-Le X mesure **18 px** — un peu plus du tiers du disque, la proportion des
-croix d'iOS — trait de **2 px** à l'écran, extrémités arrondies, couleur
-`rgba(17,17,17,.62)`.
+⚠️ Le tracé de `Croix` n'occupe que **la moitié** de son viewBox de 24. Un SVG
+de 14 px donnerait donc un X de 7 px. Il faut le rendre à **28 px**, avec une
+épaisseur de **1,7** dans le repère du viewBox pour un trait de 2 px rendu
+(`2 × 24 / 28`). Ne pas confondre la taille du SVG et celle du glyphe — c'est
+l'erreur qui a fait paraître cette croix minuscule dans une première version,
+puis énorme dans la correction suivante.
 
-⚠️ Le tracé de `Croix` n'occupe que **la moitié** de son viewBox de 24. Pour
-obtenir un X de 18 px il faut donc un SVG de **36 px**, et une épaisseur de
-**1,35** dans le repère du viewBox pour un trait de 2 px rendu
-(`2 × 24 / 36`). Ne pas confondre la taille du SVG et celle du glyphe.
-
-La pastille de 44 px sur mobile est elle-même la cible tactile — pas besoin
-d'une boîte plus grande autour.
+Sur mobile, la **boîte du bouton monte à 44 px** pour la cible tactile, sans
+grossir la pastille.
 
 Le mot « Fermer » qui occupait cette place a disparu — il était relu à chaque
 ouverture sans rien apprendre, et volait une trentaine de pixels au champ,

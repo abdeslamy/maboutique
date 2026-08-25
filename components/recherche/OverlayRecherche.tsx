@@ -811,18 +811,21 @@ type Traduire = ReturnType<typeof useTranslations>;
  * Un mot à cet endroit est lu à chaque ouverture alors qu'il ne dit rien de
  * neuf, et il volait une trentaine de pixels au champ de saisie.
  *
- * La pastille est calée sur la hauteur du champ voisin — 48 px face à un
- * champ de 56, 44 face à un champ de 48 — et en reprend le remplissage
- * `#F4F3F0` : les deux commandes de la rangée se lisent comme une paire, pas
- * comme un bouton perdu à côté d'une barre.
+ * La pastille fait 36 px, le X 14. Elle reprend le remplissage `#F4F3F0` du
+ * champ voisin : les deux commandes de la rangée se lisent comme une paire.
  *
- * Le X occupe 18 px, soit un peu plus du tiers du disque, avec des extrémités
- * arrondies : c'est la proportion des croix d'iOS. Comme le tracé ne remplit
- * que la moitié de son viewBox, il faut un SVG de 36 px pour obtenir ces
- * 18 px — et une épaisseur de 1,35 dans le repère du viewBox pour un trait de
- * 2 px à l'écran.
+ * Le X garde des extrémités arrondies et un trait de 2 px — la facture des
+ * croix d'iOS — à 39 % du disque.
+ *
+ * ⚠️ Le tracé de `Croix` n'occupe que LA MOITIÉ de son viewBox de 24. Un SVG
+ * de 14 px donnerait donc un X de 7 px. Il faut le rendre à 28 px, et régler
+ * l'épaisseur à 1,7 dans le repère du viewBox pour un trait de 2 px à
+ * l'écran (2 × 24 / 28). Ne pas confondre taille du SVG et taille du glyphe.
+ *
+ * Sur mobile, la boîte du bouton monte à 44 px pour la cible tactile, sans
+ * grossir la pastille.
  */
-const TAILLE_SVG_CROIX = 36;
+const TAILLE_SVG_CROIX = 28;
 
 function BoutonFermeture({
   onClick,
@@ -833,21 +836,25 @@ function BoutonFermeture({
   label: string;
   mobile: boolean;
 }) {
-  const diametre = mobile ? 44 : 48;
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="grid flex-none place-items-center rounded-full bg-[#F4F3F0] transition-colors duration-[120ms] hover:bg-[#E7E4DF] active:bg-[#E0DCD5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111111]"
-      style={{ width: diametre, height: diametre }}
+      className="grid flex-none place-items-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111111]"
+      style={{ width: mobile ? 44 : 36, height: mobile ? 44 : 36 }}
     >
-      <Croix
-        style={{ width: TAILLE_SVG_CROIX, height: TAILLE_SVG_CROIX }}
-        trait={1.35}
-        couleur="rgba(17,17,17,0.62)"
-      />
+      <span
+        className="grid place-items-center rounded-full bg-[#F4F3F0] transition-colors duration-[120ms] hover:bg-[#E7E4DF] active:bg-[#E0DCD5]"
+        style={{ width: 36, height: 36 }}
+      >
+        <Croix
+          style={{ width: TAILLE_SVG_CROIX, height: TAILLE_SVG_CROIX }}
+          trait={1.7}
+          couleur="rgba(17,17,17,0.62)"
+        />
+      </span>
     </button>
   );
 }
