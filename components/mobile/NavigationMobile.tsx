@@ -150,6 +150,8 @@ function BoutonRecherche() {
       type="button"
       onClick={ouvrir}
       aria-label={t("rechercher")}
+      aria-haspopup="dialog"
+      aria-expanded={ouvert}
       // Le bouton s'escamote pendant que le panneau grandit depuis lui :
       // 200 ms, scale(.85) + opacité 0. `pointer-events:none` évite qu'il
       // reste cliquable une fois invisible.

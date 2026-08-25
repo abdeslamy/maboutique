@@ -49,6 +49,8 @@ export function RechercheProvider({
   const [ouvert, setOuvert] = useState(false);
   const refRacine = useRef<HTMLDivElement | null>(null);
   const refChamp = useRef<HTMLInputElement | null>(null);
+  /** Élément qui avait le focus à l'ouverture — on le lui rend à la fermeture. */
+  const refRetour = useRef<HTMLElement | null>(null);
 
   const ouvrir = useCallback(() => {
     // Sur iOS, `focus()` n'ouvre le clavier que s'il part du MÊME geste que
@@ -59,6 +61,13 @@ export function RechercheProvider({
     //
     // `inert` est retiré à la main avant le focus : le re-rendu React qui le
     // retirerait n'a pas encore eu lieu, et un élément inerte refuse le focus.
+    // Mémorisé AVANT le focus : quel que soit le point d'entrée — la loupe
+    // de la navbar, le cercle mobile, la barre du hero, ⌘K — le focus
+    // revient là où il était. Sans ça, refermer l'overlay renvoie le focus
+    // au <body> et la navigation au clavier repart du haut de la page.
+    const actif = document.activeElement;
+    refRetour.current = actif instanceof HTMLElement ? actif : null;
+
     refRacine.current?.removeAttribute("inert");
     refChamp.current?.focus();
     setOuvert(true);
@@ -67,6 +76,11 @@ export function RechercheProvider({
   const fermer = useCallback(() => {
     refChamp.current?.blur();
     setOuvert(false);
+    // `isConnected` : si la fermeture vient d'un clic sur un résultat, le
+    // déclencheur a pu quitter le DOM avec la page précédente.
+    const retour = refRetour.current;
+    refRetour.current = null;
+    if (retour?.isConnected) retour.focus({ preventScroll: true });
   }, []);
 
   // Raccourcis clavier : ⌘K / Ctrl+K de partout, « / » sauf quand le focus

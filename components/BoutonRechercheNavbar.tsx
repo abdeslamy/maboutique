@@ -20,7 +20,7 @@ export default function BoutonRechercheNavbar({
   className?: string;
 }) {
   const t = useTranslations("navigation");
-  const { ouvrir } = useRecherche();
+  const { ouvert, ouvrir } = useRecherche();
 
   return (
     <button
@@ -29,6 +29,8 @@ export default function BoutonRechercheNavbar({
       className={className}
       aria-label={t("rechercher")}
       title={t("rechercher")}
+      aria-haspopup="dialog"
+      aria-expanded={ouvert}
     >
       <Search className="h-[18px] w-[18px]" strokeWidth={2.25} aria-hidden="true" />
     </button>
