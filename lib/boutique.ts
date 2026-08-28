@@ -1,4 +1,6 @@
 import { cache } from "react";
+import { prisma } from "@/lib/prisma";
+import { emailPlausible } from "./email-valide";
 
 /**
  * Quelle boutique sert la requête en cours ?
@@ -41,3 +43,51 @@ export const BOUTIQUE_PAR_DEFAUT = "boutique-1";
 export const boutiqueActuelle = cache(async function boutiqueActuelle(): Promise<string> {
   return BOUTIQUE_PAR_DEFAUT;
 });
+
+// ────────────────────────────────────────────────────────────────────
+// Réglages de la boutique
+// ────────────────────────────────────────────────────────────────────
+
+export type InfosBoutique = {
+  id: string;
+  nom: string;
+  /** Adresse où le marchand reçoit ses alertes. `null` = pas encore réglée. */
+  emailContact: string | null;
+};
+
+/** Fiche de la boutique qui sert la requête en cours. */
+export async function getInfosBoutique(): Promise<InfosBoutique | null> {
+  const id = await boutiqueActuelle();
+  const b = await prisma.boutique.findUnique({
+    where: { id },
+    select: { id: true, nom: true, emailContact: true },
+  });
+  return b;
+}
+
+// La validation d'adresse vit dans un fichier PUR (`lib/email-valide.ts`) :
+// le formulaire d'administration s'en sert côté navigateur, et il ne doit
+// pas traverser CE fichier-ci, qui importe Prisma.
+export { emailPlausible };
+export async function enregistrerEmailContact(
+  valeur: string
+): Promise<{ ok: true } | { ok: false; erreur: string }> {
+  const email = valeur.trim().toLowerCase();
+
+  // Chaîne vide = le marchand retire son adresse. C'est un choix légitime,
+  // pas une erreur de saisie : les alertes cessent, les commandes non.
+  if (email !== "" && !emailPlausible(email)) {
+    return { ok: false, erreur: "email_invalide" };
+  }
+
+  try {
+    await prisma.boutique.update({
+      where: { id: await boutiqueActuelle() },
+      data: { emailContact: email === "" ? null : email },
+    });
+    return { ok: true };
+  } catch (e) {
+    console.error("[boutique] echec enregistrerEmailContact :", e);
+    return { ok: false, erreur: "erreur_serveur" };
+  }
+}

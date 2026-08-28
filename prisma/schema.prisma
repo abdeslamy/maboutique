@@ -43,6 +43,18 @@ model Boutique {
   visibleMarketplace Boolean  @default(true)
   createdAt          DateTime @default(now())
 
+  /// Adresse où le marchand reçoit ses alertes de commande.
+  ///
+  /// Sur la table Boutique et non dans une constante : c'est CHEZ LE
+  /// MARCHAND que « nouvelle commande à traiter » doit tomber, pas chez la
+  /// plateforme. Sans ce champ, toutes les alertes de tous les marchands
+  /// arriveraient à la même adresse.
+  ///
+  /// Nullable : une boutique qui n'a pas encore renseigné son adresse ne
+  /// doit pas bloquer la prise de commande. L'alerte marchand est alors
+  /// simplement sautée — jamais au prix de la commande elle-même.
+  emailContact       String?
+
   produits    Produit[]
   commandes   Commande[]
   categories  Categorie[]

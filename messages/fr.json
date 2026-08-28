@@ -341,6 +341,19 @@
       "voirProduits": "Voir les produits",
       "compris": "Compris",
       "nbProduits": "{n} produit(s)"
+    },
+    "notifications": {
+      "titre": "Alertes de commande",
+      "placeholder": "commandes@ma-boutique.dz",
+      "aide": "Chaque nouvelle commande sera signalée à cette adresse. Laissez vide pour ne rien recevoir.",
+      "enregistrer": "Enregistrer",
+      "enregistrement": "Enregistrement…",
+      "enregistre": "C'est enregistré.",
+      "erreurs": {
+        "email_invalide": "Cette adresse ne semble pas valide.",
+        "champ_manquant": "Adresse manquante.",
+        "erreur_serveur": "Une erreur est survenue. Réessayez."
+      }
     }
   },
   "langue": {

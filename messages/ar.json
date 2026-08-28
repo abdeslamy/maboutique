@@ -341,6 +341,19 @@
       "voirProduits": "عرض المنتجات",
       "compris": "فهمت",
       "nbProduits": "{n} منتج"
+    },
+    "notifications": {
+      "titre": "تنبيهات الطلبات",
+      "placeholder": "commandes@ma-boutique.dz",
+      "aide": "سيتم إرسال تنبيه إلى هذا العنوان عند كل طلب جديد. اتركه فارغًا لعدم استقبال شيء.",
+      "enregistrer": "حفظ",
+      "enregistrement": "جارٍ الحفظ…",
+      "enregistre": "تم الحفظ.",
+      "erreurs": {
+        "email_invalide": "لا يبدو هذا العنوان صحيحًا.",
+        "champ_manquant": "العنوان مفقود.",
+        "erreur_serveur": "حدث خطأ. أعد المحاولة."
+      }
     }
   },
   "langue": {

@@ -6,6 +6,8 @@ import {
 import ConfigurationLivraison from "@/components/admin/ConfigurationLivraison";
 import SectionCategories from "@/components/admin/SectionCategories";
 import { getCategoriesAvecCompteur } from "@/lib/categories";
+import { getInfosBoutique } from "@/lib/boutique";
+import SectionNotifications from "@/components/admin/SectionNotifications";
 import { getTranslations } from "next-intl/server";
 
 /**
@@ -18,10 +20,11 @@ import { getTranslations } from "next-intl/server";
  */
 export default async function AdminConfigurationPage() {
   const t = await getTranslations("admin.configuration");
-  const [tarifs, parametres, categories] = await Promise.all([
+  const [tarifs, parametres, categories, boutique] = await Promise.all([
     getTarifsLivraison(),
     getParametresLivraison(),
     getCategoriesAvecCompteur(),
+    getInfosBoutique(),
   ]);
 
   return (
@@ -39,6 +42,7 @@ export default async function AdminConfigurationPage() {
           categories.map((c) => [c.id, c.nbProduits])
         )}
       />
+      <SectionNotifications emailInitial={boutique?.emailContact ?? null} />
       <ConfigurationLivraison
         groupesInitiaux={grouperTarifs(tarifs)}
         parametresInitiaux={parametres}
