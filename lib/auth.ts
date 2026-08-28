@@ -11,6 +11,7 @@
 
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { boutiqueActuelle } from "@/lib/boutique";
 import type { Role, Utilisateur } from "./types";
 import type { UtilisateurModel } from "@/lib/generated/prisma/models";
 
@@ -35,8 +36,12 @@ function dbToUtilisateur(u: UtilisateurModel): Utilisateur {
 export async function trouverUtilisateurParEmail(
   email: string
 ): Promise<Utilisateur | null> {
+  const boutiqueId = await boutiqueActuelle();
+  // L'email n'est unique QUE dans sa boutique : la clé est composite.
   const u = await prisma.utilisateur.findUnique({
-    where: { email: email.trim().toLowerCase() },
+    where: {
+      boutiqueId_email: { boutiqueId, email: email.trim().toLowerCase() },
+    },
   });
   return u ? dbToUtilisateur(u) : null;
 }
@@ -44,7 +49,10 @@ export async function trouverUtilisateurParEmail(
 export async function getUtilisateurParId(
   id: string
 ): Promise<Utilisateur | null> {
-  const u = await prisma.utilisateur.findUnique({ where: { id } });
+  const boutiqueId = await boutiqueActuelle();
+  // Filtré par boutique aussi : un compte administrateur de la boutique A ne
+  // doit pas se résoudre quand la requête sert la boutique B.
+  const u = await prisma.utilisateur.findFirst({ where: { id, boutiqueId } });
   return u ? dbToUtilisateur(u) : null;
 }
 
@@ -68,11 +76,13 @@ export async function creerUtilisateur(input: {
   nom: string;
   motDePasse: string;
 }): Promise<Utilisateur> {
+  const boutiqueId = await boutiqueActuelle();
   const created = await prisma.utilisateur.create({
     data: {
       email: input.email.trim().toLowerCase(),
       nom: input.nom.trim(),
       motDePasse: await hashMotDePasse(input.motDePasse),
+      boutiqueId,
       // role prend la valeur par défaut ("user") — voir schema.prisma
     },
   });
@@ -89,9 +99,10 @@ export async function mettreAJourUtilisateur(
   id: string,
   modifs: Partial<Pick<Utilisateur, "nom" | "motDePasse" | "image">>
 ): Promise<Utilisateur | null> {
+  const boutiqueId = await boutiqueActuelle();
   try {
     const updated = await prisma.utilisateur.update({
-      where: { id },
+      where: { id, boutiqueId },
       // Prisma refuse les propriétés `undefined`, mais accepte `null` pour
       // effacer une valeur → on normalise image === undefined en pas-de-modif.
       data: {

@@ -11,6 +11,7 @@
 // ============================================================================
 
 import { prisma } from "@/lib/prisma";
+import { boutiqueActuelle } from "@/lib/boutique";
 import { WILAYAS } from "@/lib/wilayas";
 import {
   aplatirGroupes,
@@ -51,7 +52,9 @@ export type {
  * Une wilaya absente du résultat n'est pas livrée.
  */
 export async function getTarifsLivraison(): Promise<TarifWilaya[]> {
+  const boutiqueId = await boutiqueActuelle();
   const lignes = await prisma.tarifLivraison.findMany({
+    where: { boutiqueId },
     orderBy: { wilaya: "asc" },
   });
   // On filtre sur WILAYAS pour ignorer un éventuel code obsolète en base.
@@ -67,8 +70,9 @@ export async function getTarifsLivraison(): Promise<TarifWilaya[]> {
 
 /** Paramètres globaux de livraison. */
 export async function getParametresLivraison(): Promise<ParametresLivraison> {
+  const boutiqueId = await boutiqueActuelle();
   const p = await prisma.parametresBoutique.findUnique({
-    where: { id: "boutique" },
+    where: { boutiqueId },
   });
   return { seuilLivraisonGratuite: p?.seuilLivraisonGratuite ?? null };
 }
@@ -124,6 +128,7 @@ export async function enregistrerGroupes(
   }
 
   const tarifs = aplatirGroupes(groupes);
+  const boutiqueId = await boutiqueActuelle();
 
   try {
     // ⚠️ On efface tout puis on réinsère en bloc, au lieu d'un upsert par
@@ -138,8 +143,12 @@ export async function enregistrerGroupes(
     // part, puisque la suppression et l'insertion sont dans la même transaction.
     await prisma.$transaction(
       [
-        prisma.tarifLivraison.deleteMany({}),
-        prisma.tarifLivraison.createMany({ data: tarifs }),
+        // ⚠️ Filtre indispensable : sans lui, un marchand qui enregistre sa
+        // grille effacerait celle de tous les autres marchands.
+        prisma.tarifLivraison.deleteMany({ where: { boutiqueId } }),
+        prisma.tarifLivraison.createMany({
+          data: tarifs.map((t) => ({ ...t, boutiqueId })),
+        }),
       ],
       // Marge confortable : la valeur par défaut (5 s) est juste quand la
       // latence vers Neon est élevée ou qu'une autre écriture tient un verrou.
@@ -167,10 +176,11 @@ export async function enregistrerParametres(
     return { ok: false, erreur: "seuil_invalide" };
   }
   try {
+    const boutiqueId = await boutiqueActuelle();
     await prisma.parametresBoutique.upsert({
-      where: { id: "boutique" },
+      where: { boutiqueId },
       update: { seuilLivraisonGratuite: seuil },
-      create: { id: "boutique", seuilLivraisonGratuite: seuil },
+      create: { boutiqueId, seuilLivraisonGratuite: seuil },
     });
     return { ok: true };
   } catch (e) {

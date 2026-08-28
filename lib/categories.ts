@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { prisma } from "@/lib/prisma";
+import { boutiqueActuelle } from "@/lib/boutique";
 import { CATALOGUE_CATEGORIES } from "./categories-catalogue";
 
 export type { CategorieCatalogue } from "./categories-catalogue";
@@ -31,9 +32,14 @@ export async function getCategoriesAvecCompteur(): Promise<
   CategorieAvecCompteur[]
 > {
   // Deux requêtes indépendantes → lancées ensemble.
+  const boutiqueId = await boutiqueActuelle();
   const [categories, comptes] = await Promise.all([
     getCategories(),
-    prisma.produit.groupBy({ by: ["categorie"], _count: { _all: true } }),
+    prisma.produit.groupBy({
+      by: ["categorie"],
+      where: { boutiqueId },
+      _count: { _all: true },
+    }),
   ]);
   const parCategorie = new Map(
     comptes.map((c) => [c.categorie, c._count._all])
@@ -46,7 +52,11 @@ export async function getCategoriesAvecCompteur(): Promise<
 
 /** Catégories de la boutique, dans l'ordre d'affichage. */
 export async function getCategories(): Promise<CategorieBoutique[]> {
-  return prisma.categorie.findMany({ orderBy: [{ ordre: "asc" }, { nomFr: "asc" }] });
+  const boutiqueId = await boutiqueActuelle();
+  return prisma.categorie.findMany({
+    where: { boutiqueId },
+    orderBy: [{ ordre: "asc" }, { nomFr: "asc" }],
+  });
 }
 
 /**
@@ -70,7 +80,9 @@ export async function enregistrerCategories(
 
   // Une catégorie encore portée par des produits ne peut pas disparaître :
   // ces produits deviendraient introuvables dans les filtres.
+  const boutiqueId = await boutiqueActuelle();
   const utilisees = await prisma.produit.findMany({
+    where: { boutiqueId },
     select: { categorie: true },
     distinct: ["categorie"],
   });
@@ -83,14 +95,16 @@ export async function enregistrerCategories(
 
   const lignes = uniques.map((id, i) => {
     const c = connus.get(id)!;
-    return { id: c.id, nomFr: c.nomFr, nomAr: c.nomAr, ordre: i };
+    return { id: c.id, nomFr: c.nomFr, nomAr: c.nomAr, ordre: i, boutiqueId };
   });
 
   try {
     // Remplacement en bloc : 2 requêtes quel que soit le nombre de rayons.
     await prisma.$transaction(
       [
-        prisma.categorie.deleteMany({}),
+        // ⚠️ Sans ce filtre, l'enregistrement des rayons d'un marchand
+        // effacerait ceux de TOUS les autres.
+        prisma.categorie.deleteMany({ where: { boutiqueId } }),
         prisma.categorie.createMany({ data: lignes }),
       ],
       { timeout: 20_000 }

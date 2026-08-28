@@ -10,6 +10,7 @@
 // ============================================================================
 
 import "dotenv/config";
+import { BOUTIQUE_PAR_DEFAUT } from "../lib/boutique";
 import { PrismaClient } from "../lib/generated/prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PRODUITS_INITIAUX as PRODUITS } from "./seed-data";
@@ -53,6 +54,8 @@ async function main() {
         images: p.images,
         emoji: p.emoji,
         stock: p.stock,
+        // Hors requête HTTP, aucun hôte à résoudre : la boutique est nommée.
+        boutiqueId: BOUTIQUE_PAR_DEFAUT,
       },
     });
     console.log(`  ✓ ${p.nom.fr}`);

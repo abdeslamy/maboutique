@@ -11,6 +11,7 @@
 // ============================================================================
 
 import { prisma } from "@/lib/prisma";
+import { boutiqueActuelle } from "@/lib/boutique";
 import type { Categorie, Produit } from "./types";
 import type { ProduitModel } from "@/lib/generated/prisma/models";
 
@@ -37,7 +38,9 @@ function dbToProduit(p: ProduitModel): Produit {
 
 /** Récupère tous les produits, triés par date de création (les plus récents d'abord). */
 export async function getAllProduits(): Promise<Produit[]> {
+  const boutiqueId = await boutiqueActuelle();
   const rows = await prisma.produit.findMany({
+    where: { boutiqueId },
     orderBy: { createdAt: "desc" },
   });
   return rows.map(dbToProduit);
@@ -45,14 +48,20 @@ export async function getAllProduits(): Promise<Produit[]> {
 
 /** Récupère un produit par son id. `null` si introuvable. */
 export async function getProduitParId(id: string): Promise<Produit | null> {
-  const row = await prisma.produit.findUnique({ where: { id } });
+  const boutiqueId = await boutiqueActuelle();
+  // findFirst et non findUnique : l'id seul reste la clé primaire (voir la
+  // dette signalée dans le schéma), il faut donc filtrer la boutique nous-mêmes.
+  const row = await prisma.produit.findFirst({ where: { id, boutiqueId } });
   return row ? dbToProduit(row) : null;
 }
 
 /** Récupère plusieurs produits par leurs ids, dans l'ordre demandé. */
 export async function getProduitsParIds(ids: string[]): Promise<Produit[]> {
   if (ids.length === 0) return [];
-  const rows = await prisma.produit.findMany({ where: { id: { in: ids } } });
+  const boutiqueId = await boutiqueActuelle();
+  const rows = await prisma.produit.findMany({
+    where: { id: { in: ids }, boutiqueId },
+  });
   const map = new Map(rows.map((r) => [r.id, dbToProduit(r)]));
   // On retourne dans l'ordre des ids reçus, en filtrant ceux introuvables.
   return ids.map((id) => map.get(id)).filter((p): p is Produit => p !== undefined);
@@ -98,8 +107,12 @@ export async function creerProduit(
   input: EntreeProduit
 ): Promise<ResultatEcriture> {
   // On vérifie que l'id (slug) n'existe pas déjà.
-  const existant = await prisma.produit.findUnique({
-    where: { id: input.id },
+  const boutiqueId = await boutiqueActuelle();
+  // Unicité vérifiée DANS la boutique. Deux marchands peuvent vendre un
+  // « casque-bluetooth » sans se gêner — enfin, ils le pourront une fois la
+  // clé primaire du produit corrigée ; aujourd'hui la collision reste globale.
+  const existant = await prisma.produit.findFirst({
+    where: { id: input.id, boutiqueId },
     select: { id: true },
   });
   if (existant) return { ok: false, erreur: "id_existe" };
@@ -118,6 +131,7 @@ export async function creerProduit(
         stock: input.stock,
         delaiLivraison: input.delaiLivraison,
         livraisonGratuite: input.livraisonGratuite,
+        boutiqueId,
         // Sans valeur fournie, le schéma applique son défaut ("📦").
         ...(input.emoji ? { emoji: input.emoji } : {}),
         videoUrl: input.videoUrl || null,
@@ -137,9 +151,12 @@ export async function mettreAJourProduit(
   id: string,
   input: Omit<EntreeProduit, "id">
 ): Promise<ResultatEcriture> {
+  const boutiqueId = await boutiqueActuelle();
   try {
     const row = await prisma.produit.update({
-      where: { id },
+      // boutiqueId dans le where : un admin ne peut pas modifier le produit
+      // d'un autre marchand, même en devinant son id.
+      where: { id, boutiqueId },
       data: {
         nomFr: input.nomFr.trim(),
         nomAr: input.nomAr.trim(),
@@ -164,8 +181,9 @@ export async function mettreAJourProduit(
 
 /** Supprime un produit. Les LigneCommande référentes voient produitId → NULL (voir schema). */
 export async function supprimerProduit(id: string): Promise<boolean> {
+  const boutiqueId = await boutiqueActuelle();
   try {
-    await prisma.produit.delete({ where: { id } });
+    await prisma.produit.delete({ where: { id, boutiqueId } });
     return true;
   } catch {
     return false;

@@ -12,6 +12,7 @@
 // ============================================================================
 
 import { prisma } from "@/lib/prisma";
+import { boutiqueActuelle } from "@/lib/boutique";
 import { getProduitParId } from "./products";
 import {
   getTarifsLivraison,
@@ -77,8 +78,9 @@ function dbToCommande(c: CommandeAvecLignes): Commande {
 export async function getCommandeParId(
   id: string
 ): Promise<Commande | null> {
-  const c = await prisma.commande.findUnique({
-    where: { id },
+  const boutiqueId = await boutiqueActuelle();
+  const c = await prisma.commande.findFirst({
+    where: { id, boutiqueId },
     include: { lignes: true },
   });
   return c ? dbToCommande(c) : null;
@@ -87,8 +89,9 @@ export async function getCommandeParId(
 export async function getCommandesParUtilisateurId(
   utilisateurId: string
 ): Promise<Commande[]> {
+  const boutiqueId = await boutiqueActuelle();
   const rows = await prisma.commande.findMany({
-    where: { utilisateurId },
+    where: { utilisateurId, boutiqueId },
     include: { lignes: true },
     orderBy: { createdAt: "desc" }, // plus récente d'abord
   });
@@ -97,7 +100,9 @@ export async function getCommandesParUtilisateurId(
 
 /** Récupère TOUTES les commandes (usage admin). */
 export async function getAllCommandes(): Promise<Commande[]> {
+  const boutiqueId = await boutiqueActuelle();
   const rows = await prisma.commande.findMany({
+    where: { boutiqueId },
     include: { lignes: true },
     orderBy: { createdAt: "desc" },
   });
@@ -150,8 +155,10 @@ export async function getStatistiquesAdmin(
   // top 5. Ça évite une 4e requête qui devrait attendre le résultat du groupBy
   // (elle en dépend). Sur un catalogue de cette taille, charger les noms coûte
   // beaucoup moins cher qu'un aller-retour réseau supplémentaire.
+  const boutiqueId = await boutiqueActuelle();
   const [commandes, topAgg, tousLesProduits] = await Promise.all([
     prisma.commande.findMany({
+      where: { boutiqueId },
       select: {
         id: true,
         createdAt: true,
@@ -164,11 +171,13 @@ export async function getStatistiquesAdmin(
     prisma.ligneCommande.groupBy({
       by: ["produitId"],
       _sum: { quantite: true, sousTotal: true },
-      where: { produitId: { not: null } },
+      // Les lignes n'ont pas d'étiquette : on remonte par leur commande.
+      where: { produitId: { not: null }, commande: { boutiqueId } },
       orderBy: { _sum: { quantite: "desc" } },
       take: 5,
     }),
     prisma.produit.findMany({
+      where: { boutiqueId },
       select: { id: true, nomFr: true, nomAr: true },
     }),
   ]);
@@ -325,6 +334,7 @@ export async function mettreAJourCommandeAdmin(
 ): Promise<
   { ok: true; commande: Commande } | { ok: false; erreur: string }
 > {
+  const boutiqueId = await boutiqueActuelle();
   // Validation des valeurs connues
   if (modifs.statut && !STATUTS_VALIDES.includes(modifs.statut)) {
     return { ok: false, erreur: "statut_invalide" };
@@ -350,8 +360,8 @@ export async function mettreAJourCommandeAdmin(
   let lignes: { produitId: string | null; quantite: number }[] = [];
 
   if (modifs.statut) {
-    const existante = await prisma.commande.findUnique({
-      where: { id },
+    const existante = await prisma.commande.findFirst({
+      where: { id, boutiqueId },
       select: {
         statut: true,
         confirmedAt: true,
@@ -397,8 +407,8 @@ export async function mettreAJourCommandeAdmin(
     const row = await prisma.$transaction(async (tx) => {
       if (mouvementStock === "rendre") {
         for (const l of lignesAvecProduit) {
-          await tx.produit.update({
-            where: { id: l.produitId },
+          await tx.produit.updateMany({
+            where: { id: l.produitId, boutiqueId },
             data: { stock: { increment: l.quantite } },
           });
         }
@@ -408,7 +418,7 @@ export async function mettreAJourCommandeAdmin(
         // plutôt que de le laisser passer sous zéro.
         for (const l of lignesAvecProduit) {
           const { count } = await tx.produit.updateMany({
-            where: { id: l.produitId, stock: { gte: l.quantite } },
+            where: { id: l.produitId, boutiqueId, stock: { gte: l.quantite } },
             data: { stock: { decrement: l.quantite } },
           });
           if (count === 0) throw new ErreurStockAdmin();
@@ -416,7 +426,7 @@ export async function mettreAJourCommandeAdmin(
       }
 
       return tx.commande.update({
-        where: { id },
+        where: { id, boutiqueId },
         data: {
           statut: modifs.statut,
           etatAppel: modifs.etatAppel,
@@ -518,8 +528,9 @@ export async function creerCommande(input: {
 
   // Un seul aller-retour pour tous les produits du panier (au lieu d'une
   // requête par article, qui coûtait ~120 ms chacune).
+  const boutiqueId = await boutiqueActuelle();
   const produits = await prisma.produit.findMany({
-    where: { id: { in: input.articles.map((a) => a.produitId) } },
+    where: { id: { in: input.articles.map((a) => a.produitId) }, boutiqueId },
   });
   const parId = new Map(produits.map((p) => [p.id, p]));
 
@@ -591,7 +602,7 @@ export async function creerCommande(input: {
     const commande = await prisma.$transaction(async (tx) => {
       for (const ligne of lignesCreation) {
         const { count } = await tx.produit.updateMany({
-          where: { id: ligne.produitId, stock: { gte: ligne.quantite } },
+          where: { id: ligne.produitId, boutiqueId, stock: { gte: ligne.quantite } },
           data: { stock: { decrement: ligne.quantite } },
         });
         if (count === 0) {
@@ -601,6 +612,7 @@ export async function creerCommande(input: {
 
       return tx.commande.create({
         data: {
+          boutiqueId,
           nomClient: nom.trim(),
           telephone: telephone.trim(),
           adresse: adresse.trim(),

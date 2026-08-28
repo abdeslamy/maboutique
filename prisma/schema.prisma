@@ -18,25 +18,69 @@ datasource db {
 }
 
 // ══════════════════════════════════════════════════════════════════════
+// Boutique — le TENANT
+// ══════════════════════════════════════════════════════════════════════
+// Chaque marchand possède une boutique. Toutes les autres tables métier
+// portent un `boutiqueId` : c'est l'étiquette qui dit « ceci appartient à
+// tel marchand ».
+//
+// Règle absolue : AUCUNE requête ne doit franchir cette frontière, sauf
+// depuis les fonctions nommées de la marketplace, en lecture seule.
+//
+//  - slug : identifiant lisible, sert au format sous-chemin
+//    (maplateforme.dz/coursa) et au sous-domaine (coursa.maplateforme.dz).
+//  - visibleMarketplace : le marchand peut refuser d'apparaître sur la
+//    vitrine agrégée. Le champ existe AVANT la marketplace : l'ajouter
+//    aujourd'hui coûte une ligne, l'ajouter après coup coûte une migration
+//    sur des données de production.
+//  - statut : "active" | "suspendue". Une boutique suspendue (impayé,
+//    abus) cesse de servir ses pages sans que ses données soient touchées.
+model Boutique {
+  id                 String   @id
+  nom                String
+  slug               String   @unique
+  statut             String   @default("active")
+  visibleMarketplace Boolean  @default(true)
+  createdAt          DateTime @default(now())
+
+  produits    Produit[]
+  commandes   Commande[]
+  categories  Categorie[]
+  tarifs      TarifLivraison[]
+  membres     Utilisateur[]
+  parametres  ParametresBoutique?
+}
+
+// ══════════════════════════════════════════════════════════════════════
 // Utilisateur
 // ══════════════════════════════════════════════════════════════════════
 // Notes :
 //  - id : identifiant opaque, généré automatiquement par Prisma (cuid).
-//  - email : @unique → PostgreSQL empêche deux utilisateurs avec le même mail.
 //  - motDePasse : c'est le HASH bcrypt, pas le mot de passe en clair.
 //  - image : photo de profil (base64 pour l'instant, URL plus tard).
 //  - role : "user" par défaut ; "admin" pour toi et les admins futurs.
 //  - commandes : relation "1 utilisateur → N commandes".
+//
+// ⚠️ L'unicité de l'email est PAR BOUTIQUE, plus globale : chaque marchand
+//    est responsable de ses propres clients, et la même personne peut être
+//    cliente chez deux marchands sans que l'un sache rien de l'autre.
+//    Le jour où la marketplace aura besoin d'un compte transverse, ce sera
+//    une table de plus — pas une réécriture de celle-ci.
 model Utilisateur {
   id         String     @id @default(cuid())
   nom        String
-  email      String     @unique
+  email      String
   motDePasse String
   image      String?
   role       String     @default("user")
   createdAt  DateTime   @default(now())
 
+  boutiqueId String
+  boutique   Boutique   @relation(fields: [boutiqueId], references: [id], onDelete: Cascade)
+
   commandes  Commande[]
+
+  @@unique([boutiqueId, email])
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -80,7 +124,17 @@ model Produit {
   livraisonGratuite Boolean      @default(false)
   createdAt      DateTime        @default(now())
 
+  boutiqueId     String
+  boutique       Boutique        @relation(fields: [boutiqueId], references: [id], onDelete: Cascade)
+
   lignesCommande LigneCommande[]
+
+  // ⚠️ DETTE CONNUE. `id` reste ici un slug lisible ET la clé primaire, donc
+  // GLOBALE. Deux marchands qui vendent un « casque-bluetooth » entreront en
+  // collision. Ça ne pose aucun problème tant qu'il n'y a qu'une boutique ;
+  // ça doit être corrigé AVANT d'accueillir le deuxième marchand (clé
+  // technique + slug unique par boutique). Traité dans un lot séparé.
+  @@index([boutiqueId])
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -129,7 +183,16 @@ model Commande {
   utilisateurId String?
   utilisateur   Utilisateur?    @relation(fields: [utilisateurId], references: [id], onDelete: SetNull)
 
+  // Une commande appartient à UN marchand. C'est ce qui rend le panier
+  // multi-marchands possible sans rien changer ici : un panier de trois
+  // marchands produit trois Commande, chacune avec sa livraison, son statut
+  // et son encaissement propres.
+  boutiqueId    String
+  boutique      Boutique        @relation(fields: [boutiqueId], references: [id])
+
   lignes        LigneCommande[]
+
+  @@index([boutiqueId])
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -155,10 +218,18 @@ model Commande {
 // L'admin manipule des GROUPES (plusieurs wilayas au même tarif) ; les groupes
 // sont déduits à la lecture en regroupant les wilayas de mêmes prix, ce qui
 // évite une table de jointure et garde la recherche de tarif immédiate.
+// Clé composite : chaque marchand a SA grille des 58 wilayas. Avec `wilaya`
+// seule en clé primaire, le deuxième marchand n'aurait pas pu enregistrer un
+// tarif pour Alger — la collision était garantie, pas seulement probable.
 model TarifLivraison {
-  wilaya       String @id
+  wilaya       String
   prixDomicile Int?
   prixStopdesk Int
+
+  boutiqueId   String
+  boutique     Boutique @relation(fields: [boutiqueId], references: [id], onDelete: Cascade)
+
+  @@id([boutiqueId, wilaya])
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -167,9 +238,17 @@ model TarifLivraison {
 // Table à une seule ligne, dont l'id est figé à "boutique".
 // Le jour où la plateforme devient multi-boutique, cet id devient la clé
 // de rattachement au marchand — la structure n'aura pas à changer.
+// Une ligne par boutique — l'id EST le boutiqueId. Le commentaire d'origine
+// anticipait ce jour : « le jour où la plateforme devient multi-boutique, cet
+// id devient la clé de rattachement au marchand ». C'est fait.
 model ParametresBoutique {
-  id                     String @id @default("boutique")
+  boutiqueId             String   @id
+  boutique               Boutique @relation(fields: [boutiqueId], references: [id], onDelete: Cascade)
+
   /// Montant à partir duquel la livraison est offerte. null = jamais.
+  /// ⚠️ Le seuil s'applique PAR MARCHAND. Sur un panier marketplace à trois
+  /// marchands, trois seuils distincts sont évalués — le client peut donc
+  /// n'en atteindre aucun alors que son total global les dépasse.
   seuilLivraisonGratuite Int?
 }
 
@@ -197,10 +276,18 @@ model LigneCommande {
 //
 // L'id est le slug ("mode", "beaute"), celui-là même stocké dans
 // Produit.categorie — la relation reste donc implicite et sans jointure.
+// Clé composite, pour la même raison que les tarifs : les rayons viennent
+// d'un catalogue prédéfini de 38 slugs. Deux marchands voudront tous les deux
+// « mode » — avec `id` seul en clé primaire, le second en aurait été privé.
 model Categorie {
-  id     String @id
+  id     String
   nomFr  String
   nomAr  String
   /// Ordre d affichage dans les filtres. Plus petit = plus haut.
   ordre  Int    @default(0)
+
+  boutiqueId String
+  boutique   Boutique @relation(fields: [boutiqueId], references: [id], onDelete: Cascade)
+
+  @@id([boutiqueId, id])
 }
