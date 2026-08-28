@@ -28,7 +28,10 @@ async function main() {
   // upsert = "si un produit avec cet id existe → mettre à jour ; sinon → créer"
   for (const p of PRODUITS) {
     await prisma.produit.upsert({
-      where: { id: p.id },
+      // L'étiquette est dans le `where` autant que dans le `create` : le
+      // garde de cloisonnement refuse les deux formes sans elle, et il a
+      // raison — le seed ne doit peupler qu'une boutique nommée.
+      where: { id: p.id, boutiqueId: BOUTIQUE_PAR_DEFAUT },
       // Ce qui est appliqué si le produit existe déjà :
       // le stock n'est PAS remis à zéro — il reflète l'inventaire réel,
       // qui a pu bouger depuis. Seul le contenu éditorial est rafraîchi.
@@ -61,8 +64,10 @@ async function main() {
     console.log(`  ✓ ${p.nom.fr}`);
   }
 
-  const total = await prisma.produit.count();
-  console.log(`\n✅ ${total} produits en base.`);
+  const total = await prisma.produit.count({
+    where: { boutiqueId: BOUTIQUE_PAR_DEFAUT },
+  });
+  console.log(`\n✅ ${total} produits dans la boutique ${BOUTIQUE_PAR_DEFAUT}.`);
 
   await prisma.$disconnect();
 }

@@ -86,10 +86,52 @@ les URLs des fiches produit et le panier en `localStorage`.
 | Étiquettes sur les 6 tables | ✅ Fait |
 | Cloisonnement des ~30 requêtes (`lib/` : products, orders, auth, categories, livraison) | ✅ Fait |
 | `visibleMarketplace` (un marchand peut refuser la vitrine agrégée) | ✅ Champ posé, non exploité |
-| Garde-fou automatique (extension Prisma + RLS PostgreSQL) | ⬜ À faire |
+| Garde-fou automatique (extension Prisma) | ✅ Fait, 13 cas testés |
+| Row Level Security PostgreSQL (second filet) | ⬜ Voir §5 bis — coût réel à peser |
 | Résolution par domaine | ⬜ Étape suivante |
 | Identité produit globale | ⬜ Avant le marchand n° 2 |
 | Thème et personnalisation par boutique | ⬜ Plus tard |
+
+---
+
+## 5 bis. Le garde-fou de cloisonnement
+
+`lib/prisma-cloisonnement.ts` enveloppe le client Prisma. Toute requête sur une
+table de marchand qui **ne mentionne pas** `boutiqueId` lève une
+`ErreurCloisonnement`.
+
+**Il refuse, il ne corrige pas.** Beaucoup d'implémentations multi-tenant
+injectent le filtre manquant automatiquement. Deux raisons de ne pas le faire :
+
+1. Une injection silencieuse fait « marcher » une requête fausse. Celui qui l'a
+   écrite n'apprend jamais qu'il a oublié quelque chose.
+2. Une injection doit comprendre **toutes** les formes de requête — écritures
+   imbriquées, `connect`, `include`. Le moindre trou dans cette logique
+   redevient une fuite silencieuse. Une détection n'a qu'à constater une
+   absence : ses erreurs sont bruyantes, jamais discrètes.
+
+**Il n'a pas d'échappatoire, et c'est voulu.** Aucune requête légitime ne
+traverse les boutiques aujourd'hui. Le jour où la vitrine agrégée existera, le
+garde refusera ses requêtes — et forcera à concevoir cette ouverture dans un
+module dédié en lecture seule, plutôt qu'à la laisser apparaître par
+distraction.
+
+Ce qu'il accepte : `boutiqueId` à n'importe quelle profondeur du `where` ou du
+`data`, la relation `boutique`, et les filtres relationnels comme
+`{ commande: { boutiqueId } }` — c'est ainsi que `LigneCommande`, qui n'a pas
+d'étiquette propre, est légitimement cloisonnée.
+
+### Row Level Security — pourquoi ce n'est pas fait
+
+RLS placerait la règle dans PostgreSQL lui-même, donc hors de portée d'une
+erreur applicative. C'est plus solide que le garde ci-dessus.
+
+Le coût est réel : RLS s'appuie sur une variable de session
+(`SET LOCAL app.boutique_id`). Avec le pooler Neon en mode transaction, chaque
+requête devrait être enveloppée dans une transaction pour que la variable
+tienne. Ça change la stratégie de connexion de toute l'application.
+
+À faire quand plusieurs marchands réels sont en production — pas avant.
 
 ---
 

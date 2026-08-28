@@ -28,21 +28,30 @@
 
 import { PrismaClient } from "@/lib/generated/prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
+import { gardeCloisonnement } from "./prisma-cloisonnement";
 
 // Petit garde-fou : sans DATABASE_URL, on ne peut pas créer le client.
 // Ça déclenche une erreur claire au démarrage plutôt qu'un plantage plus tard.
-function creerClient(): PrismaClient {
+//
+// Le client est ensuite ENVELOPPÉ par le garde de cloisonnement : toute
+// requête sur une table de marchand qui oublie son `boutiqueId` est refusée.
+// Voir lib/prisma-cloisonnement.ts pour le raisonnement.
+function creerClient() {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error("DATABASE_URL manquant dans .env");
   }
   const adapter = new PrismaNeon({ connectionString: url });
-  return new PrismaClient({ adapter });
+  return new PrismaClient({ adapter }).$extends(gardeCloisonnement);
 }
+
+// Le type du client étendu n'a pas de nom : on le déduit de la fonction qui
+// le construit, pour que le singleton reste correctement typé.
+type ClientEtendu = ReturnType<typeof creerClient>;
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: ClientEtendu | undefined;
+};
 
 export const prisma = globalForPrisma.prisma ?? creerClient();
 
