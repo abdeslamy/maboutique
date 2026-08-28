@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useProducts } from "./ProductsContext";
 import { FRAIS_LIVRAISON } from "@/lib/format";
-import type { ArticlePanier, Produit } from "@/lib/types";
+import type { ArticlePanier, ProduitResume } from "@/lib/types";
 
 // ──────────────────────────────────────────────────────────────────────────
 // Clé sous laquelle on enregistre le panier dans localStorage du navigateur.
@@ -19,7 +19,7 @@ import type { ArticlePanier, Produit } from "@/lib/types";
 const STORAGE_KEY = "panier-ma-boutique";
 
 // Un article du panier "enrichi" avec son objet Produit (utile pour l'affichage).
-export type ArticleAvecProduit = ArticlePanier & { produit: Produit };
+export type ArticleAvecProduit = ArticlePanier & { produit: ProduitResume };
 
 // Forme du Context : ce qu'on rend disponible à toute l'app.
 type CartContextType = {

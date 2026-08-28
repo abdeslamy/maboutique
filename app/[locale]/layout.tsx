@@ -12,7 +12,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ProductsProvider } from "@/context/ProductsContext";
 import { getSession } from "@/lib/session";
 import { getUtilisateurParId } from "@/lib/auth";
-import { getAllProduits } from "@/lib/products";
+import { getProduitsResume } from "@/lib/products";
 import { getCategories } from "@/lib/categories";
 import { RechercheProvider } from "@/context/RechercheContext";
 import ContenuPage from "@/components/recherche/ContenuPage";
@@ -99,11 +99,18 @@ export default async function LocaleLayout({
     }
   }
 
-  // Charge tous les produits une seule fois (côté serveur) pour les partager
-  // avec les composants client via ProductsProvider. Comme le catalogue est
-  // petit, on peut se permettre de tout charger. Pour un catalogue large,
-  // on passerait au chargement à la demande.
-  const produits = await getAllProduits();
+  // Catalogue ALLÉGÉ, partagé avec les composants client via
+  // ProductsProvider. `getProduitsResume` et non `getAllProduits` : les
+  // descriptions française et arabe pesaient 59 % de la charge utile et
+  // n'étaient affichées nulle part ici — seule la fiche produit s'en sert,
+  // et elle lit son produit séparément.
+  //
+  // ⚠️ Ça reste un chargement INTÉGRAL, sans pagination, exécuté à chaque
+  // requête de chaque page. Allégé, mais toujours proportionnel à la taille
+  // du catalogue. L'étape suivante est de ne plus le charger ici du tout :
+  // seules trois choses en ont besoin — le catalogue, la recherche et le
+  // panier — et aucune n'a besoin de la liste entière.
+  const produits = await getProduitsResume();
 
   // Rayons de la boutique — l'overlay de recherche en a besoin sur toutes
   // les pages, pas seulement sur le catalogue.

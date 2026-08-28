@@ -22,7 +22,7 @@ import {
   ecrireRecentes,
   lireRecentes,
 } from "@/lib/recherche";
-import type { Produit } from "@/lib/types";
+import type { ProduitResume } from "@/lib/types";
 import type { Locale } from "@/i18n/routing";
 import { Croix, Loupe } from "./IconesRecherche";
 
@@ -56,7 +56,7 @@ const RAYURES =
 /** Une entrée navigable au clavier (flèches haut / bas). */
 type Entree =
   | { type: "suggestion"; texte: string }
-  | { type: "produit"; produit: Produit }
+  | { type: "produit"; produit: ProduitResume }
   | { type: "tous" };
 
 type Props = {
@@ -201,7 +201,7 @@ export default function OverlayRecherche({
 
   /** Rayon d'un produit, en toutes lettres — sert de qualificatif. */
   const rayonDe = useCallback(
-    (p: Produit) => {
+    (p: ProduitResume) => {
       const c = categories.find((x) => x.id === p.categorie);
       return c ? libelleCategorie(c) : "";
     },
@@ -286,7 +286,7 @@ export default function OverlayRecherche({
   );
 
   const ouvrirProduit = useCallback(
-    (produit: Produit, nouvelOnglet = false) => {
+    (produit: ProduitResume, nouvelOnglet = false) => {
       if (q) memoriser(q);
       if (nouvelOnglet) {
         window.open(
@@ -890,7 +890,7 @@ function Image({
   rayon,
   locale,
 }: {
-  produit: Produit;
+  produit: ProduitResume;
   taille: number;
   rayon: number;
   locale: Locale;
@@ -1033,7 +1033,7 @@ function LigneProduit({
   survolInhibe,
   desktop = false,
 }: {
-  produit: Produit;
+  produit: ProduitResume;
   locale: Locale;
   onClick: (nouvelOnglet: boolean) => void;
   id?: string;
@@ -1169,13 +1169,13 @@ function EtatVide({
   premierUsage: boolean;
   categories: { id: string; nomFr: string; nomAr: string }[];
   libelleCategorie: (c: { nomFr: string; nomAr: string }) => string;
-  vitrine: Produit[];
+  vitrine: ProduitResume[];
   locale: Locale;
   onUtiliser: (r: string) => void;
   onSupprimer: (r: string) => void;
   onToutEffacer: () => void;
   onRayon: (c: { nomFr: string; nomAr: string }) => void;
-  onProduit: (p: Produit) => void;
+  onProduit: (p: ProduitResume) => void;
   t: Traduire;
 }) {
   return (
@@ -1266,12 +1266,12 @@ function EtatResultats({
 }: {
   suggestions: string[];
   requete: string;
-  resultats: Produit[];
+  resultats: ProduitResume[];
   chips: { id: string; nomFr: string; nomAr: string }[];
   libelleCategorie: (c: { nomFr: string; nomAr: string }) => string;
   locale: Locale;
   onSuggestion: (s: string) => void;
-  onProduit: (p: Produit, nouvelOnglet: boolean) => void;
+  onProduit: (p: ProduitResume, nouvelOnglet: boolean) => void;
   onRayon: (c: { nomFr: string; nomAr: string }) => void;
   t: Traduire;
 }) {
@@ -1600,13 +1600,13 @@ function ColonneResultats({
   onTous,
   t,
 }: {
-  resultats: Produit[];
+  resultats: ProduitResume[];
   total: number;
   decalage: number;
   indexActif: number;
   clavierActif: boolean;
   locale: Locale;
-  onProduit: (p: Produit, nouvelOnglet: boolean) => void;
+  onProduit: (p: ProduitResume, nouvelOnglet: boolean) => void;
   onTous: () => void;
   t: Traduire;
 }) {

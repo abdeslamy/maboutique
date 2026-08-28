@@ -12,7 +12,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { boutiqueActuelle } from "@/lib/boutique";
-import type { Categorie, Produit } from "./types";
+import type { Categorie, Produit, ProduitResume } from "./types";
 import type { ProduitModel } from "@/lib/generated/prisma/models";
 
 /**
@@ -44,6 +44,49 @@ export async function getAllProduits(): Promise<Produit[]> {
     orderBy: { createdAt: "desc" },
   });
   return rows.map(dbToProduit);
+}
+
+/**
+ * Catalogue ALLÉGÉ, destiné au navigateur.
+ *
+ * Deux économies distinctes :
+ *  1. le `select` empêche PostgreSQL de lire les descriptions — la base ne
+ *     les transporte même pas ;
+ *  2. `slice(0, 1)` ne garde que la vignette : les autres vues du produit
+ *     n'apparaissent que sur sa fiche, qui les charge séparément.
+ *
+ * À utiliser partout où le navigateur reçoit une LISTE. `getAllProduits()`
+ * reste réservé au serveur, quand les textes complets sont nécessaires.
+ */
+export async function getProduitsResume(): Promise<ProduitResume[]> {
+  const boutiqueId = await boutiqueActuelle();
+  const rows = await prisma.produit.findMany({
+    where: { boutiqueId },
+    select: {
+      id: true,
+      nomFr: true,
+      nomAr: true,
+      prix: true,
+      categorie: true,
+      images: true,
+      emoji: true,
+      stock: true,
+      delaiLivraison: true,
+      livraisonGratuite: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  return rows.map((p) => ({
+    id: p.id,
+    nom: { fr: p.nomFr, ar: p.nomAr },
+    prix: p.prix,
+    categorie: p.categorie as Categorie,
+    images: p.images.slice(0, 1),
+    emoji: p.emoji,
+    stock: p.stock,
+    delaiLivraison: p.delaiLivraison,
+    livraisonGratuite: p.livraisonGratuite,
+  }));
 }
 
 /** Récupère un produit par son id. `null` si introuvable. */

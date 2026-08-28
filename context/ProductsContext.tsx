@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, type ReactNode } from "react";
-import type { Produit } from "@/lib/types";
+import type { ProduitResume } from "@/lib/types";
 
 // ============================================================================
 // ProductsContext
@@ -14,9 +14,9 @@ import type { Produit } from "@/lib/types";
 // ============================================================================
 
 type ProductsContextType = {
-  produits: Produit[];
+  produits: ProduitResume[];
   /** Utilitaire côté client — équivalent de getProduitParId côté serveur. */
-  getProduitParId: (id: string) => Produit | undefined;
+  getProduitParId: (id: string) => ProduitResume | undefined;
 };
 
 const ProductsContext = createContext<ProductsContextType | null>(null);
@@ -25,10 +25,10 @@ export function ProductsProvider({
   produits,
   children,
 }: {
-  produits: Produit[];
+  produits: ProduitResume[];
   children: ReactNode;
 }) {
-  function getProduitParId(id: string): Produit | undefined {
+  function getProduitParId(id: string): ProduitResume | undefined {
     return produits.find((p) => p.id === id);
   }
   return (

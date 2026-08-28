@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import type { Produit } from "@/lib/types";
+import type { ProduitResume } from "@/lib/types";
 import type { Locale } from "@/i18n/routing";
 import { formatPrix } from "@/lib/format";
 
@@ -19,7 +19,7 @@ import { formatPrix } from "@/lib/format";
  * Feedback visuel au survol : ombre + très léger zoom de l'image → l'utilisateur
  * sent que la carte est interactive.
  */
-export default function ProductCard({ produit }: { produit: Produit }) {
+export default function ProductCard({ produit }: { produit: ProduitResume }) {
   const locale = useLocale() as Locale;
   const t = useTranslations("produit");
   const nom = produit.nom[locale];

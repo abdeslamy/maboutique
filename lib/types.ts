@@ -47,6 +47,37 @@ export type Produit = {
   livraisonGratuite: boolean;
 };
 
+/**
+ * Version ALLÉGÉE d'un produit, destinée au navigateur.
+ *
+ * Le catalogue partagé était envoyé en entier dans CHAQUE page — descriptions
+ * française et arabe comprises. Mesuré sur 11 produits : 13,2 Ko, dont **59 %
+ * de descriptions**, alors qu'aucun composant client ne les affiche. Seule la
+ * fiche produit s'en sert, et elle lit son produit séparément.
+ *
+ * Projection à la même moyenne : 500 produits représentaient 599 Ko envoyés à
+ * chaque page, y compris la page de connexion.
+ *
+ * Ce type est un SOUS-ENSEMBLE strict de `Produit` : tout composant qui
+ * accepte un `ProduitResume` accepte aussi un `Produit` complet.
+ */
+export type ProduitResume = {
+  id: string;
+  nom: TexteBilingue;
+  prix: number;
+  categorie: Categorie;
+  /**
+   * La VIGNETTE seule. Les autres vues du produit ne servent que sur sa
+   * fiche, qui les charge elle-même. Le tableau est conservé plutôt qu'une
+   * chaîne pour que `images[0]` continue de fonctionner partout.
+   */
+  images: string[];
+  emoji: string;
+  stock: number;
+  delaiLivraison: string;
+  livraisonGratuite: boolean;
+};
+
 /** Un article dans le panier : référence un produit par son id + une quantité. */
 export type ArticlePanier = {
   produitId: string;

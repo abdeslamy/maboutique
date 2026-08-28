@@ -77,13 +77,30 @@ export default function PanierClient() {
               key={a.produitId}
               className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-4 sm:flex-row sm:items-center"
             >
-              {/* Vignette */}
-              <div
-                className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-xl text-3xl ${a.produit.images[0]}`}
-                aria-hidden="true"
-              >
-                <span>{a.produit.emoji}</span>
-              </div>
+              {/* Vignette.
+                  `images[0]` peut être deux choses : une vraie URL Cloudinary,
+                  ou une ancienne classe Tailwind de couleur, héritée de
+                  l'époque où les produits n'avaient pas de photo. Sans cette
+                  distinction — qui existait déjà dans ProductCard mais pas
+                  ici — l'URL partait dans `className` et le panier affichait
+                  l'emoji de repli à la place de la photo du produit. */}
+              {/^https?:\/\//.test(a.produit.images[0] ?? "") ? (
+                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-50">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={a.produit.images[0]}
+                    alt={a.produit.nom[locale]}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div
+                  className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-xl text-3xl ${a.produit.images[0] ?? "bg-gray-100"}`}
+                  aria-hidden="true"
+                >
+                  <span>{a.produit.emoji}</span>
+                </div>
+              )}
 
               {/* Nom + prix unitaire */}
               <div className="flex-1">

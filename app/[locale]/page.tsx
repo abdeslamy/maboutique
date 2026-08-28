@@ -2,14 +2,14 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import ProductCard from "@/components/ProductCard";
 import BarreRechercheHome from "@/components/BarreRechercheHome";
-import { getAllProduits } from "@/lib/products";
+import { getProduitsResume } from "@/lib/products";
 
 export default async function Accueil() {
   const t = await getTranslations("accueil");
 
   // Coups de cœur = les 4 produits les plus récemment ajoutés en base
   // (getAllProduits trie déjà par createdAt desc).
-  const vedettes = (await getAllProduits()).slice(0, 4);
+  const vedettes = (await getProduitsResume()).slice(0, 4);
 
   return (
     <>
