@@ -3,6 +3,7 @@ import {
   creerUtilisateur,
   trouverUtilisateurParEmail,
 } from "@/lib/auth";
+import { adresseAppelant, tenter } from "@/lib/limiteur";
 
 /**
  * POST /api/auth/inscription
@@ -26,6 +27,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { erreur: "json_invalide" },
       { status: 400 }
+    );
+  }
+
+  // Création de comptes en rafale : 5 par heure et par adresse suffisent
+  // largement à un usage humain.
+  const limite = tenter(`inscription:${adresseAppelant(req)}`, 5, 3600);
+  if (!limite.ok) {
+    return NextResponse.json(
+      { erreur: "trop_de_tentatives", resteSec: limite.resteSec },
+      { status: 429, headers: { "Retry-After": String(limite.resteSec) } }
     );
   }
 

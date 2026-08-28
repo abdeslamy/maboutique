@@ -3,6 +3,7 @@ import { MapPin, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getCommandeParId } from "@/lib/orders";
 import { getSession } from "@/lib/session";
+import { peutVoirCommande } from "@/lib/commandes-recentes";
 import { formatPrix } from "@/lib/format";
 import { WILAYAS } from "@/lib/wilayas";
 import type { Locale } from "@/i18n/routing";
@@ -28,8 +29,20 @@ export default async function PageConfirmation({
   const tPanier = await getTranslations("panier");
   const tCommande = await getTranslations("commande");
 
-  const commande = id ? await getCommandeParId(id) : null;
   const session = await getSession();
+  const trouvee = id ? await getCommandeParId(id) : null;
+
+  // Contrôle de propriété. La page affiche nom, téléphone et adresse : il ne
+  // suffit pas de connaître l'identifiant pour y accéder.
+  //   - soit la commande est rattachée au compte connecté ;
+  //   - soit elle a été passée depuis ce navigateur (cookie httpOnly).
+  // Sinon on fait comme si elle n'existait pas — surtout pas un message
+  // distinct, qui confirmerait à un curieux que l'identifiant est valide.
+  const autorisee =
+    trouvee !== null &&
+    ((session !== null && trouvee.utilisateurId === session.id) ||
+      (id !== undefined && (await peutVoirCommande(id))));
+  const commande = autorisee ? trouvee : null;
   const wilaya = commande
     ? WILAYAS.find((w) => w.code === commande.client.wilaya)
     : undefined;

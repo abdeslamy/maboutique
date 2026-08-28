@@ -4,6 +4,7 @@ import {
   verifierMotDePasse,
 } from "@/lib/auth";
 import { creerToken, poserCookieSession } from "@/lib/session";
+import { adresseAppelant, reinitialiser, tenter } from "@/lib/limiteur";
 
 /**
  * POST /api/auth/connexion
@@ -37,6 +38,31 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // ── Limitation des tentatives ────────────────────────────────────────
+  // Deux compteurs complémentaires :
+  //   - par adresse + email : bloque l'acharnement sur UN compte ;
+  //   - par adresse seule   : bloque le balayage de MILLE comptes, que le
+  //     premier compteur laisserait passer puisque l'email change à chaque
+  //     essai.
+  // Ils ne sont incrémentés que sur ÉCHEC (voir plus bas) : un utilisateur
+  // qui se connecte correctement dix fois de suite n'est jamais gêné.
+  const ip = adresseAppelant(req);
+  const cleCompte = `connexion:${ip}:${email}`;
+  const cleAdresse = `connexion:${ip}`;
+
+  for (const [cle, max, fenetre] of [
+    [cleCompte, 5, 900],
+    [cleAdresse, 30, 900],
+  ] as const) {
+    const v = tenter(cle, max, fenetre);
+    if (!v.ok) {
+      return NextResponse.json(
+        { erreur: "trop_de_tentatives", resteSec: v.resteSec },
+        { status: 429, headers: { "Retry-After": String(v.resteSec) } }
+      );
+    }
+  }
+
   const utilisateur = await trouverUtilisateurParEmail(email);
   if (!utilisateur) {
     return NextResponse.json(
@@ -52,6 +78,11 @@ export async function POST(req: NextRequest) {
       { status: 401 }
     );
   }
+
+  // Connexion réussie : on efface les compteurs, la suite des tentatives
+  // de cet utilisateur repart de zéro.
+  reinitialiser(cleCompte);
+  reinitialiser(cleAdresse);
 
   // ── Création de la session ──────────────────────────────────────────
   const token = await creerToken({

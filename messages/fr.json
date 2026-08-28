@@ -541,7 +541,8 @@
       "champs_manquants": "Veuillez saisir votre email et votre mot de passe.",
       "identifiants_invalides": "Email ou mot de passe incorrect.",
       "json_invalide": "Données invalides.",
-      "erreur_serveur": "Une erreur est survenue. Réessayez dans un instant."
+      "erreur_serveur": "Une erreur est survenue. Réessayez dans un instant.",
+      "trop_de_tentatives": "Trop de tentatives. Patientez quelques minutes avant de réessayer."
     }
   },
   "inscription": {
@@ -565,7 +566,8 @@
       "confirmation_differente": "Les deux mots de passe ne correspondent pas.",
       "email_existe": "Un compte existe déjà avec cette adresse email.",
       "erreur_serveur": "Une erreur est survenue. Réessayez dans un instant.",
-      "json_invalide": "Données invalides."
+      "json_invalide": "Données invalides.",
+      "trop_de_tentatives": "Trop de tentatives. Patientez quelques minutes avant de réessayer."
     }
   },
   "recherche": {
@@ -588,5 +590,12 @@
     "essayer": "Essayer",
     "categoriesPopulaires": "Catégories populaires",
     "voirTousResultats": "{n, plural, one {Voir le # résultat} other {Voir les # résultats}}"
+  },
+  "erreur": {
+    "titre": "Une erreur est survenue",
+    "texte": "Cette page n'a pas pu s'afficher. Réessayez, le problème est souvent passager.",
+    "reessayer": "Réessayer",
+    "accueil": "Retour à l'accueil",
+    "reference": "Référence"
   }
 }

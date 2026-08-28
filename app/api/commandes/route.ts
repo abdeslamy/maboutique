@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { creerCommande } from "@/lib/orders";
 import { getSession } from "@/lib/session";
 import { routing, type Locale } from "@/i18n/routing";
+import { memoriserCommande } from "@/lib/commandes-recentes";
 
 /**
  * POST /api/commandes
@@ -74,6 +75,11 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
+
+  // Trace côté navigateur : c'est ce qui autorisera la page de
+  // confirmation à afficher les coordonnées du client. Sans elle, posséder
+  // le lien suffisait.
+  await memoriserCommande(resultat.commande.id);
 
   return NextResponse.json(
     { succes: true, commandeId: resultat.commande.id },
