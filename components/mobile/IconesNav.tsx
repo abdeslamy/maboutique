@@ -189,14 +189,14 @@ export function LangueFilled({ className }: Props) {
 /** Décalage optique de la loupe dans la tab bar — unités du viewBox. */
 const CALAGE_LOUPE = "translate(0.36,0.77) scale(1.03)";
 
-export function RechercheOutline({ className }: Props) {
+export function RechercheOutline({ className, trait = 1.7 }: Props & { trait?: number }) {
   return (
     <svg
       {...commun}
       className={className}
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.7"
+      strokeWidth={trait}
       strokeLinecap="round"
     >
       <g transform={CALAGE_LOUPE}>

@@ -138,3 +138,82 @@ select:disabled,
     transform: translateX(363%);
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Liquid Glass — navigation mobile
+   ══════════════════════════════════════════════════════════════════════
+   Reproduction CSS du materiau iOS 26. La spec prevoit d utiliser
+   .glassEffect() en SwiftUI ; nous sommes sur le web, donc c est la
+   variante manuelle qu elle decrit qui s applique.
+
+   overflow:hidden : le reflet speculaire est un pseudo-element rectangulaire
+   arrondi. Sans decoupe, il deborderait du disque sur les boutons ronds.
+   Les ombres portees, elles, ne sont pas affectees : overflow ne rogne que
+   les enfants, jamais l ombre propre de l element. */
+.verre {
+  --verre-reflet: 24px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.74) 0%,
+    rgba(255, 255, 255, 0.48) 100%
+  );
+  -webkit-backdrop-filter: blur(30px) saturate(190%);
+  backdrop-filter: blur(30px) saturate(190%);
+  border: 0.5px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.45),
+    inset 0 0 24px rgba(255, 255, 255, 0.22),
+    0 14px 34px rgba(17, 17, 17, 0.16),
+    0 3px 8px rgba(17, 17, 17, 0.07);
+}
+
+/* Reflet speculaire : la lumiere accrochee sur le haut de la matiere. */
+.verre::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: var(--verre-reflet);
+  border-radius: 27px 27px 60px 60px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0)
+  );
+  pointer-events: none;
+}
+
+/* Version allegee : boutons de 40 pt du haut. */
+.verre--leger {
+  --verre-reflet: 16px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.45),
+    inset 0 0 24px rgba(255, 255, 255, 0.22),
+    0 10px 26px rgba(17, 17, 17, 0.14),
+    0 2px 6px rgba(17, 17, 17, 0.06);
+}
+
+/* Reduce Transparency : fond opaque, memes geometries et memes ombres.
+   Le flou et le reflet disparaissent, la barre reste identique par ailleurs. */
+@media (prefers-reduced-transparency: reduce) {
+  .verre {
+    background: #ffffff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .verre::after {
+    display: none;
+  }
+}
+
+/* Repli sans backdrop-filter (Android d entree de gamme, vieux Firefox) :
+   sans le flou, un fond a 48 % laisserait lire le contenu a travers. */
+@supports not (backdrop-filter: blur(1px)) {
+  .verre {
+    background: rgba(255, 255, 255, 0.92);
+  }
+}
