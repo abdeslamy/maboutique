@@ -10,6 +10,7 @@ import {
   type PointerEvent as EvenementPointeur,
   type RefObject,
 } from "react";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useProducts } from "@/context/ProductsContext";
@@ -884,7 +885,7 @@ function TitreSection({
 }
 
 /** Vignette carrée : photo réelle si on en a une, rayures sinon. */
-function Image({
+function Vignette({
   produit,
   taille,
   rayon,
@@ -905,10 +906,13 @@ function Image({
   };
   if (!estUrl) return <div className="flex-none" style={style} aria-hidden="true" />;
   return (
-    /* eslint-disable-next-line @next/next/no-img-element */
-    <img
+    // `taille` est déjà la dimension rendue en pixels : on la donne telle
+    // quelle à next/image, qui sert alors exactement la variante utile.
+    <Image
       src={source}
       alt={produit.nom[locale]}
+      width={taille}
+      height={taille}
       className="flex-none object-cover"
       style={style}
     />
@@ -1060,7 +1064,7 @@ function LigneProduit({
           className="absolute inset-y-0 start-0 w-[2px] bg-[#111111]"
         />
       )}
-      <Image
+      <Vignette
         produit={produit}
         taille={desktop ? 48 : 56}
         rayon={desktop ? 12 : 14}

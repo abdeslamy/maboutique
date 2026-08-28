@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { ProduitResume } from "@/lib/types";
@@ -39,11 +40,17 @@ export default function ProductCard({ produit }: { produit: ProduitResume }) {
           `relative` porte le badge de rupture. */}
       {estUrl ? (
         <div className="relative h-44 overflow-hidden bg-gray-50">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          {/* `fill` : la vignette épouse son cadre de 176 px de haut, dont la
+              largeur dépend de la colonne. `sizes` décrit cette largeur au
+              navigateur pour qu'il télécharge la bonne variante — sans lui,
+              Next.js suppose 100vw et sert une image de pleine largeur dans
+              une carte de 264 px. */}
+          <Image
             src={imageVignette}
             alt={nom}
-            className={`h-full w-full object-cover transition duration-300 group-hover:scale-110 ${
+            fill
+            sizes="(min-width: 1280px) 264px, (min-width: 1024px) 336px, (min-width: 640px) 46vw, 92vw"
+            className={`object-cover transition duration-300 group-hover:scale-110 ${
               produit.stock <= 0 ? "opacity-50" : ""
             }`}
           />

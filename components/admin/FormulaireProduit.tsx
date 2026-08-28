@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { CldUploadWidget } from "next-cloudinary";
 import { Upload, Trash2, ImageIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -181,10 +182,11 @@ export default function FormulaireProduit({
                   key={url}
                   className="group relative overflow-hidden rounded-xl border border-gray-200"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={url}
                     alt=""
+                    width={200}
+                    height={200}
                     className="aspect-square w-full object-cover"
                   />
                   <button

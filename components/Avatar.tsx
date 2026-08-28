@@ -47,6 +47,13 @@ export default function Avatar({
 
   if (image) {
     return (
+      // Volontairement une balise <img> et non next/image.
+      //
+      // La photo de profil est une data URL en base64, déjà redimensionnée
+      // dans le navigateur avant l'envoi (voir FormulaireParametres).
+      // L'optimiseur de Next.js ne sait rien faire d'une data URL : il
+      // faudrait `unoptimized`, ce qui revient exactement à une balise <img>,
+      // en plus verbeux. L'image est petite et déjà à la bonne taille.
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={image}

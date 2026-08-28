@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useCart } from "@/context/CartContext";
@@ -86,10 +87,12 @@ export default function PanierClient() {
                   l'emoji de repli à la place de la photo du produit. */}
               {/^https?:\/\//.test(a.produit.images[0] ?? "") ? (
                 <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-50">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  {/* Dimensions fixes : la vignette fait toujours 80 px. */}
+                  <Image
                     src={a.produit.images[0]}
                     alt={a.produit.nom[locale]}
+                    width={80}
+                    height={80}
                     className="h-full w-full object-cover"
                   />
                 </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -52,15 +54,22 @@ export default function GalerieProduit({
       <div className="relative">
         {estUrl(imageCourante) ? (
           <div
-            className="aspect-square overflow-hidden rounded-3xl bg-gray-50"
+            className="relative aspect-square overflow-hidden rounded-3xl bg-gray-50"
             aria-label={`${altPrefix} — image ${index + 1} / ${images.length}`}
             role="img"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            {/* L'image principale d'une fiche produit est ce que le visiteur
+                attend en premier : `preload` demande au navigateur de la
+                chercher tout de suite. (`priority` est déprécié depuis
+                Next.js 16 — vérifié dans la documentation embarquée.)
+                Le conteneur porte `relative`, indispensable à `fill`. */}
+            <Image
               src={imageCourante}
               alt={`${altPrefix} — ${index + 1}`}
-              className="h-full w-full object-cover"
+              fill
+              preload
+              sizes="(min-width: 1024px) 512px, 100vw"
+              className="object-cover"
             />
           </div>
         ) : (
@@ -118,10 +127,11 @@ export default function GalerieProduit({
               className={estUrl(img) ? `${cadre} bg-gray-50` : `${cadre} text-2xl ${img}`}
             >
               {estUrl(img) ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={img}
                   alt=""
+                  width={96}
+                  height={96}
                   className="h-full w-full object-cover"
                 />
               ) : (

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useMemo, useTransition } from "react";
 import { Plus, Search, Pencil, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -108,10 +109,11 @@ export default function ListeProduitsAdmin({
               <div className="flex items-center gap-3 sm:gap-4">
                 {/* Vignette */}
                 {p.images[0]?.startsWith("http") ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={p.images[0]}
                     alt=""
+                    width={80}
+                    height={80}
                     className="h-16 w-16 shrink-0 rounded-xl object-cover sm:h-20 sm:w-20"
                   />
                 ) : (
