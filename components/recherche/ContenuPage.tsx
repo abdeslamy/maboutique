@@ -21,7 +21,20 @@ export default function ContenuPage({ children }: { children: ReactNode }) {
   return (
     <div
       className="flex flex-1 flex-col transition-transform duration-[340ms] ease-[cubic-bezier(.2,.8,.2,1)] motion-reduce:transition-none motion-reduce:transform-none"
-      style={{ transform: ouvert ? "scale(.985)" : "scale(1)" }}
+      // ⚠️ `none` au repos, surtout PAS `scale(1)`.
+      //
+      // En CSS, `scale(1)` n'est pas l'absence de transformation : c'est une
+      // transformation neutre, et toute valeur autre que `none` fait de cet
+      // élément le bloc de référence de ses descendants en `position: fixed`.
+      //
+      // Avec `scale(1)`, toutes les fenêtres modales de la page — sélecteur
+      // de wilayas, création de commande, tiroir admin — se calaient sur la
+      // hauteur du DOCUMENT au lieu de celle de l'écran. Leurs boutons de
+      // validation tombaient hors du champ de vision.
+      //
+      // La transition fonctionne quand même : le navigateur interpole `none`
+      // comme la matrice identité.
+      style={{ transform: ouvert ? "scale(.985)" : "none" }}
     >
       {children}
     </div>
