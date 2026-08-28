@@ -9,10 +9,8 @@ import NavigationMobile from "@/components/mobile/NavigationMobile";
 import Footer from "@/components/Footer";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
-import { ProductsProvider } from "@/context/ProductsContext";
 import { getSession } from "@/lib/session";
 import { getUtilisateurParId } from "@/lib/auth";
-import { getProduitsResume } from "@/lib/products";
 import { getCategories } from "@/lib/categories";
 import { RechercheProvider } from "@/context/RechercheContext";
 import ContenuPage from "@/components/recherche/ContenuPage";
@@ -99,19 +97,15 @@ export default async function LocaleLayout({
     }
   }
 
-  // Catalogue ALLÉGÉ, partagé avec les composants client via
-  // ProductsProvider. `getProduitsResume` et non `getAllProduits` : les
-  // descriptions française et arabe pesaient 59 % de la charge utile et
-  // n'étaient affichées nulle part ici — seule la fiche produit s'en sert,
-  // et elle lit son produit séparément.
+  // ⚠️ PLUS AUCUN CHARGEMENT DE CATALOGUE ICI.
   //
-  // ⚠️ Ça reste un chargement INTÉGRAL, sans pagination, exécuté à chaque
-  // requête de chaque page. Allégé, mais toujours proportionnel à la taille
-  // du catalogue. L'étape suivante est de ne plus le charger ici du tout :
-  // seules trois choses en ont besoin — le catalogue, la recherche et le
-  // panier — et aucune n'a besoin de la liste entière.
-  const produits = await getProduitsResume();
-
+  // Le layout chargeait la liste entière des produits à chaque requête de
+  // chaque page, y compris celles qui n'en affichent aucun. Trois choses en
+  // avaient besoin, et aucune n'avait besoin de la liste complète :
+  //   - le catalogue, qui la charge désormais lui-même ;
+  //   - la recherche, passée côté serveur (/api/recherche) ;
+  //   - le panier, qui ne demande que SES produits (/api/produits?ids=…).
+  // Le compteur du panier, lui, n'a jamais eu besoin que d'un nombre.
   // Rayons de la boutique — l'overlay de recherche en a besoin sur toutes
   // les pages, pas seulement sur le catalogue.
   const categories = await getCategories();
@@ -139,9 +133,7 @@ export default async function LocaleLayout({
             Les deux englobent Navbar + pages.
           */}
           <AuthProvider utilisateurInitial={utilisateurInitial}>
-            {/* ProductsProvider expose la liste des produits aux composants client. */}
-            <ProductsProvider produits={produits}>
-              <CartProvider>
+            <CartProvider>
                 {/* RechercheProvider rend l'overlay APRÈS le contenu de page,
                     et donc hors de l'enveloppe qui recule pendant qu'il est
                     ouvert. Les rayons lui sont passés ici : un composant
@@ -179,7 +171,6 @@ export default async function LocaleLayout({
                   <NavigationMobile />
                 </RechercheProvider>
               </CartProvider>
-            </ProductsProvider>
           </AuthProvider>
         </NextIntlClientProvider>
       </body>

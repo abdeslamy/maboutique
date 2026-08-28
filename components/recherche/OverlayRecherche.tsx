@@ -13,12 +13,9 @@ import {
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { useProducts } from "@/context/ProductsContext";
 import { formatPrix } from "@/lib/format";
 import {
   ajouterRecente,
-  contient,
-  correctionProche,
   decouper,
   ecrireRecentes,
   lireRecentes,
@@ -54,6 +51,26 @@ const COURBE_FOND = "cubic-bezier(.2,.8,.2,1)";
 const RAYURES =
   "repeating-linear-gradient(135deg,#EFEEEA 0 6px,#F7F6F3 6px 12px)";
 
+/** Rayon tel que le serveur le renvoie. */
+type Rayon = { id: string; nomFr: string; nomAr: string };
+
+/**
+ * Réponse de /api/recherche. Deux formes distinctes selon que le champ est
+ * vide ou non — un booléen `vide` les sépare, ce qui permet à TypeScript de
+ * garantir qu'on ne lira jamais `produits` sur une réponse de vitrine.
+ */
+type ReponseRecherche =
+  | { vide: true; vitrine: ProduitResume[]; categories: Rayon[] }
+  | {
+      vide: false;
+      produits: ProduitResume[];
+      total: number;
+      suggestions: string[];
+      rayons: Rayon[];
+      correction: string | null;
+      categories: Rayon[];
+    };
+
 /** Une entrée navigable au clavier (flèches haut / bas). */
 type Entree =
   | { type: "suggestion"; texte: string }
@@ -78,7 +95,6 @@ export default function OverlayRecherche({
   const locale = useLocale() as Locale;
   const t = useTranslations("recherche");
   const router = useRouter();
-  const { produits } = useProducts();
 
   const [requete, setRequete] = useState("");
   const [recentes, setRecentes] = useState<string[]>([]);
@@ -90,6 +106,10 @@ export default function OverlayRecherche({
   const [indexActif, setIndexActif] = useState(-1);
   /** Le survol s'efface tant que la navigation clavier est active. */
   const [clavierActif, setClavierActif] = useState(false);
+  /** Dernière réponse du serveur. `null` avant la première requête. */
+  const [reponse, setReponse] = useState<ReponseRecherche | null>(null);
+  /** Vrai pendant une requête qui dure plus de 150 ms. */
+  const [enChargement, setEnChargement] = useState(false);
 
   const refPanneau = useRef<HTMLDivElement | null>(null);
 
@@ -200,65 +220,71 @@ export default function OverlayRecherche({
     [locale]
   );
 
-  /** Rayon d'un produit, en toutes lettres — sert de qualificatif. */
-  const rayonDe = useCallback(
-    (p: ProduitResume) => {
-      const c = categories.find((x) => x.id === p.categorie);
-      return c ? libelleCategorie(c) : "";
-    },
-    [categories, libelleCategorie]
-  );
-
   const q = requete.trim();
 
-  const resultats = useMemo(() => {
-    if (!q) return [];
-    // Nom + rayon : c'est l'équivalent du « nom + marque » du document,
-    // la marque n'existant pas dans notre modèle produit.
-    return produits.filter((p) =>
-      contient(`${p.nom[locale]} ${rayonDe(p)}`, q)
+  // ── Interrogation du serveur ──────────────────────────────────────
+  // La recherche se faisait dans le navigateur, sur le catalogue complet que
+  // chaque page transportait. Elle passe par /api/recherche : plus une ligne
+  // de catalogue n'est envoyée tant que personne n'ouvre la recherche.
+  //
+  // Le délai de 180 ms évite une requête par frappe. La première ouverture,
+  // champ vide, va chercher la vitrine.
+  useEffect(() => {
+    if (!ouvert) return;
+
+    const controleur = new AbortController();
+    // Différé de 150 ms comme le veut la spécification : sur une réponse
+    // rapide, la barre n'a pas le temps d'apparaître et ne clignote donc pas.
+    const minuteurChargement = window.setTimeout(() => setEnChargement(true), 150);
+
+    const minuteur = window.setTimeout(
+      () => {
+        const url = `/api/recherche?q=${encodeURIComponent(q)}&locale=${locale}&format=${format}`;
+        fetch(url, { signal: controleur.signal })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => {
+            if (d) setReponse(d);
+          })
+          .catch(() => {
+            // Abandon volontaire (frappe suivante) ou réseau : on garde
+            // l'affichage précédent plutôt que de vider brutalement la liste.
+          })
+          .finally(() => {
+            window.clearTimeout(minuteurChargement);
+            setEnChargement(false);
+          });
+      },
+      q ? 180 : 0
     );
-  }, [q, produits, locale, rayonDe]);
 
-  /** Corpus de complétion : noms de produits + noms de rayons. */
-  const corpus = useMemo(() => {
-    const termes = [
-      ...produits.map((p) => p.nom[locale]),
-      ...categories.map(libelleCategorie),
-    ];
-    return Array.from(new Set(termes.filter(Boolean)));
-  }, [produits, categories, locale, libelleCategorie]);
+    return () => {
+      controleur.abort();
+      window.clearTimeout(minuteur);
+      window.clearTimeout(minuteurChargement);
+      setEnChargement(false);
+    };
+  }, [ouvert, q, locale, format]);
 
-  const maxSuggestions = format === "desktop" ? 8 : 3;
-  const suggestions = useMemo(() => {
-    if (!q) return [];
-    return corpus.filter((s) => contient(s, q)).slice(0, maxSuggestions);
-  }, [q, corpus, maxSuggestions]);
-
-  const chipsRayons = useMemo(() => {
-    if (!q) return [];
-    return categories
-      .filter((c) => contient(libelleCategorie(c), q))
-      .slice(0, 4);
-  }, [q, categories, libelleCategorie]);
-
-  const correction = useMemo(
-    () => (q ? correctionProche(q, corpus) : null),
-    [q, corpus]
-  );
+  // ── Données affichées, telles que le serveur les a calculées ──────
+  const resultats: ProduitResume[] = reponse?.vide === false ? reponse.produits : [];
+  const totalResultats = reponse?.vide === false ? reponse.total : 0;
+  const suggestions: string[] = reponse?.vide === false ? reponse.suggestions : [];
+  const chipsRayons = reponse?.vide === false ? reponse.rayons : [];
+  const correction = reponse?.vide === false ? reponse.correction : null;
+  const vitrine: ProduitResume[] = reponse?.vide ? reponse.vitrine : [];
 
   const premierUsage = recentes.length === 0;
   const enSaisie = q.length > 0;
-  const aucunResultat = enSaisie && resultats.length === 0;
+  // « Aucun résultat » seulement quand la RÉPONSE porte sur la requête
+  // courante : sinon, le temps d'un aller-retour, on afficherait « aucun
+  // résultat » alors qu'on n'a simplement pas encore demandé.
+  const aucunResultat =
+    enSaisie && reponse?.vide === false && reponse.total === 0;
 
-  /** Vitrine : le document promet « populaires », nous n'avons pas la donnée. */
-  const vitrine = useMemo(
-    () => produits.slice(0, format === "mobile" ? 4 : 6),
-    [produits, format]
-  );
-
-  const maxResultats = format === "desktop" ? 8 : resultats.length;
-  const resultatsAffiches = resultats.slice(0, maxResultats);
+  // Le plafond est appliqué côté serveur : ce qui arrive est déjà la liste
+  // à afficher. `total` dit combien il y en a réellement, pour le lien
+  // « Voir les N résultats ».
+  const resultatsAffiches = resultats;
 
   // ── Liste plate pour les flèches haut / bas ───────────────────────
   const entrees = useMemo<Entree[]>(() => {
@@ -268,9 +294,9 @@ export default function OverlayRecherche({
       texte,
     }));
     for (const produit of resultatsAffiches) liste.push({ type: "produit", produit });
-    if (resultats.length > resultatsAffiches.length) liste.push({ type: "tous" });
+    if (totalResultats > resultatsAffiches.length) liste.push({ type: "tous" });
     return liste;
-  }, [enSaisie, suggestions, resultatsAffiches, resultats.length]);
+  }, [enSaisie, suggestions, resultatsAffiches, totalResultats]);
 
   // Toute modification de la requête remet la sélection à zéro : garder
   // l'index ferait pointer la sélection sur un autre produit.
@@ -641,13 +667,12 @@ export default function OverlayRecherche({
         </div>
 
         {/* ── Barre de chargement ─────────────────────────────────────
-            Câblée mais jamais allumée aujourd'hui : la recherche est locale
-            (produits déjà en mémoire), donc instantanée, et le retard de
-            150 ms du document la garde éteinte. Elle s'allumera le jour où
-            la recherche passera côté serveur. */}
+            Elle sert enfin : la recherche interroge le serveur. Le retard de
+            150 ms du document fait qu'elle reste invisible sur les réponses
+            rapides, et n'apparaît que quand l'attente devient perceptible. */}
         <div
           className="h-[2px] flex-none overflow-hidden transition-opacity duration-200"
-          style={{ opacity: 0 }}
+          style={{ opacity: enChargement ? 1 : 0 }}
           aria-hidden="true"
         >
           <div className="h-[2px] w-[38%] animate-[om-slide_1s_cubic-bezier(.4,0,.6,1)_infinite] rounded-[1px] bg-[#111111]" />
@@ -707,7 +732,7 @@ export default function OverlayRecherche({
               {enSaisie ? (
                 <ColonneResultats
                   resultats={resultatsAffiches}
-                  total={resultats.length}
+                  total={totalResultats}
                   decalage={suggestions.length}
                   indexActif={indexActif}
                   clavierActif={clavierActif}

@@ -12,9 +12,8 @@ import { ChevronDown, Check } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import ProductCard from "./ProductCard";
-import { useProducts } from "@/context/ProductsContext";
 import { contient } from "@/lib/recherche";
-import type { Categorie } from "@/lib/types";
+import type { Categorie, ProduitResume } from "@/lib/types";
 import type { Locale } from "@/i18n/routing";
 
 /**
@@ -49,14 +48,16 @@ const useEffetDeMise =
  */
 export default function CatalogueClient({
   categories,
+  produits,
 }: {
   /** Rayons de la boutique, lus en base par la page parente. */
   categories: { id: string; nomFr: string; nomAr: string }[];
+  /** Produits, lus par la page parente — plus par un contexte global. */
+  produits: ProduitResume[];
 }) {
   const locale = useLocale() as Locale;
   const t = useTranslations("catalogue");
   const tCat = useTranslations("categories");
-  const { produits } = useProducts();
 
   // Si on arrive depuis la homepage avec ?q=xxx, on pré-remplit le champ.
   const searchParams = useSearchParams();

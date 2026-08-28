@@ -8,7 +8,6 @@ import {
   useMemo,
   type ReactNode,
 } from "react";
-import { useProducts } from "./ProductsContext";
 import { FRAIS_LIVRAISON } from "@/lib/format";
 import type { ArticlePanier, ProduitResume } from "@/lib/types";
 
@@ -57,8 +56,16 @@ const CartContext = createContext<CartContextType | null>(null);
 // au panier.
 // ──────────────────────────────────────────────────────────────────────────
 export function CartProvider({ children }: { children: ReactNode }) {
-  // On récupère la liste des produits pour enrichir chaque article du panier.
-  const { produits } = useProducts();
+  // Le panier ne dépend PLUS du catalogue global.
+  //
+  // Il lisait auparavant `useProducts()`, ce qui obligeait chaque page du
+  // site à transporter tout le catalogue — uniquement pour qu'un badge de
+  // navigation puisse s'afficher. Or ce badge n'a besoin que du NOMBRE
+  // d'articles, qui se calcule depuis le stockage local seul.
+  //
+  // Les détails (nom, prix, vignette) ne sont demandés que lorsque le panier
+  // n'est pas vide, et seulement pour les produits qu'il contient.
+  const [produits, setProduits] = useState<ProduitResume[]>([]);
 
   // L'état du panier vit ici, dans ce composant client.
   const [articles, setArticles] = useState<ArticlePanier[]>([]);
@@ -127,6 +134,39 @@ export function CartProvider({ children }: { children: ReactNode }) {
   function vider() {
     setArticles([]);
   }
+
+  // ── Effet 3 : détails des produits du panier ─────────────────────────
+  // Déclenché par la LISTE DES IDENTIFIANTS, pas par `articles` : changer une
+  // quantité ne doit pas relancer une requête réseau.
+  const cleIds = articles
+    .map((a) => a.produitId)
+    .sort()
+    .join(",");
+
+  useEffect(() => {
+    if (!estCharge) return;
+    if (cleIds === "") {
+      setProduits([]);
+      return;
+    }
+    // `annule` évite d'appliquer une réponse tardive alors que le panier a
+    // déjà changé — sinon deux requêtes rapides peuvent revenir dans le
+    // désordre et réafficher un état périmé.
+    let annule = false;
+    fetch(`/api/produits?ids=${encodeURIComponent(cleIds)}`)
+      .then((r) => (r.ok ? r.json() : { produits: [] }))
+      .then((d) => {
+        if (!annule) setProduits(d.produits ?? []);
+      })
+      .catch(() => {
+        // Réseau indisponible : le panier garde son compte et ses quantités,
+        // seuls les libellés manquent. Mieux vaut un panier incomplet qu'un
+        // panier qui disparaît.
+      });
+    return () => {
+      annule = true;
+    };
+  }, [cleIds, estCharge]);
 
   // ── Valeurs calculées (mémorisées pour ne pas recalculer à chaque rendu) ──
   const articlesEnrichis = useMemo(() => {
