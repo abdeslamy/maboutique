@@ -133,7 +133,7 @@ export default async function PageConnexionMarchand({
           Colonne du visuel — purement décorative, donc la première à
           partir quand la place manque.
          ══════════════════════════════════════════════════════════════ */}
-      <div className="hidden flex-1 py-14 pe-14 min-[1180px]:flex">
+      <div className="hidden flex-1 items-center justify-center py-14 pe-14 min-[1180px]:flex">
         <VisuelConnexion />
       </div>
     </div>
