@@ -91,9 +91,8 @@ export default async function PageConnexionMarchand({
               strokeLinejoin="round"
               aria-hidden="true"
             >
-              <path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.55L20.5 8H6" />
-              <circle cx="10" cy="20" r="1.2" />
-              <circle cx="18" cy="20" r="1.2" />
+              <path d="M5 8h14l-1 12H6L5 8Z" />
+              <path d="M9 8V6.2a3 3 0 0 1 6 0V8" />
             </svg>
           </span>
           <span className="font-[family-name:var(--police-titre)] text-[19px] font-medium tracking-[-.005em] text-[#0a0a0a]">
@@ -114,6 +113,19 @@ export default async function PageConnexionMarchand({
           <div className="mt-[34px] w-full max-w-[452px]">
             <FormulaireConnexionMarchand />
           </div>
+
+          {/* DÉCORATIF — l'inscription libre des marchands n'existe pas : un
+              accès est ouvert par la plateforme, jamais demandé en self-service.
+              Le lien est là parce que la maquette le montre, mais il ne mène
+              nulle part et sort du parcours au clavier. */}
+          <span
+            role="link"
+            aria-disabled="true"
+            tabIndex={-1}
+            className="mt-7 cursor-default border-b border-[#d6cfc4] pb-[3px] text-[13.5px] font-medium text-[#0a0a0a] transition-colors hover:border-[#0a0a0a]"
+          >
+            {t("creerCompteMarchand")}
+          </span>
         </div>
       </div>
 
