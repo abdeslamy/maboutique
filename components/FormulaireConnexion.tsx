@@ -4,13 +4,22 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/context/AuthContext";
+import {
+  AlerteClient,
+  BoutonPrincipalClient,
+  CadreAuthClient,
+  ChampClient,
+} from "@/components/auth/CadreAuthClient";
 
 /**
- * Formulaire de connexion.
- * Appelle seConnecter() de AuthContext, qui :
- *  1. POSTe vers /api/auth/connexion,
- *  2. Si succès, met à jour l'état client (utilisateur connecté).
- * On redirige ensuite vers /compte.
+ * Connexion CLIENT — celui qui vient retrouver son compte et ses commandes.
+ *
+ * Ne pas confondre avec <FormulaireConnexionMarchand />, qui sert l'espace de
+ * gestion. Les deux écrans sont volontairement distincts à l'œil : voir
+ * CadreAuthClient pour les cinq choix qui les séparent.
+ *
+ * Appelle seConnecter() de AuthContext, qui POSTe vers /api/auth/connexion et
+ * met à jour l'état client. On redirige ensuite vers /compte.
  */
 export default function FormulaireConnexion() {
   const t = useTranslations("connexion");
@@ -35,72 +44,52 @@ export default function FormulaireConnexion() {
       return;
     }
 
-    // Connexion réussie → redirection vers /compte.
-    // router.refresh() force aussi le re-rendu des composants serveur
-    // pour qu'ils prennent en compte le nouveau cookie de session.
+    // router.refresh() force le re-rendu des composants serveur pour qu'ils
+    // prennent en compte le nouveau cookie de session.
     router.push("/compte");
     router.refresh();
   }
 
   return (
-    <section className="mx-auto max-w-md px-4 py-16">
-      <h1 className="mb-2 text-3xl font-semibold tracking-tight">
-        {t("titre")}
-      </h1>
-      <p className="mb-8 text-gray-600">{t("sousTitre")}</p>
-
-      <form onSubmit={soumettre} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-gray-700">{t("email")}</span>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            required
-            className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-base focus:border-black focus:outline-none"
-          />
-        </label>
-
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-gray-700">{t("motDePasse")}</span>
-          <input
-            type="password"
-            value={motDePasse}
-            onChange={(e) => setMotDePasse(e.target.value)}
-            autoComplete="current-password"
-            required
-            className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-base focus:border-black focus:outline-none"
-          />
-        </label>
-
-        {cleErreur && (
-          <p
-            role="alert"
-            className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+    <CadreAuthClient
+      titre={t("titre")}
+      sousTitre={t("sousTitre")}
+      bas={
+        <>
+          {t("pasDeCompte")}{" "}
+          <Link
+            href="/inscription"
+            className="font-medium text-gray-900 underline underline-offset-2"
           >
-            {t(`erreurs.${cleErreur}`)}
-          </p>
-        )}
+            {t("creerCompte")}
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={soumettre} className="flex flex-col gap-4">
+        <ChampClient
+          id="client-email"
+          label={t("email")}
+          type="email"
+          value={email}
+          onChange={setEmail}
+          autoComplete="email"
+        />
+        <ChampClient
+          id="client-mot-de-passe"
+          label={t("motDePasse")}
+          type="password"
+          value={motDePasse}
+          onChange={setMotDePasse}
+          autoComplete="current-password"
+        />
 
-        <button
-          type="submit"
-          disabled={chargement}
-          className="mt-2 rounded-full bg-black px-6 py-3 text-sm font-medium text-white transition hover:bg-gray-800 disabled:opacity-60"
-        >
+        {cleErreur && <AlerteClient>{t(`erreurs.${cleErreur}`)}</AlerteClient>}
+
+        <BoutonPrincipalClient chargement={chargement}>
           {chargement ? t("connexionEnCours") : t("seConnecter")}
-        </button>
+        </BoutonPrincipalClient>
       </form>
-
-      <p className="mt-6 text-center text-sm text-gray-600">
-        {t("pasDeCompte")}{" "}
-        <Link
-          href="/inscription"
-          className="font-medium text-black underline"
-        >
-          {t("creerCompte")}
-        </Link>
-      </p>
-    </section>
+    </CadreAuthClient>
   );
 }
