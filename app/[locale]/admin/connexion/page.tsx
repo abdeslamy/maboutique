@@ -75,10 +75,10 @@ export default async function PageConnexionMarchand({
           Colonne du formulaire — 800 px à partir de 1180, pleine largeur
           en dessous, où le visuel disparaît.
          ══════════════════════════════════════════════════════════════ */}
-      <div className="flex w-full flex-col min-[1180px]:w-[800px] min-[1180px]:shrink-0">
+      <div className="flex w-full flex-col min-[1200px]:w-[800px] min-[1200px]:shrink-0">
         {/* Logo. Centré tant que la page est seule à l'écran, ancré à gauche
             dès que le visuel apparaît à côté. */}
-        <div className="flex items-center justify-center gap-[11px] px-6 pt-11 [@media(max-height:900px)]:pt-7 min-[1180px]:justify-start min-[1180px]:ps-[60px]">
+        <div className="flex items-center justify-center gap-[11px] px-6 pt-11 [@media(max-height:900px)]:pt-7 min-[1200px]:justify-start min-[1200px]:ps-[60px]">
           <span className="flex h-[26px] w-[26px] items-center justify-center rounded-lg bg-[#0a0a0a] text-white">
             <svg
               width="15"
@@ -101,8 +101,8 @@ export default async function PageConnexionMarchand({
         </div>
 
         {/* Titre + carte, centrés verticalement dans ce qui reste. */}
-        <div className="flex flex-1 flex-col items-center justify-center px-[26px] pb-10 [@media(max-height:900px)]:pb-5 min-[1180px]:px-[60px]">
-          <h1 className="text-balance text-center font-[family-name:var(--police-titre)] text-[40px] font-light leading-[1.03] tracking-[-.018em] text-[#0a0a0a] min-[1180px]:text-[58px] min-[1180px]:[@media(max-height:900px)]:text-[46px]">
+        <div className="flex flex-1 flex-col items-center justify-center px-[26px] pb-10 [@media(max-height:900px)]:pb-5 min-[1200px]:px-[60px]">
+          <h1 className="text-balance text-center font-[family-name:var(--police-titre)] text-[40px] font-light leading-[1.03] tracking-[-.018em] text-[#0a0a0a] min-[1200px]:text-[58px] min-[1200px]:[@media(max-height:900px)]:text-[46px]">
             {t("titre")}
           </h1>
 
@@ -133,7 +133,7 @@ export default async function PageConnexionMarchand({
           Colonne du visuel — purement décorative, donc la première à
           partir quand la place manque.
          ══════════════════════════════════════════════════════════════ */}
-      <div className="hidden flex-1 items-center justify-center py-14 pe-14 min-[1180px]:flex">
+      <div className="hidden min-w-0 flex-1 py-14 pe-14 min-[1200px]:flex">
         <VisuelConnexion />
       </div>
     </div>
