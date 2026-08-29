@@ -3,17 +3,11 @@ import { Plus_Jakarta_Sans, Cairo } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { routing, type Locale } from "@/i18n/routing";
-import Navbar from "@/components/Navbar";
-import NavigationMobile from "@/components/mobile/NavigationMobile";
-import Footer from "@/components/Footer";
+import { routing } from "@/i18n/routing";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { getSession } from "@/lib/session";
 import { getUtilisateurParId } from "@/lib/auth";
-import { getCategories } from "@/lib/categories";
-import { RechercheProvider } from "@/context/RechercheContext";
-import ContenuPage from "@/components/recherche/ContenuPage";
 import "../globals.css";
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -97,18 +91,12 @@ export default async function LocaleLayout({
     }
   }
 
-  // ⚠️ PLUS AUCUN CHARGEMENT DE CATALOGUE ICI.
+  // ⚠️ AUCUN CHARGEMENT DE DONNÉES MÉTIER ICI.
   //
-  // Le layout chargeait la liste entière des produits à chaque requête de
-  // chaque page, y compris celles qui n'en affichent aucun. Trois choses en
-  // avaient besoin, et aucune n'avait besoin de la liste complète :
-  //   - le catalogue, qui la charge désormais lui-même ;
-  //   - la recherche, passée côté serveur (/api/recherche) ;
-  //   - le panier, qui ne demande que SES produits (/api/produits?ids=…).
-  // Le compteur du panier, lui, n'a jamais eu besoin que d'un nombre.
-  // Rayons de la boutique — l'overlay de recherche en a besoin sur toutes
-  // les pages, pas seulement sur le catalogue.
-  const categories = await getCategories();
+  // Ce layout est traversé par TOUTES les pages, admin comprise. Tout ce
+  // qu'on y charge est payé par des pages qui n'en ont que faire — c'est
+  // exactement ce qui pesait sur le catalogue, puis sur les rayons.
+  // L'habillage boutique et ses données vivent dans (boutique)/layout.tsx.
 
   // RTL si arabe, LTR sinon. C'est cette ligne qui retourne toute la mise en page.
   const dir = locale === "ar" ? "rtl" : "ltr";
@@ -127,50 +115,19 @@ export default async function LocaleLayout({
         */}
         <NextIntlClientProvider locale={locale} messages={messages}>
           {/*
-            AuthProvider : connaît l'utilisateur connecté (lu côté serveur depuis
-            le cookie httpOnly), expose useAuth() pour les composants client.
+            AuthProvider : connaît l'utilisateur connecté (lu côté serveur
+            depuis le cookie httpOnly), expose useAuth() aux composants client.
             CartProvider : panier persisté dans localStorage.
-            Les deux englobent Navbar + pages.
+
+            Les deux restent ICI, et non dans (boutique) : l'espace marchand a
+            besoin de useAuth() pour son bouton de déconnexion, et un marchand
+            reste un utilisateur comme un autre s'il visite sa vitrine.
+
+            Tout le reste — barre de navigation, pied de page, tab bar mobile,
+            recherche — est descendu dans (boutique)/layout.tsx.
           */}
           <AuthProvider utilisateurInitial={utilisateurInitial}>
-            <CartProvider>
-                {/* RechercheProvider rend l'overlay APRÈS le contenu de page,
-                    et donc hors de l'enveloppe qui recule pendant qu'il est
-                    ouvert. Les rayons lui sont passés ici : un composant
-                    client ne peut pas interroger Prisma. */}
-                <RechercheProvider categories={categories}>
-                  <ContenuPage>
-                {/* Navigation DESKTOP : masquee sous 640 px, ou la
-                    navigation mobile flottante prend le relais. */}
-                <div className="hidden sm:block">
-                  <Navbar locale={locale as Locale} />
-                </div>
-
-                {/* Navigation MOBILE : deux barres flottantes, sous 640 px.
-                    Les paddings compensent leur position fixe pour que le
-                    contenu ne passe jamais dessous.
-                      haut : 132 px = status bar 52 + titre/boutons + 16
-                    La reserve du BAS est portee par le pied de page, qui suit
-                    <main> : c est lui qui touche le bas du document, donc lui
-                    que la tab bar flottante recouvrirait. */}
-                <main
-                  id="contenu-principal"
-                  // Classes Tailwind plutot qu un style inline : le padding
-                  // doit disparaitre a partir de sm, et un style inline ne
-                  // peut pas etre conditionne par une media query.
-                  className="flex-1 pt-[132px] sm:pt-0"
-                >
-                  {children}
-                </main>
-                <Footer />
-                  </ContenuPage>
-
-                  {/* Hors de l'enveloppe : les barres flottantes sont en
-                      position fixed et doivent le rester par rapport au
-                      viewport, pas par rapport au conteneur transformé. */}
-                  <NavigationMobile />
-                </RechercheProvider>
-              </CartProvider>
+            <CartProvider>{children}</CartProvider>
           </AuthProvider>
         </NextIntlClientProvider>
       </body>

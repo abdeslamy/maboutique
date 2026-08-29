@@ -574,7 +574,35 @@
       "erreur_serveur": "Une erreur est survenue. Réessayez dans un instant.",
       "trop_de_tentatives": "Trop de tentatives. Patientez quelques minutes avant de réessayer.",
       "pas_marchand": "Ce compte est un compte client : il n'a pas d'espace de gestion."
-    }
+    },
+    "marque": "Ma Boutique",
+    "visuel": {
+      "ventesTitre": "Ventes du jour",
+      "ventesDate": "Lun. 28 août",
+      "ventesMontant": "42 180",
+      "devise": "DA",
+      "ventesEvolution": "+12,4 %",
+      "kpiCommandes": "Commandes",
+      "kpiCommandesValeur": "38",
+      "kpiPanier": "Panier moyen",
+      "kpiPanierValeur": "1 110 DA",
+      "kpiConversion": "Conversion",
+      "kpiConversionValeur": "3,4 %",
+      "notifTitre": "Nouvelle commande",
+      "notifDetail": "Chèche coton indigo · 3 400 DA",
+      "commandesTitre": "Dernières commandes",
+      "produitVase": "Vase en terre cuite",
+      "produitVasePrix": "5 900 DA",
+      "produitCheche": "Chèche coton indigo",
+      "produitChechePrix": "3 400 DA",
+      "produitSavon": "Savon d'Alep",
+      "produitSavonPrix": "1 200 DA",
+      "produitSac": "Sac cabas toile",
+      "produitSacPrix": "2 800 DA",
+      "alt": "Aperçu de l'espace marchand : ventes du jour, dernières commandes et fiches produit."
+    },
+    "emailPlaceholder": "Saisissez votre e-mail",
+    "motDePassePlaceholder": "Votre mot de passe"
   },
   "inscription": {
     "titre": "Créer un compte",

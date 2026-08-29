@@ -278,8 +278,11 @@ export default function SidebarAdmin({
           DESKTOP — sidebar permanente, rétractable
          ══════════════════════════════════════════════════════════════ */}
       <aside
-        // top-16 = hauteur de la navbar du site (elle est sticky).
-        className={`sticky top-16 z-30 hidden h-[calc(100vh-4rem)] shrink-0 flex-col border-e border-gray-100 bg-white transition-[width] duration-200 ease-out sm:flex ${
+        // Collée en haut du viewport, sur toute sa hauteur. Elle réservait
+        // auparavant 4rem pour la navbar de la boutique, qui passait au-dessus
+        // de l'admin ; cette navbar est redescendue dans (boutique) et ne
+        // traverse plus l'espace marchand.
+        className={`sticky top-0 z-30 hidden h-screen shrink-0 flex-col border-e border-gray-100 bg-white transition-[width] duration-200 ease-out sm:flex ${
           reduit ? "w-[68px]" : "w-64"
         }`}
       >

@@ -574,7 +574,35 @@
       "erreur_serveur": "حدث خطأ. أعد المحاولة بعد قليل.",
       "trop_de_tentatives": "محاولات كثيرة جدًا. انتظر بضع دقائق قبل إعادة المحاولة.",
       "pas_marchand": "هذا حساب زبون: لا تتوفر له مساحة إدارة."
-    }
+    },
+    "marque": "متجري",
+    "visuel": {
+      "ventesTitre": "مبيعات اليوم",
+      "ventesDate": "الإثنين 28 أوت",
+      "ventesMontant": "42 180",
+      "devise": "د.ج",
+      "ventesEvolution": "+12,4 %",
+      "kpiCommandes": "الطلبات",
+      "kpiCommandesValeur": "38",
+      "kpiPanier": "متوسط السلة",
+      "kpiPanierValeur": "1 110 د.ج",
+      "kpiConversion": "معدل التحويل",
+      "kpiConversionValeur": "3,4 %",
+      "notifTitre": "طلب جديد",
+      "notifDetail": "شاش قطني نيلي · 3 400 د.ج",
+      "commandesTitre": "آخر الطلبات",
+      "produitVase": "مزهرية من الطين",
+      "produitVasePrix": "5 900 د.ج",
+      "produitCheche": "شاش قطني نيلي",
+      "produitChechePrix": "3 400 د.ج",
+      "produitSavon": "صابون حلبي",
+      "produitSavonPrix": "1 200 د.ج",
+      "produitSac": "حقيبة قماشية",
+      "produitSacPrix": "2 800 د.ج",
+      "alt": "لمحة عن مساحة التاجر: مبيعات اليوم، آخر الطلبات وبطاقات المنتجات."
+    },
+    "emailPlaceholder": "أدخل بريدك الإلكتروني",
+    "motDePassePlaceholder": "كلمة المرور"
   },
   "inscription": {
     "titre": "إنشاء حساب",
