@@ -1,3 +1,5 @@
+import { OMBRE, Panneau } from "@/components/admin/visuel/jetons";
+
 /**
  * Le panneau décoratif de la page de connexion marchand — ce qu'on aperçoit
  * « derrière le rideau ».
@@ -32,23 +34,6 @@
  * Masqué sous 1200 px : sur un écran étroit, le formulaire prend toute la
  * place. Aucune tentative de réagencer ces cartes.
  */
-
-/** Pile typographique de l'interface — celle de la maquette, pas celle du site. */
-const POLICE_UI =
-  "-apple-system, 'SF Pro Text', Helvetica, sans-serif";
-
-/**
- * Ombres à trois valeurs. Une ombre simple aplatirait l'empilement : c'est la
- * combinaison d'une ombre large et diffuse avec une ombre courte et dense qui
- * donne sa profondeur au dessin.
- */
-const OMBRE = {
-  panneau: "0 18px 44px rgba(52,42,28,.10), 0 2px 6px rgba(52,42,28,.04)",
-  ventes: "0 20px 44px rgba(52,42,28,.12), 0 2px 5px rgba(52,42,28,.04)",
-  notification: "0 16px 36px rgba(52,42,28,.14), 0 2px 5px rgba(52,42,28,.04)",
-  commandes: "0 16px 36px rgba(52,42,28,.12), 0 2px 5px rgba(52,42,28,.04)",
-  produits: "0 20px 44px rgba(52,42,28,.13), 0 2px 5px rgba(52,42,28,.04)",
-} as const;
 
 // ── Icônes ────────────────────────────────────────────────────────────────
 // Tracés repris mot pour mot de la spec. Aucune bibliothèque d'icônes : les
@@ -206,16 +191,7 @@ const PRODUITS = [
 
 export default function VisuelConnexion() {
   return (
-    <div
-      dir="ltr"
-      aria-hidden="true"
-      // Pas de `h-full` : la boîte est un élément flex qui s'étire déjà à la
-      // hauteur de sa colonne. Un `height: 100%` créerait une dépendance
-      // circulaire — la colonne attend la hauteur de son contenu, le contenu
-      // attend celle de la colonne.
-      className="relative w-full overflow-hidden rounded-[40px] bg-[#fcfaf6]"
-      style={{ fontFamily: POLICE_UI, boxShadow: OMBRE.panneau }}
-    >
+    <Panneau>
       {/* ══ Carte 1 — Today's sales ═══════════════════════════════════════
           Alignement à préserver : la zone de contenu fait 400 px (452 − 2×26)
           et le SVG fait exactement 400. La fin de la courbe, le bord droit de
@@ -224,7 +200,7 @@ export default function VisuelConnexion() {
           SVG casse ce calage. */}
       <div
         className="absolute left-[-40px] top-[56px] z-[1] w-[452px] rounded-3xl bg-white px-[26px] py-6"
-        style={{ boxShadow: OMBRE.ventes }}
+        style={{ boxShadow: OMBRE.principale }}
       >
         <div className="flex items-center justify-between">
           <span className="text-[14px] font-semibold leading-none text-[#0a0a0a]">
@@ -327,7 +303,7 @@ export default function VisuelConnexion() {
           moitié. Ne pas raccourcir la liste pour « arranger » ça. */}
       <div
         className="absolute right-[-28px] top-[462px] z-[2] w-[300px] rounded-[20px] bg-white px-5 py-[18px]"
-        style={{ boxShadow: OMBRE.commandes }}
+        style={{ boxShadow: OMBRE.liste }}
       >
         <div className="text-[13px] font-semibold leading-none text-[#0a0a0a]">
           Latest orders
@@ -371,6 +347,6 @@ export default function VisuelConnexion() {
           </div>
         ))}
       </div>
-    </div>
+    </Panneau>
   );
 }

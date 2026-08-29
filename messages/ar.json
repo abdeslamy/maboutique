@@ -578,12 +578,29 @@
     "marque": "متجري",
     "emailPlaceholder": "أدخل بريدك الإلكتروني",
     "motDePassePlaceholder": "كلمة المرور",
+    "continuerEmail": "المتابعة بالبريد الإلكتروني",
+    "creerCompteMarchand": "افتح متجرًا"
+  },
+  "authMarchand": {
     "continuerGoogle": "المتابعة مع Google",
     "continuerApple": "المتابعة مع Apple",
     "ou": "أو",
-    "continuerEmail": "المتابعة بالبريد الإلكتروني",
-    "mentions": "بالمتابعة، أنت توافق على <cgu>شروط الاستخدام</cgu> و<confid>سياسة الخصوصية</confid>.",
-    "creerCompteMarchand": "إنشاء حساب تاجر"
+    "mentions": "بالمتابعة، أنت توافق على <cgu>شروط الاستخدام</cgu> و<confid>سياسة الخصوصية</confid>."
+  },
+  "inscriptionMarchand": {
+    "titre": "افتح متجرك",
+    "sousTitre": "بضع دقائق تكفي. الباقي يُضبط في الطريق.",
+    "nomBoutique": "اسم المتجر",
+    "nomBoutiquePlaceholder": "اسم متجرك",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "أدخل بريدك الإلكتروني",
+    "motDePasse": "كلمة المرور",
+    "motDePassePlaceholder": "اختر كلمة مرور",
+    "creer": "أنشئ متجري",
+    "creationEnCours": "جارٍ الإنشاء…",
+    "dejaUnCompte": "لديك متجر بالفعل؟",
+    "seConnecter": "تسجيل الدخول",
+    "indisponible": "فتح المتاجر غير متاح بعد. راسلنا وسنفتح لك حسابًا."
   },
   "inscription": {
     "titre": "إنشاء حساب",

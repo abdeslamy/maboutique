@@ -578,12 +578,29 @@
     "marque": "Ma Boutique",
     "emailPlaceholder": "Saisissez votre e-mail",
     "motDePassePlaceholder": "Votre mot de passe",
+    "continuerEmail": "Continuer avec l'e-mail",
+    "creerCompteMarchand": "Ouvrir une boutique"
+  },
+  "authMarchand": {
     "continuerGoogle": "Continuer avec Google",
     "continuerApple": "Continuer avec Apple",
     "ou": "OU",
-    "continuerEmail": "Continuer avec l'e-mail",
-    "mentions": "En continuant, vous acceptez les <cgu>CGU</cgu> et la <confid>politique de confidentialité</confid>.",
-    "creerCompteMarchand": "Créer un compte marchand"
+    "mentions": "En continuant, vous acceptez les <cgu>CGU</cgu> et la <confid>politique de confidentialité</confid>."
+  },
+  "inscriptionMarchand": {
+    "titre": "Ouvrez boutique",
+    "sousTitre": "Quelques minutes suffisent. Le reste s'installe en chemin.",
+    "nomBoutique": "Nom de la boutique",
+    "nomBoutiquePlaceholder": "Le nom de votre boutique",
+    "email": "Adresse email",
+    "emailPlaceholder": "Saisissez votre e-mail",
+    "motDePasse": "Mot de passe",
+    "motDePassePlaceholder": "Choisissez un mot de passe",
+    "creer": "Créer ma boutique",
+    "creationEnCours": "Création…",
+    "dejaUnCompte": "Vous avez déjà une boutique ?",
+    "seConnecter": "Se connecter",
+    "indisponible": "L'ouverture de boutique n'est pas encore ouverte. Écrivez-nous et nous vous ouvrons un accès."
   },
   "inscription": {
     "titre": "Créer un compte",
