@@ -36,6 +36,22 @@ import { useAuth } from "@/context/AuthContext";
  * du dessus.
  */
 
+/**
+ * Cadre commun aux deux logos.
+ *
+ * Sans lui, les deux boutons n'auraient pas le même retrait : le cadre SVG de
+ * Google fait 18 px, celui d'Apple 22, et comme le contenu du bouton est
+ * centré, l'écart se répercuterait sur le libellé — 2 px de décalage entre les
+ * deux lignes. Un cadre fixe de 22 px les aligne exactement.
+ */
+function CadreLogo({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="flex h-[22px] w-[22px] shrink-0 items-center justify-center">
+      {children}
+    </span>
+  );
+}
+
 /** Logo Google, quatre couleurs, 18 px. */
 function LogoGoogle() {
   return (
@@ -60,10 +76,21 @@ function LogoGoogle() {
   );
 }
 
-/** Logo Apple, monochrome, 17 px. */
+/**
+ * Logo Apple, monochrome.
+ *
+ * Rendu à 22 px et non 18 comme Google, et ce n'est pas une erreur : les deux
+ * dessins ne remplissent pas leur cadre de la même façon. Mesuré — Google
+ * occupe 91,7 % de son viewBox, Apple seulement 75 %. À cadre égal, la pomme
+ * paraissait un cinquième plus petite.
+ *
+ * 16,5 / 0,75 = 22 : les deux glyphes font désormais 16,5 px optiques. Leurs
+ * centres coïncidaient déjà avec celui du viewBox, l'alignement vertical
+ * n'avait rien à corriger.
+ */
 function LogoApple() {
   return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="#0a0a0a" aria-hidden="true">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="#0a0a0a" aria-hidden="true">
       <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08ZM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25Z" />
     </svg>
   );
@@ -133,7 +160,7 @@ export default function FormulaireConnexionMarchand() {
 
   return (
     <div
-      className="w-full max-w-[452px] rounded-[28px] border border-[#f4f1ec] bg-white px-[34px] pb-7 pt-[34px]"
+      className="w-full max-w-[452px] rounded-[28px] border border-[#f4f1ec] bg-white px-[34px] pb-7 pt-[34px] [@media(max-height:900px)]:pb-5 [@media(max-height:900px)]:pt-6"
       style={{
         boxShadow: "0 20px 48px rgba(52,42,28,.09), 0 2px 6px rgba(52,42,28,.04)",
       }}
@@ -147,7 +174,9 @@ export default function FormulaireConnexionMarchand() {
           className={boutonOAuth}
           style={{ boxShadow: "0 1px 2px rgba(17,17,17,.04)" }}
         >
-          <LogoGoogle />
+          <CadreLogo>
+            <LogoGoogle />
+          </CadreLogo>
           {t("continuerGoogle")}
         </button>
 
@@ -158,13 +187,15 @@ export default function FormulaireConnexionMarchand() {
           className={boutonOAuth}
           style={{ boxShadow: "0 1px 2px rgba(17,17,17,.04)" }}
         >
-          <LogoApple />
+          <CadreLogo>
+            <LogoApple />
+          </CadreLogo>
           {t("continuerApple")}
         </button>
       </div>
 
       {/* ── Séparateur ─────────────────────────────────────────────────── */}
-      <div className="my-[22px] flex items-center gap-3.5">
+      <div className="my-[22px] [@media(max-height:900px)]:my-3.5 flex items-center gap-3.5">
         <span className="h-px flex-1 bg-[#e9e4db]" />
         <span className="text-[11.5px] font-medium tracking-[.09em] text-[#9a9288]">
           {t("ou")}
@@ -237,7 +268,7 @@ export default function FormulaireConnexionMarchand() {
       </form>
 
       {/* ── DÉCORATIF : les pages CGU et confidentialité n'existent pas ── */}
-      <p className="mt-5 text-center text-[12.5px] leading-[1.55] text-[#8b8377]">
+      <p className="mt-5 [@media(max-height:900px)]:mt-3.5 text-center text-[12.5px] leading-[1.55] text-[#8b8377]">
         {t.rich("mentions", { cgu: mentionSoulignee, confid: mentionSoulignee })}
       </p>
     </div>

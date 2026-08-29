@@ -78,7 +78,7 @@ export default async function PageConnexionMarchand({
       <div className="flex w-full flex-col min-[1180px]:w-[800px] min-[1180px]:shrink-0">
         {/* Logo. Centré tant que la page est seule à l'écran, ancré à gauche
             dès que le visuel apparaît à côté. */}
-        <div className="flex items-center justify-center gap-[11px] px-6 pt-11 min-[1180px]:justify-start min-[1180px]:ps-[60px]">
+        <div className="flex items-center justify-center gap-[11px] px-6 pt-11 [@media(max-height:900px)]:pt-7 min-[1180px]:justify-start min-[1180px]:ps-[60px]">
           <span className="flex h-[26px] w-[26px] items-center justify-center rounded-lg bg-[#0a0a0a] text-white">
             <svg
               width="15"
@@ -101,16 +101,16 @@ export default async function PageConnexionMarchand({
         </div>
 
         {/* Titre + carte, centrés verticalement dans ce qui reste. */}
-        <div className="flex flex-1 flex-col items-center justify-center px-[26px] pb-10 min-[1180px]:px-[60px]">
-          <h1 className="text-balance text-center font-[family-name:var(--police-titre)] text-[40px] font-light leading-[1.03] tracking-[-.018em] text-[#0a0a0a] min-[1180px]:text-[58px]">
+        <div className="flex flex-1 flex-col items-center justify-center px-[26px] pb-10 [@media(max-height:900px)]:pb-5 min-[1180px]:px-[60px]">
+          <h1 className="text-balance text-center font-[family-name:var(--police-titre)] text-[40px] font-light leading-[1.03] tracking-[-.018em] text-[#0a0a0a] min-[1180px]:text-[58px] min-[1180px]:[@media(max-height:900px)]:text-[46px]">
             {t("titre")}
           </h1>
 
-          <p className="mt-[18px] max-w-[404px] text-pretty text-center font-[family-name:var(--police-titre)] text-[17.5px] leading-[1.45] text-[#5d564d]">
+          <p className="mt-[18px] [@media(max-height:900px)]:mt-3.5 max-w-[404px] text-pretty text-center font-[family-name:var(--police-titre)] text-[17.5px] leading-[1.45] text-[#5d564d]">
             {t("sousTitre")}
           </p>
 
-          <div className="mt-[34px] w-full max-w-[452px]">
+          <div className="mt-[34px] [@media(max-height:900px)]:mt-[22px] w-full max-w-[452px]">
             <FormulaireConnexionMarchand />
           </div>
 
@@ -122,7 +122,7 @@ export default async function PageConnexionMarchand({
             role="link"
             aria-disabled="true"
             tabIndex={-1}
-            className="mt-7 cursor-default border-b border-[#d6cfc4] pb-[3px] text-[13.5px] font-medium text-[#0a0a0a] transition-colors hover:border-[#0a0a0a]"
+            className="mt-7 [@media(max-height:900px)]:mt-[18px] cursor-default border-b border-[#d6cfc4] pb-[3px] text-[13.5px] font-medium text-[#0a0a0a] transition-colors hover:border-[#0a0a0a]"
           >
             {t("creerCompteMarchand")}
           </span>
@@ -133,7 +133,7 @@ export default async function PageConnexionMarchand({
           Colonne du visuel — purement décorative, donc la première à
           partir quand la place manque.
          ══════════════════════════════════════════════════════════════ */}
-      <div className="hidden flex-1 py-14 pe-14 min-[1180px]:block">
+      <div className="hidden flex-1 py-14 pe-14 min-[1180px]:flex">
         <VisuelConnexion />
       </div>
     </div>
