@@ -558,6 +558,23 @@
       "trop_de_tentatives": "Trop de tentatives. Patientez quelques minutes avant de réessayer."
     }
   },
+  "connexionMarchand": {
+    "titre": "Levez le rideau",
+    "sousTitre": "Vos produits, vos commandes et vos clients vous attendent derrière.",
+    "email": "Adresse email",
+    "motDePasse": "Mot de passe",
+    "seConnecter": "Entrer",
+    "connexionEnCours": "Connexion…",
+    "retourBoutique": "Retourner à la boutique",
+    "erreurs": {
+      "champs_manquants": "Veuillez saisir votre email et votre mot de passe.",
+      "identifiants_invalides": "Email ou mot de passe incorrect.",
+      "json_invalide": "Données invalides.",
+      "erreur_serveur": "Une erreur est survenue. Réessayez dans un instant.",
+      "trop_de_tentatives": "Trop de tentatives. Patientez quelques minutes avant de réessayer.",
+      "pas_marchand": "Ce compte est un compte client : il n'a pas d'espace de gestion."
+    }
+  },
   "inscription": {
     "titre": "Créer un compte",
     "sousTitre": "Inscrivez-vous pour suivre vos commandes.",

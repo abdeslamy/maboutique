@@ -22,8 +22,15 @@ export type UtilisateurPublic = {
   role: "user" | "admin";
 };
 
+// Le rôle est renvoyé avec le succès. Sans lui, un appelant qui veut router
+// selon le rôle devrait lire `utilisateur` juste après l'appel — or le state
+// React n'est pas encore committé à cet instant, et il lirait la valeur
+// PRÉCÉDENTE (null). Le rôle voyage donc dans le résultat.
+//
+// ⚠️ Affichage et aiguillage seulement. La garde qui compte est côté serveur
+// (lib/admin.ts), qui relit le rôle en base à chaque requête.
 type ResultatConnexion =
-  | { ok: true }
+  | { ok: true; role: "user" | "admin" }
   | { ok: false; cleErreur: string };
 
 type AuthContextType = {
@@ -62,7 +69,7 @@ export function AuthProvider({
         return { ok: false, cleErreur: data.erreur ?? "erreur_serveur" };
       }
       setUtilisateur(data.utilisateur);
-      return { ok: true };
+      return { ok: true, role: data.utilisateur?.role === "admin" ? "admin" : "user" };
     } catch {
       return { ok: false, cleErreur: "erreur_serveur" };
     }
