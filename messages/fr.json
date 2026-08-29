@@ -57,7 +57,8 @@
       "menu": "Menu",
       "fermer": "Fermer le menu",
       "role": "Administrateur",
-      "voirBoutique": "Retour à la boutique"
+      "voirBoutique": "Retour à la boutique",
+      "deconnexion": "Déconnexion"
     },
     "dashboard": {
       "kpi": {

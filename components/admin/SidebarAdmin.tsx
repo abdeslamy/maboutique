@@ -11,9 +11,11 @@ import {
   ChevronRight,
   ChevronLeft,
   Store,
+  LogOut,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Link, usePathname } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { useAuth } from "@/context/AuthContext";
 import Avatar from "@/components/Avatar";
 
 /**
@@ -62,9 +64,27 @@ export default function SidebarAdmin({
 }) {
   const tNav = useTranslations("admin.onglets");
   const pathname = usePathname();
+  const router = useRouter();
+  const { seDeconnecter } = useAuth();
 
   const [reduit, setReduit] = useState(reduitInitial);
   const [tiroirOuvert, setTiroirOuvert] = useState(false);
+  const [deconnexionEnCours, setDeconnexionEnCours] = useState(false);
+
+  // Le marchand repart de SA porte, pas de la vitrine. Il vient de quitter son
+  // espace de gestion : le renvoyer sur la boutique le sortirait du contexte
+  // dans lequel il travaillait, et l'obligerait à retrouver /admin/connexion
+  // pour revenir.
+  //
+  // router.refresh() est indispensable : sans lui, le layout servirait encore
+  // la page protégée depuis son cache, alors que le cookie a disparu.
+  async function deconnecter() {
+    setDeconnexionEnCours(true);
+    setTiroirOuvert(false);
+    await seDeconnecter();
+    router.push("/admin/connexion");
+    router.refresh();
+  }
 
   // Le tiroir se referme dès qu'on navigue.
   useEffect(() => {
@@ -218,16 +238,38 @@ export default function SidebarAdmin({
             </ul>
           </nav>
 
-          {/* Pied : sortie vers la boutique */}
-          <div className="border-t border-gray-100 px-5 py-5">
+          {/* Pied : deux sorties, et elles ne veulent pas dire la même chose.
+              Voir la boutique = je reste connecté, je vais regarder ma vitrine.
+              Déconnexion = je ferme ma session de gestion. */}
+          <div className="flex flex-col gap-1 border-t border-gray-100 px-4 py-4">
             <Link
               href="/"
               tabIndex={tiroirOuvert ? 0 : -1}
-              className="flex items-center justify-center gap-2 text-[15px] font-medium text-gray-700 transition-colors hover:text-gray-900"
+              className="flex items-center gap-3 rounded-lg px-2 py-2.5 text-[15px] font-medium text-gray-700 transition-colors active:bg-gray-50"
             >
-              <Store className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+              <Store
+                className="h-[18px] w-[18px] shrink-0"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
               {tNav("voirBoutique")}
             </Link>
+            <button
+              type="button"
+              onClick={deconnecter}
+              disabled={deconnexionEnCours}
+              tabIndex={tiroirOuvert ? 0 : -1}
+              className="flex items-center gap-3 rounded-lg px-2 py-2.5 text-start text-[15px] font-medium text-red-600 transition-colors active:bg-red-50 disabled:opacity-60"
+            >
+              {/* La flèche sort d'une porte : en RTL elle doit sortir de
+                  l'autre côté, sinon elle pointe vers l'intérieur. */}
+              <LogOut
+                className="h-[18px] w-[18px] shrink-0 rtl:-scale-x-100"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
+              {tNav("deconnexion")}
+            </button>
           </div>
         </aside>
       </div>
@@ -322,6 +364,47 @@ export default function SidebarAdmin({
           </ul>
         </nav>
 
+        {/* Le desktop n'avait AUCUN pied : ni déconnexion, ni même retour à la
+            boutique. Le marchand devait sortir sur la vitrine et passer par le
+            menu client pour fermer sa session — soit exactement le mélange des
+            deux espaces qu'on cherche à défaire.
+
+            Réduite, la barre ne garde que les icônes : d'où les infobulles
+            natives, seul libellé disponible dans cet état. */}
+        <div className="mx-3 h-px bg-gray-100" />
+        <div className="flex flex-col gap-1 p-3">
+          <Link
+            href="/"
+            title={reduit ? tNav("voirBoutique") : undefined}
+            className={`flex items-center gap-3 rounded-lg text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 ${
+              reduit ? "justify-center px-0 py-2.5" : "px-3 py-2.5"
+            }`}
+          >
+            <Store
+              className="h-[18px] w-[18px] shrink-0 text-gray-500"
+              strokeWidth={1.75}
+              aria-hidden="true"
+            />
+            {!reduit && <span className="truncate">{tNav("voirBoutique")}</span>}
+          </Link>
+
+          <button
+            type="button"
+            onClick={deconnecter}
+            disabled={deconnexionEnCours}
+            title={reduit ? tNav("deconnexion") : undefined}
+            className={`flex items-center gap-3 rounded-lg text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 ${
+              reduit ? "justify-center px-0 py-2.5" : "px-3 py-2.5"
+            }`}
+          >
+            <LogOut
+              className="h-[18px] w-[18px] shrink-0 rtl:-scale-x-100"
+              strokeWidth={1.75}
+              aria-hidden="true"
+            />
+            {!reduit && <span className="truncate">{tNav("deconnexion")}</span>}
+          </button>
+        </div>
       </aside>
     </>
   );
