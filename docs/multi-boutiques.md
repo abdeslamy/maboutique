@@ -42,6 +42,86 @@ Les scripts hors requête HTTP (`prisma/seed.ts`, maintenance) n'ont pas d'hôte
 
 ---
 
+## 2 bis. Où vivent les adresses
+
+Décidé au moment de séparer la connexion marchand de celle des clients. Rien
+de tout cela n'est implémenté — tout tient encore sur un seul domaine — mais la
+règle doit être écrite **avant** les domaines personnalisés, parce qu'après
+elle coûte une migration d'authentification.
+
+**Règle : la vitrine porte le nom du marchand, l'administration porte le
+nôtre.**
+
+| | Adresse | Qui possède le nom |
+|---|---|---|
+| Vitrine client | `www.tyradam.com` ou `tyradam.laplateforme.dz` | le marchand |
+| Compte client | même domaine que sa vitrine | le marchand |
+| **Administration** | **`admin.laplateforme.dz`** — une seule, tous marchands confondus | **nous** |
+
+L'adresse d'administration ne dit pas quelle boutique : c'est la **session**
+qui le dit. La boutique apparaît ensuite dans le chemin
+(`admin.laplateforme.dz/coursa/produits`) pour que les liens soient
+partageables et qu'un marchand à deux boutiques bascule sans se reconnecter.
+Ce chemin est un confort de navigation, **jamais une barrière** : c'est le
+serveur qui vérifie l'appartenance.
+
+### Pourquoi l'admin ne descend jamais sur le domaine d'un marchand
+
+**1. Les scripts tiers de la vitrine.** Un marchand installe un pixel, un
+widget d'avis, un chat. C'est notre métier de le lui permettre, et il ne les a
+pas écrits. Si la session d'administration est un cookie posé sur son domaine,
+une faille dans le moindre de ces scripts ne vole plus un panier : elle vole le
+back-office. Sur une origine séparée, ce chemin **n'existe pas** — le
+navigateur le refuse.
+
+**2. Le DNS appartient au marchand.** Domaine expiré, registrar compromis,
+marchand parti fâché : le nom pointe où quelqu'un d'autre décide. Déléguer son
+contrôle d'accès à un client n'est pas une option.
+
+### Le piège du sous-domaine
+
+`admin.tyradam.com` semble régler le problème 1. Il ne le règle qu'à moitié,
+et pas du tout le problème 2 :
+
+- **Les cookies n'obéissent pas à la règle d'origine.** Deux sous-domaines sont
+  bien deux origines — la vitrine ne peut pas *lire* le cookie de l'admin. Mais
+  elle peut en **écrire** un sur `.tyradam.com`, que l'admin recevra sans
+  pouvoir dire qui l'a posé. C'est la fixation de session par sous-domaine. Le
+  préfixe `__Host-` s'en défend, mais c'est une parade à un problème que
+  l'autre option n'a pas.
+- **`SameSite=Lax` ne protège pas** entre sous-domaines : pour le navigateur,
+  c'est le même *site*.
+- **Un certificat et une ligne DNS par marchand**, contre un seul nom d'hôte.
+- **Le marchand sans domaine** aurait son admin en
+  `admin.tyradam.laplateforme.dz` — non couvert par le joker
+  `*.laplateforme.dz`, qui ne vaut que pour un seul niveau. Puis son adresse
+  d'admin changerait le jour où il achète son domaine.
+
+### État actuel
+
+`/admin/connexion` (voir `app/[locale]/admin/`). Tant que tout tient sur un
+domaine, c'est la bonne forme : l'origine séparée n'apporterait rien de plus.
+
+Le groupe de routes `(espace)` porte le garde et la barre latérale ;
+`connexion/` reste dehors, **sans quoi la page de connexion se redirigerait
+vers elle-même sans fin**. C'est aussi ce découpage qui rendra le déménagement
+mécanique le jour venu.
+
+### Question ouverte, en amont de tout le reste
+
+**Le client est-il global à la plateforme, ou propre à une boutique ?**
+Aujourd'hui il porte un `boutiqueId` : il appartient à une boutique. Une
+marketplace agrégée suppose qu'il navigue entre elles.
+
+Conséquence à connaître : avec des domaines personnalisés, **un client connecté
+sur `tyradam.com` ne l'est pas sur `coursa.com`** — cookies différents,
+domaines différents, et c'est le navigateur qui l'impose. Une session client
+valable partout demanderait une origine d'identité centrale
+(`compte.laplateforme.dz`) et une redirection de type OIDC. C'est un
+chantier, pas un réglage.
+
+---
+
 ## 3. Schéma
 
 | Table | Étiquette | Clé primaire |
@@ -88,7 +168,10 @@ les URLs des fiches produit et le panier en `localStorage`.
 | `visibleMarketplace` (un marchand peut refuser la vitrine agrégée) | ✅ Champ posé, non exploité |
 | Garde-fou automatique (extension Prisma) | ✅ Fait, 13 cas testés |
 | Row Level Security PostgreSQL (second filet) | ⬜ Voir §5 bis — coût réel à peser |
+| Connexion marchand séparée de celle des clients | ✅ Fait — `/admin/connexion`, voir §2 bis |
+| Règle des origines (vitrine / administration) | ✅ Décidée et écrite, §2 bis — non implémentée |
 | Résolution par domaine | ⬜ Étape suivante |
+| Table d'appartenance (`utilisateur × boutique × rôle`) | ⬜ Avant le marchand n° 2 |
 | Identité produit globale | ⬜ Avant le marchand n° 2 |
 | Thème et personnalisation par boutique | ⬜ Plus tard |
 
@@ -146,6 +229,14 @@ autres**. Les deux sont désormais filtrés.
 stock passait par `update({ where: { id } })`. Devenu `updateMany` avec
 l'étiquette : un admin ne peut pas modifier le stock d'un autre marchand, même
 en devinant un identifiant.
+
+**Un layout protège sa propre page de connexion.** Le layout `/admin` appelle
+`requireAdmin()`, donc tout ce qui vit sous lui est gardé — page de connexion
+comprise, qui redirigeait alors vers elle-même sans fin. La sortie est un
+groupe de routes : `(espace)` porte le garde, `connexion/` reste dehors, et
+les URLs ne bougent pas puisque les parenthèses n'apparaissent pas dedans. Le
+piège se reproduira à l'identique pour « mot de passe oublié » et pour toute
+page publique qu'on voudra loger sous `/admin`.
 
 **Le seuil de livraison gratuite est par marchand.** Sur un panier marketplace
 à trois marchands, trois seuils distincts sont évalués — le client peut n'en
