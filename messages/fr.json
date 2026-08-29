@@ -559,6 +559,11 @@
       "trop_de_tentatives": "Trop de tentatives. Patientez quelques minutes avant de réessayer."
     }
   },
+  "authClient": {
+    "avantageSuivi": "Suivez vos commandes",
+    "avantageLivraison": "Livraison dans les 58 wilayas",
+    "avantagePaiement": "Paiement à la livraison"
+  },
   "connexionMarchand": {
     "titre": "Levez le rideau",
     "sousTitre": "Vos produits, vos commandes et vos clients vous attendent derrière.",

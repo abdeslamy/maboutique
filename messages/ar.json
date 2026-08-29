@@ -559,6 +559,11 @@
       "trop_de_tentatives": "محاولات كثيرة جدًا. انتظر بضع دقائق قبل إعادة المحاولة."
     }
   },
+  "authClient": {
+    "avantageSuivi": "تابع طلباتك",
+    "avantageLivraison": "توصيل إلى 58 ولاية",
+    "avantagePaiement": "الدفع عند الاستلام"
+  },
   "connexionMarchand": {
     "titre": "ارفع الستار",
     "sousTitre": "منتجاتك وطلباتك وزبائنك في انتظارك خلفه.",
