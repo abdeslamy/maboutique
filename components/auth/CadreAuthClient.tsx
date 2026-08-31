@@ -106,22 +106,35 @@ export function CadreAuthClient({
     // Bande pleine largeur, très légèrement teintée : elle détache aussi bien
     // la carte blanche que le panneau crème, et fait lire tout le bloc comme
     // une zone à part dans la boutique.
+    //
+    // Le rythme vertical est celui du cadre vendeur — 18 sous le titre, 34
+    // avant la carte, 34 de retrait dedans, 7 pour le lien du bas — et il
+    // bascule au même seuil de 1200 px, avec le même resserrement sur les
+    // écrans peu hauts. C'est ce reglage, pas la couleur, qui faisait paraître
+    // la page vendeur mieux tenue.
     <div className="w-full bg-[#f7f7f6]">
-      <div className="mx-auto flex max-w-6xl items-center gap-14 px-4 py-14 sm:px-6 lg:py-16">
-        {/* ── Colonne du formulaire ─────────────────────────────────── */}
-        <div className="mx-auto w-full max-w-[452px] lg:mx-0 lg:shrink-0">
-          <h1 className="text-center text-[30px] font-semibold leading-[1.15] tracking-tight text-gray-900 sm:text-[34px]">
-            {titre}
-          </h1>
-          <p className="mx-auto mt-3 max-w-[380px] text-pretty text-center text-[15.5px] leading-[1.5] text-gray-500">
-            {sousTitre}
-          </p>
+      <div className="mx-auto flex w-full max-w-[1240px] items-stretch px-4 sm:px-6">
+        {/* ── Colonne du formulaire ─────────────────────────────────────
+            560 px à partir de 1200, pour que la carte de 452 respire au lieu
+            d'être plaquée contre le panneau. */}
+        <div className="flex w-full flex-col justify-center py-14 [@media(max-height:899px)]:py-10 min-[1200px]:w-[560px] min-[1200px]:shrink-0 min-[1200px]:pe-14">
+          <div className="mx-auto w-full max-w-[452px]">
+            <h1 className="text-balance text-center text-[34px] font-semibold leading-[1.08] tracking-[-.02em] text-gray-900 min-[1200px]:text-[46px] min-[1200px]:[@media(max-height:899px)]:text-[38px]">
+              {titre}
+            </h1>
+            <p className="mx-auto mt-[18px] max-w-[404px] text-pretty text-center text-[16.5px] leading-[1.45] text-gray-500 [@media(max-height:899px)]:mt-3.5">
+              {sousTitre}
+            </p>
 
-          <div className="mt-8 rounded-3xl border border-gray-200/70 bg-white p-6 shadow-[0_16px_40px_rgba(17,17,17,.07),0_2px_6px_rgba(17,17,17,.04)] sm:p-7">
-            {children}
-          </div>
+            <div className="mt-[34px] rounded-3xl border border-gray-200/70 bg-white px-[34px] pb-7 pt-[34px] shadow-[0_16px_40px_rgba(17,17,17,.07),0_2px_6px_rgba(17,17,17,.04)] [@media(max-height:899px)]:mt-[22px] [@media(max-height:899px)]:pb-5 [@media(max-height:899px)]:pt-6">
+              {children}
+            </div>
 
-          {bas && <p className="mt-6 text-center text-sm text-gray-600">{bas}</p>}
+            {bas && (
+              <p className="mt-7 text-center text-sm text-gray-600 [@media(max-height:899px)]:mt-[18px]">
+                {bas}
+              </p>
+            )}
 
           {/* Trois repères — et ce ne sont pas des promesses en l'air : le
               suivi existe (la Timeline des commandes), les 58 wilayas sont
@@ -130,7 +143,7 @@ export function CadreAuthClient({
 
               Masqués dès que le panneau apparaît : il dit la même chose, en
               mieux. Les répéter alourdirait la colonne pour rien. */}
-          <ul className="mt-10 flex flex-col gap-3 border-t border-gray-200/70 pt-8 sm:flex-row sm:justify-center sm:gap-6 sm:border-0 sm:pt-9 lg:hidden">
+            <ul className="mt-10 flex flex-col gap-3 border-t border-gray-200/70 pt-8 sm:flex-row sm:justify-center sm:gap-6 sm:border-0 sm:pt-9 min-[1200px]:hidden">
             {repères.map(({ Icone, texte }) => (
               <li
                 key={texte}
@@ -142,16 +155,30 @@ export function CadreAuthClient({
                 {texte}
               </li>
             ))}
-          </ul>
+            </ul>
+          </div>
         </div>
 
         {/* ── Colonne du panneau ────────────────────────────────────────
             Purement décorative, donc la première à partir quand la place
-            manque. Hauteur fixe plutôt que liée au viewport : cette page vit
-            DANS la boutique, entre une barre et un pied de page — la caler sur
-            la hauteur de l'écran la ferait déborder. */}
-        <div className="hidden h-[660px] flex-1 lg:flex">
-          <VisuelCompteClient />
+            manque.
+
+            La hauteur est bornée des DEUX côtés : elle suit l'écran, mais ne
+            dépasse jamais les 788 px de la composition — inutile de l'agrandir
+            au-delà de sa taille de référence. Et elle reste liée au viewport
+            plutôt que figée, sans quoi le panneau déborderait sous le pied de
+            page sur un portable. */}
+        <div className="hidden min-w-0 flex-1 items-center py-14 min-[1200px]:flex">
+          {/* La classe flex n'est pas decorative : PanneauEchelle n'a pas de
+              hauteur propre, il s'etire sur celle de son parent. Dans un
+              simple bloc il retombait a zero — mesure nulle, composition
+              masquee, panneau invisible. */}
+          <div
+            className="flex w-full"
+            style={{ height: "min(788px, calc(100vh - 12rem))" }}
+          >
+            <VisuelCompteClient />
+          </div>
         </div>
       </div>
     </div>
@@ -190,7 +217,7 @@ export function BoutonsOAuthClient() {
         </button>
       </div>
 
-      <div className="my-5 flex items-center gap-3.5">
+      <div className="my-[22px] flex items-center gap-3.5 [@media(max-height:899px)]:my-3.5">
         <span className="h-px flex-1 bg-gray-200" />
         <span className="text-[11.5px] font-medium tracking-[.09em] text-gray-400">
           {ta("ou")}

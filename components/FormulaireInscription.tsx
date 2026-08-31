@@ -135,7 +135,7 @@ export default function FormulaireInscription() {
       {/* DÉCORATIF — aucune connexion OAuth n'est branchée. */}
       <BoutonsOAuthClient />
 
-      <form onSubmit={soumettre} className="flex flex-col gap-4">
+      <form onSubmit={soumettre} className="flex flex-col gap-3.5">
         <ChampClient
           id="inscription-nom"
           label={t("nom")}

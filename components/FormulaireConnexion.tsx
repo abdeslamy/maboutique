@@ -70,7 +70,7 @@ export default function FormulaireConnexion() {
       {/* DÉCORATIF — aucune connexion OAuth n'est branchée. */}
       <BoutonsOAuthClient />
 
-      <form onSubmit={soumettre} className="flex flex-col gap-4">
+      <form onSubmit={soumettre} className="flex flex-col gap-3.5">
         <ChampClient
           id="client-email"
           label={t("email")}

@@ -103,54 +103,43 @@ function IconeCoeur() {
   );
 }
 
-/** Cabas. */
-function DessinSac() {
+/**
+ * Montre-bracelet.
+ *
+ * Les deux dessins des favoris ne sont plus le cabas et le casque : ceux-ci
+ * appartiennent au panneau VENDEUR, et les répéter ici donnait l'impression de
+ * regarder deux fois la même maquette. Un objet personnel dit mieux « ce que
+ * j'ai mis de côté » qu'un article de catalogue.
+ */
+function DessinMontre() {
   return (
     <svg viewBox="0 0 120 120" width="92" height="92" aria-hidden="true">
-      <path
-        d="M32 42 H88 C90.8 42 93 44.3 92.7 47.1 L88.4 96.6 C87.7 103.2 82.6 108 76 108 H44 C37.4 108 32.3 103.2 31.6 96.6 L27.3 47.1 C27 44.3 29.2 42 32 42 Z"
-        fill="none"
-        stroke="#0a0a0a"
-        strokeWidth="2.4"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M45 52 V32 C45 23.7 51.7 17 60 17 C68.3 17 75 23.7 75 32 V52"
-        fill="none"
-        stroke="#0a0a0a"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
-      <path d="M27.6 56 H92.4" fill="none" stroke="#0a0a0a" strokeWidth="1.6" opacity=".26" />
+      <g stroke="#0a0a0a" strokeLinecap="round" strokeLinejoin="round" fill="none">
+        <rect x="38" y="38" width="44" height="44" rx="12" strokeWidth="2.4" />
+        <path d="M48 38 V24 C48 21.8 49.8 20 52 20 H68 C70.2 20 72 21.8 72 24 V38" strokeWidth="2.4" />
+        <path d="M48 82 V96 C48 98.2 49.8 100 52 100 H68 C70.2 100 72 98.2 72 96 V82" strokeWidth="2.4" />
+        <path d="M60 50 V60 H69" strokeWidth="1.8" opacity=".45" />
+        <path d="M82 54 H87" strokeWidth="2.4" />
+      </g>
     </svg>
   );
 }
 
-/** Casque. */
-function DessinCasque() {
+/** Basket. */
+function DessinBasket() {
   return (
     <svg viewBox="0 0 120 120" width="92" height="92" aria-hidden="true">
-      <path
-        d="M26 66 V56 C26 37.2 41.2 22 60 22 C78.8 22 94 37.2 94 56 V66"
-        fill="none"
-        stroke="#0a0a0a"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
-      <path
-        d="M26 66 H34 C37.3 66 40 68.7 40 72 V90 C40 93.3 37.3 96 34 96 H30 C27.8 96 26 94.2 26 92 Z"
-        fill="none"
-        stroke="#0a0a0a"
-        strokeWidth="2.4"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M94 66 H86 C82.7 66 80 68.7 80 72 V90 C80 93.3 82.7 96 86 96 H90 C92.2 96 94 94.2 94 92 Z"
-        fill="none"
-        stroke="#0a0a0a"
-        strokeWidth="2.4"
-        strokeLinejoin="round"
-      />
+      <g stroke="#0a0a0a" strokeLinecap="round" strokeLinejoin="round" fill="none">
+        <path
+          d="M20 86 C20 81.6 23.6 78 28 78 H92 C97.5 78 102 82.5 102 88 C102 92.4 98.4 96 94 96 H30 C24.5 96 20 91.5 20 86 Z"
+          strokeWidth="2.4"
+        />
+        <path
+          d="M28 78 V58 C28 51.4 33.4 46 40 46 H50 L70 64 H86 C94.8 64 102 71.2 102 80"
+          strokeWidth="2.4"
+        />
+        <path d="M44 54 L54 62 M52 48 L62 57" strokeWidth="1.8" opacity=".4" />
+      </g>
     </svg>
   );
 }
@@ -164,13 +153,13 @@ const ETAPES = [
 
 const COMMANDES = [
   { Icone: IconeCoche, nom: "Silicone corner guards", etat: "Delivered" },
-  { Icone: IconeEnRoute, nom: "Wireless headphones", etat: "On the way" },
+  { Icone: IconeEnRoute, nom: "Classic wristwatch", etat: "On the way" },
   { Icone: IconePreparation, nom: "Car suction mount", etat: "Preparing" },
 ];
 
 const FAVORIS = [
-  { Dessin: DessinSac, nom: "Premium shopping bag", prix: "3 400 DA" },
-  { Dessin: DessinCasque, nom: "Wireless headphones", prix: "18 900 DA" },
+  { Dessin: DessinMontre, nom: "Classic wristwatch", prix: "12 500 DA" },
+  { Dessin: DessinBasket, nom: "Canvas sneakers", prix: "7 200 DA" },
 ];
 
 export default function VisuelCompteClient() {
