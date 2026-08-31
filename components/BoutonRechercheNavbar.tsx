@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { RechercheOutline } from "@/components/mobile/IconesNav";
 import { useTranslations } from "next-intl";
 import { useRecherche } from "@/context/RechercheContext";
 
@@ -8,8 +8,11 @@ import { useRecherche } from "@/context/RechercheContext";
  * Loupe de la capsule d'actions (barre de navigation desktop).
  *
  * Était un lien vers /produits ; ouvre maintenant l'overlay de recherche.
- * L'icône reste celle de la capsule (lucide, trait 2,25) pour ne pas
- * dépareiller au milieu des deux autres pastilles.
+ *
+ * L'icône est celle de la NAVIGATION MOBILE, pas une icône de bibliothèque :
+ * le même geste doit se reconnaître d'un format à l'autre. Elle porte un
+ * léger calage optique hérité de la tab bar (0,36 / 0,77 sur 24), invisible
+ * à cette taille.
  *
  * Contrairement au déclencheur mobile, elle NE disparaît PAS à l'ouverture :
  * le document ne prévoit aucun échelonnage depuis le bouton en desktop.
@@ -32,7 +35,7 @@ export default function BoutonRechercheNavbar({
       aria-haspopup="dialog"
       aria-expanded={ouvert}
     >
-      <Search className="h-[18px] w-[18px]" strokeWidth={2.25} aria-hidden="true" />
+      <RechercheOutline className="h-[19px] w-[19px]" trait={1.9} />
     </button>
   );
 }

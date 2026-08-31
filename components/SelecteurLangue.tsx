@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
+import { LangueOutline } from "@/components/mobile/IconesNav";
 import { useTranslations } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
@@ -68,11 +69,17 @@ export default function SelecteurLangue({
         aria-label={t("actuelle", { langue: t(localeActive) })}
         title={t("actuelle", { langue: t(localeActive) })}
         // Même gabarit que les autres pastilles de la capsule : 32 px.
-        className={`flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold uppercase transition ${
+        className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
           ouvert ? "bg-gray-900 text-white" : "text-gray-900 hover:bg-gray-100"
         }`}
       >
-        {localeActive}
+        {/* Le globe de la navigation mobile, à la place du code « FR ».
+            ⚠️ Ce que ça coûte : la langue active n'est plus lisible d'un coup
+            d'œil sur la pastille. Elle reste annoncée par aria-label et par
+            l'infobulle, et le menu la marque d'une coche — mais l'information
+            visible, elle, disparaît. C'est le prix de la cohérence avec le
+            mobile, qui affiche déjà ce globe. */}
+        <LangueOutline className="h-[19px] w-[19px]" />
       </button>
 
       {ouvert && (

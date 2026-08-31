@@ -28,6 +28,7 @@ import BoutonRechercheNavbar from "./BoutonRechercheNavbar";
 export default async function Navbar({ locale }: { locale: Locale }) {
   const t = await getTranslations("navigation");
   const tMeta = await getTranslations("meta");
+  const tVendeur = await getTranslations("connexionMarchand");
 
   // Gabarit commun aux pastilles de la capsule.
   const pastille =
@@ -58,8 +59,23 @@ export default async function Navbar({ locale }: { locale: Locale }) {
           </li>
         </ul>
 
-        {/* ── Zone "end" : capsule d'actions + profil ────────────────── */}
+        {/* ── Zone "end" : appel vendeur + capsule d'actions + profil ── */}
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          {/* Porte d'entrée de l'espace vendeur, depuis la vitrine.
+              Discrète à dessein : la barre appartient aux ACHETEURS, et un
+              bouton plein leur volerait l'attention pour une action qui ne
+              concerne presque aucun d'eux. Un contour suffit à la rendre
+              trouvable.
+
+              Masquée sous 1024 px : à cette largeur la barre est déjà serrée,
+              et c'est l'action la moins prioritaire des quatre. */}
+          <Link
+            href="/admin/connexion"
+            className="me-1 hidden h-9 items-center rounded-full border border-gray-200 px-4 text-[13.5px] font-medium text-gray-800 transition hover:border-gray-900 hover:text-gray-900 lg:inline-flex"
+          >
+            {tVendeur("creerCompteMarchand")}
+          </Link>
+
           <div className="flex items-center gap-0.5 rounded-full bg-white p-0.5 shadow-[0_1px_6px_rgba(0,0,0,0.10)]">
             <SelecteurLangue localeActive={locale} />
 
