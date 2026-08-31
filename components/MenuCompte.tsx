@@ -71,7 +71,9 @@ export default function MenuCompte() {
       // la barre garde quatre éléments de taille identique.
       <Link
         href="/connexion"
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:bg-gray-100 hover:text-black"
+        // Ni bordure ni ombre : au repos l'icône est nue, comme ses voisines.
+        // Le conteneur n'apparaît qu'au survol.
+        className="flex h-9 w-9 items-center justify-center rounded-full text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
         aria-label={t("connexion")}
         title={t("connexion")}
       >

@@ -1,4 +1,5 @@
 import { ShoppingCart } from "lucide-react";
+import { Newsreader } from "next/font/google";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
@@ -10,91 +11,139 @@ import BoutonRechercheNavbar from "./BoutonRechercheNavbar";
 /**
  * Barre de navigation principale, affichée sur toutes les pages.
  *
- * Disposition :
- *   [logo]        [Accueil · Produits]        [ langue · loupe · panier ] [profil]
- *                    (desktop seulement)              capsule
+ *   [pastille + Ma Boutique]   [Accueil · Produits]   [Ouvrir une boutique] [◯◯◯◯]
  *
- * Les trois actions secondaires sont regroupées dans une CAPSULE, le profil
- * reste isolé à l'extrémité : c'est l'élément le plus personnel, il mérite
- * d'être distinct du reste.
+ * ── Ce qui a été retiré, et pourquoi ──────────────────────────────────────
  *
- * Les quatre pastilles font toutes 36 px : au-delà du confort de clic, une
- * taille commune est ce qui donne l'impression d'un ensemble cohérent —
- * l'ancien avatar, plus gros que ses voisins, cassait cette lecture.
+ * Les trois actions vivaient dans une CAPSULE blanche à ombre portée, avec le
+ * profil isolé dans son propre anneau bordé, à côté d'un bouton vendeur à
+ * contour. Soit trois traitements de conteneur différents sur quinze
+ * centimètres — c'est ce qui donnait l'impression d'ancien.
+ *
+ * Tout cela disparaît. Les icônes n'ont plus de fond ni de bordure au repos :
+ * seulement une zone de clic de 36 px qui se teinte au survol. C'est la
+ * grammaire d'Apple — le conteneur n'apparaît qu'au moment où on le vise.
+ *
+ * Il ne reste donc qu'UNE forme pleine dans toute la barre, l'appel vendeur,
+ * et c'est exactement ce qui le rend lisible.
+ *
+ * ── Le logo ───────────────────────────────────────────────────────────────
+ *
+ * Repris de la page de connexion vendeur : la pastille noire et le mot en
+ * Newsreader. Un logo doit être le même partout — c'est ce qui en fait un
+ * logo. Ça ne brouille pas la distinction client / vendeur, qui repose sur la
+ * mise en page, les fonds et les contrôles, jamais sur la marque.
+ *
+ * ⚠️ Coût assumé : Newsreader est désormais chargée sur TOUTES les pages de
+ * la vitrine, alors qu'elle ne servait qu'aux écrans d'accès. D'où un seul
+ * gabarit demandé ici — la graisse 500 — au lieu des trois de la page de
+ * connexion.
  *
  * Composant SERVEUR : seuls les enfants interactifs (langue, compteur, menu
  * du compte) sont des composants client.
  */
+
+// Une seule graisse : ce mot est la seule chose qu'elle a à composer ici.
+const policeMarque = Newsreader({
+  subsets: ["latin"],
+  weight: ["500"],
+  variable: "--police-marque",
+  display: "swap",
+});
+
 export default async function Navbar({ locale }: { locale: Locale }) {
   const t = await getTranslations("navigation");
   const tMeta = await getTranslations("meta");
   const tVendeur = await getTranslations("connexionMarchand");
 
-  // Gabarit commun aux pastilles de la capsule.
+  // Newsreader n'a pas de glyphes arabes : en arabe le mot reprend Cairo,
+  // déjà chargée par le layout racine.
+  const policeDuMot =
+    locale === "ar" ? "var(--font-arabic)" : "var(--police-marque)";
+
+  // Zone de clic des icônes. Aucun fond au repos, une teinte au survol.
   const pastille =
-    "flex h-8 w-8 items-center justify-center rounded-full text-gray-900 transition hover:bg-gray-100";
+    "flex h-9 w-9 items-center justify-center rounded-full text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:bg-gray-100";
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/90 backdrop-blur">
-      <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:h-16 sm:gap-6 sm:px-4">
-        {/* ── Logo (côté "start") ────────────────────────────────────── */}
-        <Link
-          href="/"
-          className="shrink-0 whitespace-nowrap text-base font-semibold tracking-tight text-black sm:text-lg"
-        >
-          {tMeta("titreSite")}
+    <header
+      className={`${policeMarque.variable} sticky top-0 z-50 w-full border-b border-gray-100 bg-white/80 backdrop-blur-xl`}
+    >
+      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+        {/* ── Logo ───────────────────────────────────────────────────── */}
+        <Link href="/" className="flex shrink-0 items-center gap-2.5">
+          <span className="flex h-[26px] w-[26px] items-center justify-center rounded-lg bg-[#0a0a0a] text-white">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M5 8h14l-1 12H6L5 8Z" />
+              <path d="M9 8V6.2a3 3 0 0 1 6 0V8" />
+            </svg>
+          </span>
+          <span
+            className="whitespace-nowrap text-[19px] font-medium tracking-[-.005em] text-[#0a0a0a]"
+            style={{ fontFamily: `${policeDuMot}, Georgia, serif` }}
+          >
+            {tMeta("titreSite")}
+          </span>
         </Link>
 
-        {/* ── Liens de navigation (centre, cachés sur petit écran) ──── */}
-        <ul className="hidden items-center gap-6 text-sm text-gray-700 sm:flex">
+        {/* ── Liens, au centre ───────────────────────────────────────── */}
+        <ul className="hidden items-center gap-8 text-[14.5px] text-gray-600 sm:flex">
           <li>
-            <Link href="/" className="hover:text-black">
+            <Link href="/" className="transition-colors hover:text-gray-900">
               {t("accueil")}
             </Link>
           </li>
           <li>
-            <Link href="/produits" className="hover:text-black">
+            <Link
+              href="/produits"
+              className="transition-colors hover:text-gray-900"
+            >
               {t("produits")}
             </Link>
           </li>
         </ul>
 
-        {/* ── Zone "end" : appel vendeur + capsule d'actions + profil ── */}
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          {/* Porte d'entrée de l'espace vendeur, depuis la vitrine.
-              Discrète à dessein : la barre appartient aux ACHETEURS, et un
-              bouton plein leur volerait l'attention pour une action qui ne
-              concerne presque aucun d'eux. Un contour suffit à la rendre
-              trouvable.
-
-              Masquée sous 1024 px : à cette largeur la barre est déjà serrée,
-              et c'est l'action la moins prioritaire des quatre. */}
+        {/* ── Actions ────────────────────────────────────────────────── */}
+        <div className="flex shrink-0 items-center gap-1">
+          {/* Porte d'entrée de l'espace vendeur.
+              Une pastille pleine et SANS BORDURE : un contour, sur un fond
+              blanc, est ce qui datait le plus l'ancienne version. Le gris
+              clair la rend trouvable sans crier — la barre appartient aux
+              acheteurs, et cette action ne concerne presque aucun d'eux.
+              Masquée sous 1024 px, où la barre est déjà serrée. */}
           <Link
             href="/admin/connexion"
-            className="me-1 hidden h-9 items-center rounded-full border border-gray-200 px-4 text-[13.5px] font-medium text-gray-800 transition hover:border-gray-900 hover:text-gray-900 lg:inline-flex"
+            className="me-2 hidden h-9 items-center rounded-full bg-gray-100 px-4 text-[13.5px] font-medium text-gray-900 transition-colors hover:bg-gray-200 lg:inline-flex"
           >
             {tVendeur("creerCompteMarchand")}
           </Link>
 
-          <div className="flex items-center gap-0.5 rounded-full bg-white p-0.5 shadow-[0_1px_6px_rgba(0,0,0,0.10)]">
-            <SelecteurLangue localeActive={locale} />
+          <SelecteurLangue localeActive={locale} />
 
-            {/* La loupe ouvre l'overlay de recherche (⌘K / Ctrl+K / « / »). */}
-            <BoutonRechercheNavbar className={pastille} />
+          {/* La loupe ouvre l'overlay de recherche (⌘K / Ctrl+K / « / »). */}
+          <BoutonRechercheNavbar className={pastille} />
 
-            {/* `relative` porte la pastille du compteur. */}
-            <Link
-              href="/panier"
-              className={`${pastille} relative`}
-              aria-label={t("panier")}
-              title={t("panier")}
-            >
-              <ShoppingCart className="h-[18px] w-[18px]" strokeWidth={2.25} />
-              <PanierCompteur />
-            </Link>
-          </div>
+          {/* `relative` porte la pastille du compteur. */}
+          <Link
+            href="/panier"
+            className={`${pastille} relative`}
+            aria-label={t("panier")}
+            title={t("panier")}
+          >
+            <ShoppingCart className="h-[19px] w-[19px]" strokeWidth={1.75} />
+            <PanierCompteur />
+          </Link>
 
-          {/* Profil, à l'extrémité et hors de la capsule. */}
           <MenuCompte />
         </div>
       </nav>

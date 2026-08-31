@@ -68,9 +68,13 @@ export default function SelecteurLangue({
         aria-expanded={ouvert}
         aria-label={t("actuelle", { langue: t(localeActive) })}
         title={t("actuelle", { langue: t(localeActive) })}
-        // Même gabarit que les autres pastilles de la capsule : 32 px.
-        className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
-          ouvert ? "bg-gray-900 text-white" : "text-gray-900 hover:bg-gray-100"
+        // Même gabarit que les autres actions de la barre : 36 px, sans fond
+        // au repos. L'état OUVERT, lui, reste plein — c'est ce qui rattache
+        // visuellement le menu à son bouton pendant qu'il est déroulé.
+        className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
+          ouvert
+            ? "bg-gray-900 text-white"
+            : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
         }`}
       >
         {/* Le globe de la navigation mobile, à la place du code « FR ».

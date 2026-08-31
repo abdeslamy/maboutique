@@ -5,14 +5,29 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 /**
- * Bouton "Retour" : icône flèche + libellé.
+ * Bouton « Retour » — flèche + libellé.
  *
- * Pour le RTL : la flèche doit pointer vers la droite en arabe.
- * On utilise `rtl:-scale-x-100` (Tailwind variant) — équivalent CSS de
- * `transform: scaleX(-1)`. Cela inverse l'image horizontalement.
+ * ── Pourquoi il ne ressemble plus à un bouton ─────────────────────────────
  *
- * On peut passer un `href` pour aller à une route précise. Si on ne passe rien,
- * c'est juste un retour en arrière dans l'historique (window.history.back()).
+ * Il portait une bordure grise, un fond blanc et une ombre de focus décalée :
+ * le costume d'une action importante, pour ce qui n'est qu'un pas en arrière.
+ * Sur une page de produit, il rivalisait visuellement avec « Ajouter au
+ * panier ».
+ *
+ * Il est désormais « fantôme » : rien au repos, une teinte au survol. C'est le
+ * même principe que les icônes de la barre de navigation — le conteneur
+ * n'apparaît qu'au moment où on le vise. Le retrait négatif (`-ms-3`) ramène
+ * le TEXTE sur la marge de la page : sans lui, le rembourrage du bouton
+ * décalerait le libellé par rapport au titre qui le suit.
+ *
+ * ── RTL ───────────────────────────────────────────────────────────────────
+ *
+ * La flèche doit pointer vers la droite en arabe : `rtl:-scale-x-100`. À noter
+ * — en Tailwind v4 cette classe passe par la propriété `scale` et non par
+ * `transform`, ce qui trompe si on inspecte la mauvaise propriété.
+ *
+ * Avec `href`, c'est un <Link> localisé et préchargé. Sans, un simple retour
+ * dans l'historique.
  */
 export default function BoutonRetour({
   href,
@@ -25,13 +40,13 @@ export default function BoutonRetour({
   const texte = libelle ?? t("retour");
 
   const classe =
-    "inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-400 hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2";
+    "-ms-3 inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[14px] font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:bg-gray-100 focus-visible:text-gray-900";
 
   const contenu = (
     <>
-      {/* La flèche : pivote de 180° (scaleX) en RTL pour pointer vers la droite */}
       <ArrowLeft
-        className="h-4 w-4 rtl:-scale-x-100"
+        className="h-[17px] w-[17px] rtl:-scale-x-100"
+        strokeWidth={2}
         aria-hidden="true"
       />
       <span>{texte}</span>
@@ -39,19 +54,14 @@ export default function BoutonRetour({
   );
 
   if (href) {
-    // Si href fourni, on utilise <Link> pour rester locale-aware et prefetch.
     return (
-      <Link
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        href={href as any}
-        className={classe}
-      >
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      <Link href={href as any} className={classe}>
         {contenu}
       </Link>
     );
   }
 
-  // Sinon : bouton qui fait history.back().
   return (
     <button
       type="button"
