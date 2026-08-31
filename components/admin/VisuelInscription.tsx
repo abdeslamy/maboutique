@@ -1,4 +1,5 @@
-import { OMBRE, Panneau } from "@/components/admin/visuel/jetons";
+import { OMBRE } from "@/components/admin/visuel/jetons";
+import PanneauEchelle from "@/components/admin/visuel/PanneauEchelle";
 
 /**
  * Le panneau décoratif de l'OUVERTURE de boutique.
@@ -129,7 +130,7 @@ const ETAPES = [
 
 export default function VisuelInscription() {
   return (
-    <Panneau>
+    <PanneauEchelle>
       {/* ══ Carte 1 — la boutique en préparation ═════════════════════════
           Même gabarit que « Today's sales » : largeur 452, débord de 40 à
           gauche, retrait latéral de 26. La zone de contenu fait donc 400 px,
@@ -295,6 +296,6 @@ export default function VisuelInscription() {
           </div>
         </div>
       </div>
-    </Panneau>
+    </PanneauEchelle>
   );
 }

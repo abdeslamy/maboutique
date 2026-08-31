@@ -25,33 +25,8 @@ export const OMBRE = {
 } as const;
 
 /**
- * L'enveloppe du panneau.
- *
- * ⚠️ `overflow-hidden` n'est pas un détail. Les cartes débordent
- * VOLONTAIREMENT (décalages négatifs) et se font rogner par les coins
- * arrondis : ce rognage EST le dessin, il donne l'impression d'un cadrage sur
- * une interface plus grande.
- *
- * Pas de `h-full` : le panneau est un élément flex qui s'étire déjà à la
- * hauteur de sa colonne. Un `height: 100%` créerait une dépendance circulaire
- * — la colonne attend la hauteur de son contenu, le contenu attend celle de la
- * colonne.
- *
- * `dir="ltr"` : le contenu est une maquette d'interface en anglais. Sans cette
- * ligne, les cartes se retourneraient en arabe et les libellés seraient mal
- * composés. `aria-hidden` pour la même raison — des chiffres inventés, dans
- * une langue qui n'est pas celle de la page, n'ont rien à annoncer à un
- * lecteur d'écran.
+ * L'enveloppe vit désormais dans PanneauEchelle.tsx : elle a besoin de mesurer
+ * sa propre taille pour mettre la composition à l'échelle, ce qui en fait un
+ * composant client. Les constantes ci-dessus restent ici, utilisables par les
+ * composants serveur.
  */
-export function Panneau({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      dir="ltr"
-      aria-hidden="true"
-      className="relative w-full overflow-hidden rounded-[40px] bg-[#fcfaf6]"
-      style={{ fontFamily: POLICE_UI, boxShadow: OMBRE.panneau }}
-    >
-      {children}
-    </div>
-  );
-}

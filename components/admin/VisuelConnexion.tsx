@@ -1,4 +1,5 @@
-import { OMBRE, Panneau } from "@/components/admin/visuel/jetons";
+import { OMBRE } from "@/components/admin/visuel/jetons";
+import PanneauEchelle from "@/components/admin/visuel/PanneauEchelle";
 
 /**
  * Le panneau décoratif de la page de connexion marchand — ce qu'on aperçoit
@@ -191,7 +192,7 @@ const PRODUITS = [
 
 export default function VisuelConnexion() {
   return (
-    <Panneau>
+    <PanneauEchelle>
       {/* ══ Carte 1 — Today's sales ═══════════════════════════════════════
           Alignement à préserver : la zone de contenu fait 400 px (452 − 2×26)
           et le SVG fait exactement 400. La fin de la courbe, le bord droit de
@@ -347,6 +348,6 @@ export default function VisuelConnexion() {
           </div>
         ))}
       </div>
-    </Panneau>
+    </PanneauEchelle>
   );
 }
