@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import {
   AlerteClient,
   BoutonPrincipalClient,
+  BoutonsOAuthClient,
   CadreAuthClient,
   ChampClient,
 } from "@/components/auth/CadreAuthClient";
@@ -131,6 +132,9 @@ export default function FormulaireInscription() {
         </>
       }
     >
+      {/* DÉCORATIF — aucune connexion OAuth n'est branchée. */}
+      <BoutonsOAuthClient />
+
       <form onSubmit={soumettre} className="flex flex-col gap-4">
         <ChampClient
           id="inscription-nom"

@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import {
   AlerteClient,
   BoutonPrincipalClient,
+  BoutonsOAuthClient,
   CadreAuthClient,
   ChampClient,
 } from "@/components/auth/CadreAuthClient";
@@ -66,6 +67,9 @@ export default function FormulaireConnexion() {
         </>
       }
     >
+      {/* DÉCORATIF — aucune connexion OAuth n'est branchée. */}
+      <BoutonsOAuthClient />
+
       <form onSubmit={soumettre} className="flex flex-col gap-4">
         <ChampClient
           id="client-email"

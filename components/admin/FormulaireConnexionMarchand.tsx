@@ -39,9 +39,8 @@ import { CadreLogo, LogoApple, LogoGoogle } from "@/components/admin/LogosOAuth"
 
 export default function FormulaireConnexionMarchand() {
   const t = useTranslations("connexionMarchand");
-  // Libellés communs aux deux écrans d'accès — ils ne sont pas propres à la
-  // connexion, ils vivent donc dans leur propre bloc.
-  const ta = useTranslations("authMarchand");
+  // Libellés communs à TOUS les écrans d'accès, client comme vendeur.
+  const ta = useTranslations("authPartage");
   const { seConnecter } = useAuth();
   const router = useRouter();
 

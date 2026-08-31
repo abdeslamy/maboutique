@@ -33,8 +33,8 @@ import { CadreLogo, LogoApple, LogoGoogle } from "@/components/admin/LogosOAuth"
  */
 export default function FormulaireInscriptionMarchand() {
   const t = useTranslations("inscriptionMarchand");
-  // Libellés communs aux deux écrans d'accès.
-  const ta = useTranslations("authMarchand");
+  // Libellés communs à TOUS les écrans d'accès, client comme vendeur.
+  const ta = useTranslations("authPartage");
 
   const [nomBoutique, setNomBoutique] = useState("");
   const [email, setEmail] = useState("");
