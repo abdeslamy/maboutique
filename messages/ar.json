@@ -557,7 +557,9 @@
       "json_invalide": "بيانات غير صالحة.",
       "erreur_serveur": "حدث خطأ، يرجى المحاولة مرّة أخرى.",
       "trop_de_tentatives": "محاولات كثيرة جدًا. انتظر بضع دقائق قبل إعادة المحاولة."
-    }
+    },
+    "emailPlaceholder": "أدخل بريدك الإلكتروني",
+    "motDePassePlaceholder": "كلمة المرور"
   },
   "authClient": {
     "avantageSuivi": "تابع طلباتك",
@@ -590,7 +592,9 @@
     "continuerGoogle": "المتابعة مع Google",
     "continuerApple": "المتابعة مع Apple",
     "ou": "أو",
-    "mentions": "بالمتابعة، أنت توافق على <cgu>شروط الاستخدام</cgu> و<confid>سياسة الخصوصية</confid>."
+    "mentions": "بالمتابعة، أنت توافق على <cgu>شروط الاستخدام</cgu> و<confid>سياسة الخصوصية</confid>.",
+    "marque": "متجري",
+    "retourBoutique": "العودة إلى المتجر"
   },
   "inscriptionMarchand": {
     "titre": "افتح متجرك",
@@ -630,7 +634,11 @@
       "erreur_serveur": "حدث خطأ، يرجى المحاولة مرّة أخرى.",
       "json_invalide": "بيانات غير صالحة.",
       "trop_de_tentatives": "محاولات كثيرة جدًا. انتظر بضع دقائق قبل إعادة المحاولة."
-    }
+    },
+    "nomPlaceholder": "اسمك الكامل",
+    "emailPlaceholder": "أدخل بريدك الإلكتروني",
+    "motDePassePlaceholder": "اختر كلمة مرور",
+    "confirmationPlaceholder": "أكّد كلمة المرور"
   },
   "recherche": {
     "dialogue": "البحث",

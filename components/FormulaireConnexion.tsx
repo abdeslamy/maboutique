@@ -2,22 +2,22 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
-  AlerteClient,
-  BoutonPrincipalClient,
-  BoutonsOAuthClient,
-  CadreAuthClient,
-  ChampClient,
-} from "@/components/auth/CadreAuthClient";
+  AlerteAuth,
+  BoutonAuth,
+  BoutonsOAuth,
+  CarteAuth,
+  ChampAuth,
+} from "@/components/auth/ControlesAuth";
 
 /**
  * Connexion CLIENT — celui qui vient retrouver son compte et ses commandes.
  *
- * Ne pas confondre avec <FormulaireConnexionMarchand />, qui sert l'espace de
- * gestion. Les deux écrans sont volontairement distincts à l'œil : voir
- * CadreAuthClient pour les cinq choix qui les séparent.
+ * Exactement la même carte que la connexion vendeur : mêmes briques, même
+ * géométrie. Ce qui distingue les deux écrans est ailleurs — le titre, et le
+ * panneau de droite.
  *
  * Appelle seConnecter() de AuthContext, qui POSTe vers /api/auth/connexion et
  * met à jour l'état client. On redirige ensuite vers /compte.
@@ -52,48 +52,36 @@ export default function FormulaireConnexion() {
   }
 
   return (
-    <CadreAuthClient
-      titre={t("titre")}
-      sousTitre={t("sousTitre")}
-      bas={
-        <>
-          {t("pasDeCompte")}{" "}
-          <Link
-            href="/inscription"
-            className="font-medium text-gray-900 underline underline-offset-2"
-          >
-            {t("creerCompte")}
-          </Link>
-        </>
-      }
-    >
+    <CarteAuth>
       {/* DÉCORATIF — aucune connexion OAuth n'est branchée. */}
-      <BoutonsOAuthClient />
+      <BoutonsOAuth />
 
-      <form onSubmit={soumettre} className="flex flex-col gap-3.5">
-        <ChampClient
+      <form onSubmit={soumettre} className="flex flex-col gap-2.5">
+        <ChampAuth
           id="client-email"
           label={t("email")}
+          placeholder={t("emailPlaceholder")}
           type="email"
           value={email}
           onChange={setEmail}
           autoComplete="email"
         />
-        <ChampClient
+        <ChampAuth
           id="client-mot-de-passe"
           label={t("motDePasse")}
+          placeholder={t("motDePassePlaceholder")}
           type="password"
           value={motDePasse}
           onChange={setMotDePasse}
           autoComplete="current-password"
         />
 
-        {cleErreur && <AlerteClient>{t(`erreurs.${cleErreur}`)}</AlerteClient>}
+        {cleErreur && <AlerteAuth>{t(`erreurs.${cleErreur}`)}</AlerteAuth>}
 
-        <BoutonPrincipalClient chargement={chargement}>
+        <BoutonAuth chargement={chargement}>
           {chargement ? t("connexionEnCours") : t("seConnecter")}
-        </BoutonPrincipalClient>
+        </BoutonAuth>
       </form>
-    </CadreAuthClient>
+    </CarteAuth>
   );
 }

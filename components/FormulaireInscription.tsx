@@ -4,19 +4,20 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
-  AlerteClient,
-  BoutonPrincipalClient,
-  BoutonsOAuthClient,
-  CadreAuthClient,
-  ChampClient,
-} from "@/components/auth/CadreAuthClient";
+  AlerteAuth,
+  BoutonAuth,
+  BoutonsOAuth,
+  CarteAuth,
+  ChampAuth,
+  MentionsAuth,
+} from "@/components/auth/ControlesAuth";
 
 /**
  * Création de compte CLIENT — nom, e-mail, mot de passe et confirmation.
  *
- * Ne pas confondre avec <FormulaireInscriptionMarchand />, qui ouvre une
- * BOUTIQUE. Les deux écrans sont volontairement distincts à l'œil : voir
- * CadreAuthClient pour les cinq choix qui les séparent.
+ * Exactement la même carte que l'ouverture de boutique : mêmes briques, même
+ * géométrie. Ce qui distingue les deux écrans est ailleurs — le titre, et le
+ * panneau de droite.
  *
  * ⚠️ La validation ci-dessous est un confort d'affichage, pas une protection.
  * Le client peut être contourné : la seule barrière qui compte est celle de
@@ -80,21 +81,19 @@ export default function FormulaireInscription() {
   }
 
   // ── Vue « succès » ────────────────────────────────────────────────────
-  // Reprend la même carte que le formulaire, pour que l'écran ne se dérobe
-  // pas sous les pieds au moment où tout s'est bien passé.
+  // Garde la même carte : l'écran ne se dérobe pas sous les pieds au moment
+  // où tout s'est bien passé.
   if (succes) {
     return (
-      <CadreAuthClient titre={t("succesTitre")} sousTitre={t("succesMessage")}>
+      <CarteAuth>
         <div className="flex flex-col items-center gap-5 py-2 text-center">
-          {/* Le vert de la boutique, en pastille. Seule touche de couleur de
-              l'écran, et elle n'apparaît qu'une fois : au bon moment. */}
-          <span className="grid h-14 w-14 place-items-center rounded-full bg-green-50">
+          <span className="grid h-14 w-14 place-items-center rounded-full bg-[#eaf2ec]">
             <svg
               width="26"
               height="26"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#16a34a"
+              stroke="#2f7d4f"
               strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -104,78 +103,76 @@ export default function FormulaireInscription() {
             </svg>
           </span>
 
+          <p className="text-[15.5px] leading-[1.5] text-[#5d564d]">
+            {t("succesMessage")}
+          </p>
+
           <Link
             href="/connexion"
-            className="flex h-[52px] w-full items-center justify-center rounded-full bg-black text-[15px] font-semibold text-white transition hover:bg-gray-800"
+            className="flex h-[52px] w-full items-center justify-center rounded-[11px] bg-[#0a0a0a] text-[15.5px] font-semibold text-white transition-colors hover:bg-[#1c1c1c]"
           >
             {t("seConnecter")}
           </Link>
         </div>
-      </CadreAuthClient>
+      </CarteAuth>
     );
   }
 
   // ── Formulaire ────────────────────────────────────────────────────────
   return (
-    <CadreAuthClient
-      titre={t("titre")}
-      sousTitre={t("sousTitre")}
-      bas={
-        <>
-          {t("dejaInscrit")}{" "}
-          <Link
-            href="/connexion"
-            className="font-medium text-gray-900 underline underline-offset-2"
-          >
-            {t("seConnecter")}
-          </Link>
-        </>
-      }
-    >
+    <CarteAuth>
       {/* DÉCORATIF — aucune connexion OAuth n'est branchée. */}
-      <BoutonsOAuthClient />
+      <BoutonsOAuth />
 
-      <form onSubmit={soumettre} className="flex flex-col gap-3.5">
-        <ChampClient
+      <form onSubmit={soumettre} className="flex flex-col gap-2.5">
+        <ChampAuth
           id="inscription-nom"
           label={t("nom")}
+          placeholder={t("nomPlaceholder")}
           type="text"
           value={nom}
           onChange={setNom}
           autoComplete="name"
         />
-        <ChampClient
+        <ChampAuth
           id="inscription-email"
           label={t("email")}
+          placeholder={t("emailPlaceholder")}
           type="email"
           value={email}
           onChange={setEmail}
           autoComplete="email"
         />
-        <ChampClient
+        <ChampAuth
           id="inscription-mot-de-passe"
           label={t("motDePasse")}
+          placeholder={t("motDePassePlaceholder")}
           type="password"
           value={motDePasse}
           onChange={setMotDePasse}
           autoComplete="new-password"
-          aide={t("motDePasseAide")}
+          minLength={8}
         />
-        <ChampClient
+        <ChampAuth
           id="inscription-confirmation"
           label={t("confirmation")}
+          placeholder={t("confirmationPlaceholder")}
           type="password"
           value={confirmation}
           onChange={setConfirmation}
           autoComplete="new-password"
         />
 
-        {cleErreur && <AlerteClient>{t(`erreurs.${cleErreur}`)}</AlerteClient>}
+        {cleErreur && <AlerteAuth>{t(`erreurs.${cleErreur}`)}</AlerteAuth>}
 
-        <BoutonPrincipalClient chargement={chargement}>
+        <BoutonAuth chargement={chargement}>
           {chargement ? t("creation") : t("creerCompte")}
-        </BoutonPrincipalClient>
+        </BoutonAuth>
       </form>
-    </CadreAuthClient>
+
+      {/* La mention est ici à sa place : c'est une création de compte, le
+          moment où l'on accepte réellement des conditions. */}
+      <MentionsAuth />
+    </CarteAuth>
   );
 }

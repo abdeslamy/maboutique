@@ -4,7 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getSession } from "@/lib/session";
 import { getUtilisateurParId } from "@/lib/auth";
-import CadreAuthMarchand from "@/components/admin/CadreAuthMarchand";
+import CadreAuth from "@/components/auth/CadreAuth";
+import { LienBasAuth, LIEN_SOULIGNE } from "@/components/auth/ControlesAuth";
 import FormulaireConnexionMarchand from "@/components/admin/FormulaireConnexionMarchand";
 import VisuelConnexion from "@/components/admin/VisuelConnexion";
 
@@ -24,7 +25,7 @@ import VisuelConnexion from "@/components/admin/VisuelConnexion";
  * Elle vit aussi hors du groupe (boutique) : ni barre de navigation, ni pied
  * de page, ni tab bar mobile. C'est un plein écran qui s'appartient.
  *
- * La mise en page est portée par CadreAuthMarchand, partagé avec l'ouverture
+ * La mise en page est portée par CadreAuth, partagé par les quatre écrans d accès
  * de boutique — les deux écrans doivent rester identiques au pixel.
  */
 
@@ -55,7 +56,7 @@ export default async function PageConnexionMarchand({
   }
 
   return (
-    <CadreAuthMarchand
+    <CadreAuth
       locale={locale}
       titre={t("titre")}
       sousTitre={t("sousTitre")}
@@ -65,12 +66,11 @@ export default async function PageConnexionMarchand({
         // un vrai. Le libellé parle de la BOUTIQUE et non de la personne —
         // « marchand » sonnait daté, et « vendeur », juste dans la
         // documentation, réduit une marque à un rôle sur un bouton.
-        <Link
-          href="/admin/inscription"
-          className="mt-7 border-b border-[#d6cfc4] pb-[3px] text-[13.5px] font-medium text-[#0a0a0a] transition-colors hover:border-[#0a0a0a] [@media(max-height:899px)]:mt-[18px]"
-        >
-          {t("creerCompteMarchand")}
-        </Link>
+        <LienBasAuth>
+          <Link href="/admin/inscription" className={LIEN_SOULIGNE}>
+            {t("creerCompteMarchand")}
+          </Link>
+        </LienBasAuth>
       }
       visuel={<VisuelConnexion />}
     />

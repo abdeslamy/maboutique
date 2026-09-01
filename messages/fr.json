@@ -557,7 +557,9 @@
       "json_invalide": "Données invalides.",
       "erreur_serveur": "Une erreur est survenue. Réessayez dans un instant.",
       "trop_de_tentatives": "Trop de tentatives. Patientez quelques minutes avant de réessayer."
-    }
+    },
+    "emailPlaceholder": "Saisissez votre e-mail",
+    "motDePassePlaceholder": "Votre mot de passe"
   },
   "authClient": {
     "avantageSuivi": "Suivez vos commandes",
@@ -590,7 +592,9 @@
     "continuerGoogle": "Continuer avec Google",
     "continuerApple": "Continuer avec Apple",
     "ou": "OU",
-    "mentions": "En continuant, vous acceptez les <cgu>CGU</cgu> et la <confid>politique de confidentialité</confid>."
+    "mentions": "En continuant, vous acceptez les <cgu>CGU</cgu> et la <confid>politique de confidentialité</confid>.",
+    "marque": "Ma Boutique",
+    "retourBoutique": "Retourner à la boutique"
   },
   "inscriptionMarchand": {
     "titre": "Ouvrez boutique",
@@ -630,7 +634,11 @@
       "erreur_serveur": "Une erreur est survenue. Réessayez dans un instant.",
       "json_invalide": "Données invalides.",
       "trop_de_tentatives": "Trop de tentatives. Patientez quelques minutes avant de réessayer."
-    }
+    },
+    "nomPlaceholder": "Votre nom complet",
+    "emailPlaceholder": "Saisissez votre e-mail",
+    "motDePassePlaceholder": "Choisissez un mot de passe",
+    "confirmationPlaceholder": "Confirmez le mot de passe"
   },
   "recherche": {
     "dialogue": "Recherche",

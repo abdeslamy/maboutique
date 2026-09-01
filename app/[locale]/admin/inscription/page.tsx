@@ -4,7 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getSession } from "@/lib/session";
 import { getUtilisateurParId } from "@/lib/auth";
-import CadreAuthMarchand from "@/components/admin/CadreAuthMarchand";
+import CadreAuth from "@/components/auth/CadreAuth";
+import { LienBasAuth, LIEN_SOULIGNE } from "@/components/auth/ControlesAuth";
 import FormulaireInscriptionMarchand from "@/components/admin/FormulaireInscriptionMarchand";
 import VisuelInscription from "@/components/admin/VisuelInscription";
 
@@ -45,22 +46,18 @@ export default async function PageInscriptionMarchand({
   }
 
   return (
-    <CadreAuthMarchand
+    <CadreAuth
       locale={locale}
       titre={t("titre")}
       sousTitre={t("sousTitre")}
       carte={<FormulaireInscriptionMarchand />}
       bas={
-        <p className="mt-7 text-center text-[13.5px] text-[#8b8377] [@media(max-height:899px)]:mt-[18px]">
+        <LienBasAuth>
           {t("dejaUnCompte")}{" "}
-          {/* Un VRAI lien, celui-ci : les deux écrans d'accès se répondent. */}
-          <Link
-            href="/admin/connexion"
-            className="border-b border-[#d6cfc4] pb-[3px] font-medium text-[#0a0a0a] transition-colors hover:border-[#0a0a0a]"
-          >
+          <Link href="/admin/connexion" className={LIEN_SOULIGNE}>
             {t("seConnecter")}
           </Link>
-        </p>
+        </LienBasAuth>
       }
       visuel={<VisuelInscription />}
     />
