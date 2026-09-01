@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
+import { cheminDeRetour, PARAM_SUITE } from "@/lib/redirection";
 import { useAuth } from "@/context/AuthContext";
 import {
   AlerteAuth,
@@ -27,6 +29,11 @@ export default function FormulaireConnexion() {
   const { seConnecter } = useAuth();
   const router = useRouter();
 
+  // D'où vient la personne. Même filtre que la page : un chemin interne, ou
+  // rien. useSearchParams vient de next/navigation et non de @/i18n/navigation
+  // — la recherche d'URL ne dépend pas de la langue.
+  const suite = cheminDeRetour(useSearchParams().get(PARAM_SUITE), "/compte");
+
   const [email, setEmail] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
   const [cleErreur, setCleErreur] = useState<string | null>(null);
@@ -47,7 +54,12 @@ export default function FormulaireConnexion() {
 
     // router.refresh() force le re-rendu des composants serveur pour qu'ils
     // prennent en compte le nouveau cookie de session.
-    router.push("/compte");
+    //
+    // On retourne là d'où l'on vient — une fiche produit, le panier — et non
+    // sur /compte par défaut : se connecter au milieu d'un achat ne doit pas
+    // faire perdre sa page.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    router.push(suite as any);
     router.refresh();
   }
 

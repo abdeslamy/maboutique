@@ -594,7 +594,8 @@
     "ou": "أو",
     "mentions": "بالمتابعة، أنت توافق على <cgu>شروط الاستخدام</cgu> و<confid>سياسة الخصوصية</confid>.",
     "marque": "متجري",
-    "retourBoutique": "العودة إلى المتجر"
+    "retourBoutique": "العودة إلى المتجر",
+    "devenirVendeur": "كن بائعًا"
   },
   "inscriptionMarchand": {
     "titre": "افتح متجرك",

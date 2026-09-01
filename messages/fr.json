@@ -594,7 +594,8 @@
     "ou": "OU",
     "mentions": "En continuant, vous acceptez les <cgu>CGU</cgu> et la <confid>politique de confidentialité</confid>.",
     "marque": "Ma Boutique",
-    "retourBoutique": "Retourner à la boutique"
+    "retourBoutique": "Retour à la boutique",
+    "devenirVendeur": "Devenir vendeur"
   },
   "inscriptionMarchand": {
     "titre": "Ouvrez boutique",

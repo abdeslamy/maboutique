@@ -58,6 +58,7 @@ export default async function PageConnexionMarchand({
   return (
     <CadreAuth
       locale={locale}
+      retour="/"
       titre={t("titre")}
       sousTitre={t("sousTitre")}
       carte={<FormulaireConnexionMarchand />}

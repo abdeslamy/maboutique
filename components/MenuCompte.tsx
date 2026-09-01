@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { LogIn, LogOut, Package, Settings, Shield, UserIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { lienAvecSuite } from "@/lib/redirection";
 import { useAuth } from "@/context/AuthContext";
 import Avatar from "./Avatar";
 
@@ -29,6 +30,9 @@ export default function MenuCompte() {
   const t = useTranslations("navigation");
   const { utilisateur, seDeconnecter } = useAuth();
   const router = useRouter();
+  // usePathname de @/i18n/navigation renvoie le chemin SANS préfixe de langue
+  // — c'est bien ce qu'on veut transporter, le <Link> localisé le remettra.
+  const pathname = usePathname();
 
   const [ouvert, setOuvert] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
@@ -70,7 +74,11 @@ export default function MenuCompte() {
       // Le libellé « Se connecter » disparaît au profit de l'icône, pour que
       // la barre garde quatre éléments de taille identique.
       <Link
-        href="/connexion"
+        // On emporte la page courante : après connexion, la personne y revient
+        // au lieu d'atterrir sur son compte. Le filtre de lib/redirection
+        // garantit qu'on ne transporte qu'un chemin interne.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        href={lienAvecSuite("/connexion", pathname) as any}
         // Ni bordure ni ombre : au repos l'icône est nue, comme ses voisines.
         // Le conteneur n'apparaît qu'au survol.
         className="flex h-9 w-9 items-center justify-center rounded-full text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"

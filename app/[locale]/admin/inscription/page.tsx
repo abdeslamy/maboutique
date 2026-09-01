@@ -48,6 +48,7 @@ export default async function PageInscriptionMarchand({
   return (
     <CadreAuth
       locale={locale}
+      retour="/"
       titre={t("titre")}
       sousTitre={t("sousTitre")}
       carte={<FormulaireInscriptionMarchand />}

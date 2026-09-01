@@ -54,7 +54,7 @@ const policeMarque = Newsreader({
 export default async function Navbar({ locale }: { locale: Locale }) {
   const t = await getTranslations("navigation");
   const tMeta = await getTranslations("meta");
-  const tVendeur = await getTranslations("connexionMarchand");
+  const tVendeur = await getTranslations("authPartage");
 
   // Newsreader n'a pas de glyphes arabes : en arabe le mot reprend Cairo,
   // déjà chargée par le layout racine.
@@ -116,6 +116,11 @@ export default async function Navbar({ locale }: { locale: Locale }) {
         {/* ── Actions ────────────────────────────────────────────────── */}
         <div className="flex shrink-0 items-center gap-1">
           {/* Porte d'entrée de l'espace vendeur.
+
+              Le libellé ne dit plus « Ouvrir une boutique » : à côté d'une
+              barre où « boutique » désigne le magasin qu'on visite, le même
+              mot pour « devenir marchand » créait une ambiguïté. « Devenir
+              vendeur » nomme la personne, et ne peut se confondre avec rien.
               Une pastille pleine et SANS BORDURE : un contour, sur un fond
               blanc, est ce qui datait le plus l'ancienne version. Le gris
               clair la rend trouvable sans crier — la barre appartient aux
@@ -125,7 +130,7 @@ export default async function Navbar({ locale }: { locale: Locale }) {
             href="/admin/connexion"
             className="me-2 hidden h-9 items-center rounded-full bg-gray-100 px-4 text-[13.5px] font-medium text-gray-900 transition-colors hover:bg-gray-200 lg:inline-flex"
           >
-            {tVendeur("creerCompteMarchand")}
+            {tVendeur("devenirVendeur")}
           </Link>
 
           <SelecteurLangue localeActive={locale} />

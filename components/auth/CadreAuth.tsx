@@ -46,6 +46,7 @@ export default async function CadreAuth({
   carte,
   bas,
   visuel,
+  retour,
 }: {
   locale: string;
   titre: string;
@@ -56,6 +57,11 @@ export default async function CadreAuth({
   bas: React.ReactNode;
   /** La composition du panneau de droite. */
   visuel: React.ReactNode;
+  /**
+   * Où renvoie le lien de sortie. La page d'origine quand on en connaît une,
+   * l'accueil sinon — déjà validée par cheminDeRetour().
+   */
+  retour: string;
 }) {
   const t = await getTranslations("authPartage");
 
@@ -75,8 +81,9 @@ export default async function CadreAuth({
           mais nommée : sans elle, un visiteur qui renonce à se connecter
           n'aurait que le bouton « précédent » de son navigateur. */}
       <Link
-        href="/"
-        className="absolute end-6 top-11 z-10 rounded-full px-3 py-2 text-[13.5px] font-medium text-[#8b8377] transition-colors hover:bg-[#f4f1ec] hover:text-[#0a0a0a] [@media(max-height:899px)]:top-7 min-[1200px]:end-14"
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        href={retour as any}
+        className="absolute end-6 top-10 z-10 rounded-full px-3 py-2 text-[13.5px] font-medium text-[#8b8377] transition-colors hover:bg-[#f4f1ec] hover:text-[#0a0a0a] [@media(max-height:899px)]:top-6 min-[1200px]:end-14"
       >
         {t("retourBoutique")}
       </Link>
@@ -138,7 +145,11 @@ export default async function CadreAuth({
           partir quand la place manque.
 
          ══════════════════════════════════════════════════════════════ */}
-      <div className="hidden min-w-0 flex-1 py-14 pe-14 min-[1200px]:flex">
+      {/* Le panneau commence PLUS BAS que la colonne du formulaire : le lien
+          de sortie occupe le coin, et se superposait au coin arrondi du
+          panneau. 104 px lui laissent sa bande, au prix de 48 px de hauteur —
+          la composition se remet à l'échelle toute seule. */}
+      <div className="hidden min-w-0 flex-1 pb-14 pe-14 pt-[104px] [@media(max-height:899px)]:pt-[88px] min-[1200px]:flex">
         {visuel}
       </div>
     </div>
