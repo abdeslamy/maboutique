@@ -1,7 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getSession } from "@/lib/session";
 import { getUtilisateurParId } from "@/lib/auth";
-import { mettreAJourCommandeAdmin } from "@/lib/orders";
+import {
+  mettreAJourCommandeAdmin,
+  supprimerCommandeAdmin,
+} from "@/lib/orders";
 import type { EtatAppel, StatutCommande } from "@/lib/types";
 
 /**
@@ -51,4 +54,42 @@ export async function PATCH(
   }
 
   return NextResponse.json({ succes: true, commande: resultat.commande });
+}
+
+/**
+ * DELETE /api/admin/commandes/[id]
+ *
+ * Supprime DÉFINITIVEMENT une commande. Réservé au vendeur.
+ *
+ * Le stock est rendu au passage quand la commande n'était pas déjà annulée —
+ * voir supprimerCommandeAdmin, qui fait les deux dans une seule transaction.
+ */
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // ── Garde admin ──────────────────────────────────────────────────────
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ erreur: "non_connecte" }, { status: 401 });
+  }
+  const user = await getUtilisateurParId(session.id);
+  if (!user || user.role !== "admin") {
+    return NextResponse.json({ erreur: "acces_refuse" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  if (!id) {
+    return NextResponse.json({ erreur: "id_manquant" }, { status: 400 });
+  }
+
+  const resultat = await supprimerCommandeAdmin(id);
+  if (!resultat.ok) {
+    return NextResponse.json(
+      { erreur: resultat.erreur ?? "erreur_serveur" },
+      { status: resultat.erreur === "commande_introuvable" ? 404 : 500 }
+    );
+  }
+
+  return NextResponse.json({ succes: true });
 }

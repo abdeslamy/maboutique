@@ -173,7 +173,15 @@
         "json_invalide": "Données invalides.",
         "erreur_serveur": "Une erreur est survenue. Réessaie.",
         "stock_insuffisant_reactivation": "Stock insuffisant pour réactiver cette commande. Réapprovisionnez le produit avant de changer son statut."
-      }
+      },
+      "supprimer": "Supprimer",
+      "supprimerAria": "Supprimer cette commande",
+      "supprimerTitre": "Supprimer cette commande ?",
+      "supprimerTexteActive": "Elle sera effacée définitivement. Les articles retournent en stock, et son montant disparaît de vos statistiques. Cette action est irréversible.",
+      "supprimerTexteAnnulee": "Elle sera effacée définitivement, et son montant disparaît de vos statistiques. Les articles étaient déjà revenus en stock à l'annulation. Cette action est irréversible.",
+      "supprimerAnnuler": "Annuler",
+      "supprimerEnCours": "Suppression…",
+      "supprimerErreur": "La suppression n'a pas abouti. Réessayez dans un instant."
     },
     "formulaireProduit": {
       "titreCreation": "Nouveau produit",

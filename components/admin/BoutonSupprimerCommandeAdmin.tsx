@@ -5,27 +5,32 @@ import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import DialogueConfirmation from "@/components/DialogueConfirmation";
+import type { StatutCommande } from "@/lib/types";
 
 /**
- * Retire une commande de l'historique du CLIENT, après confirmation.
+ * Supprime DÉFINITIVEMENT une commande. Côté vendeur.
  *
- * ⚠️ Le mot « supprimer » est évité à dessein. Rien n'est supprimé en base :
- * la commande est détachée du compte, parce qu'elle reste la pièce comptable
- * du vendeur et porte le stock qu'elle a décrémenté. Voir
- * retirerCommandeDeLHistorique dans lib/orders.ts.
+ * À ne pas confondre avec <BoutonRetirerCommande />, côté client, qui ne fait
+ * que détacher la commande d'un compte : la ligne y survit, ici elle disparaît.
  *
- * Pour le client, l'effet EST définitif — elle ne reviendra jamais — et le
- * texte de la boîte le dit, sans prétendre que le vendeur l'oublie aussi.
+ * ── Le texte s'adapte à l'état de la commande ─────────────────────────────
  *
- * À ne pas confondre avec <BoutonSupprimerCommandeAdmin />, qui supprime
- * VRAIMENT, côté vendeur, et rend le stock au passage.
+ * Parce que la conséquence n'est pas la même. Une commande ACTIVE a décrémenté
+ * le stock : le supprimer rend les articles. Une commande DÉJÀ ANNULÉE les a
+ * déjà rendus à l'annulation — le dire une seconde fois laisserait croire à un
+ * double crédit qui n'aura pas lieu.
+ *
+ * C'est le serveur qui décide (supprimerCommandeAdmin) ; le texte ne fait que
+ * décrire fidèlement ce qui va se passer.
  */
-export default function BoutonRetirerCommande({
+export default function BoutonSupprimerCommandeAdmin({
   commandeId,
+  statut,
 }: {
   commandeId: string;
+  statut: StatutCommande;
 }) {
-  const t = useTranslations("compte");
+  const t = useTranslations("admin.commandes");
   const router = useRouter();
 
   const [ouvert, setOuvert] = useState(false);
@@ -39,15 +44,14 @@ export default function BoutonRetirerCommande({
   const fermer = useCallback(() => {
     setOuvert(false);
     setErreur(false);
-    // Le focus revient d'où il venait, sinon il repart au début du document.
     declencheur.current?.focus();
   }, []);
 
-  async function retirer() {
+  async function supprimer() {
     setChargement(true);
     setErreur(false);
     try {
-      const res = await fetch(`/api/commandes/${commandeId}`, {
+      const res = await fetch(`/api/admin/commandes/${commandeId}`, {
         method: "DELETE",
       });
       if (!res.ok) {
@@ -56,7 +60,7 @@ export default function BoutonRetirerCommande({
         return;
       }
       setOuvert(false);
-      // La liste est rendue côté serveur : c'est lui qui doit la recalculer.
+      // La liste vient du serveur : c'est lui qui doit la recalculer.
       router.refresh();
     } catch {
       setErreur(true);
@@ -70,11 +74,8 @@ export default function BoutonRetirerCommande({
         ref={declencheur}
         type="button"
         onClick={() => setOuvert(true)}
-        aria-label={t("retirerAria")}
-        title={t("retirerAria")}
-        // Zone de clic de 36 px, sans fond au repos : la même grammaire que la
-        // barre de navigation. Le rouge n'apparaît qu'au survol — une action
-        // destructrice ne doit pas crier tant qu'on ne la vise pas.
+        aria-label={t("supprimerAria")}
+        title={t("supprimerAria")}
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 focus:outline-none focus-visible:bg-red-50 focus-visible:text-red-600"
       >
         <Trash2 className="h-[17px] w-[17px]" strokeWidth={1.75} aria-hidden="true" />
@@ -86,14 +87,18 @@ export default function BoutonRetirerCommande({
           icone={
             <Trash2 className="h-5 w-5 text-red-600" strokeWidth={1.9} aria-hidden="true" />
           }
-          titre={t("retirerTitre")}
-          texte={t("retirerTexte")}
-          erreur={erreur ? t("retirerErreur") : null}
-          libelleAnnuler={t("retirerAnnuler")}
-          libelleConfirmer={chargement ? t("retirerEnCours") : t("retirer")}
+          titre={t("supprimerTitre")}
+          texte={
+            statut === "annulee"
+              ? t("supprimerTexteAnnulee")
+              : t("supprimerTexteActive")
+          }
+          erreur={erreur ? t("supprimerErreur") : null}
+          libelleAnnuler={t("supprimerAnnuler")}
+          libelleConfirmer={chargement ? t("supprimerEnCours") : t("supprimer")}
           chargement={chargement}
           onAnnuler={fermer}
-          onConfirmer={retirer}
+          onConfirmer={supprimer}
         />
       )}
     </>

@@ -140,6 +140,82 @@ export async function retirerCommandeDeLHistorique(
   return { ok: resultat.count === 1 };
 }
 
+/**
+ * Supprime DÉFINITIVEMENT une commande. Réservé au vendeur.
+ *
+ * Contrairement au retrait côté client, la ligne disparaît vraiment. C'est
+ * légitime : le vendeur est propriétaire de sa pièce comptable. Deux effets
+ * doivent être traités, sinon on corrompt en silence.
+ *
+ * ── 1. Le stock ───────────────────────────────────────────────────────────
+ *
+ * Une commande a DÉCRÉMENTÉ le stock à sa création. Seul un passage en
+ * « annulee » le rend (voir mettreAJourCommandeAdmin). Supprimer une commande
+ * encore active sans rien faire laisserait donc le stock amputé pour toujours,
+ * sans plus aucune trace permettant de le corriger.
+ *
+ * On rend donc les articles AVANT de supprimer — sauf si la commande était
+ * déjà annulée, auquel cas ils sont déjà revenus et les rendre une seconde
+ * fois gonflerait le stock.
+ *
+ * Le tout dans UNE transaction : impossible d'avoir une commande supprimée
+ * dont les articles ne sont pas revenus, ou l'inverse.
+ *
+ * ── 2. Les lignes ─────────────────────────────────────────────────────────
+ *
+ * LigneCommande porte onDelete: Cascade sur commandeId : les lignes partent
+ * avec la commande, sans qu'on ait à les toucher.
+ *
+ * ── Ce qui est perdu, et qu'il faut assumer ───────────────────────────────
+ *
+ * Le chiffre d'affaires de cette commande disparaît des statistiques, et si
+ * elle était rattachée à un client, elle quitte aussi son historique. C'est le
+ * sens même d'une suppression ; la boîte de confirmation le dit.
+ */
+export async function supprimerCommandeAdmin(
+  id: string
+): Promise<{ ok: boolean; erreur?: string }> {
+  const boutiqueId = await boutiqueActuelle();
+
+  const existante = await prisma.commande.findFirst({
+    where: { id, boutiqueId },
+    select: {
+      statut: true,
+      lignes: { select: { produitId: true, quantite: true } },
+    },
+  });
+  if (!existante) {
+    return { ok: false, erreur: "commande_introuvable" };
+  }
+
+  // Déjà annulée : les articles sont revenus en stock au moment de
+  // l'annulation, il n'y a rien à rendre.
+  const aRendreAuStock =
+    existante.statut === "annulee"
+      ? []
+      : existante.lignes.filter(
+          (l): l is { produitId: string; quantite: number } =>
+            // produitId passe à NULL quand un produit est supprimé : il n'y a
+            // alors plus rien à recréditer.
+            l.produitId !== null
+        );
+
+  await prisma.$transaction(async (tx) => {
+    for (const l of aRendreAuStock) {
+      await tx.produit.updateMany({
+        where: { id: l.produitId, boutiqueId },
+        data: { stock: { increment: l.quantite } },
+      });
+    }
+    // deleteMany et non delete : l'étiquette de boutique reste dans le where,
+    // comme partout ailleurs. Le garde-fou de cloisonnement refuserait un
+    // delete par identifiant seul.
+    await tx.commande.deleteMany({ where: { id, boutiqueId } });
+  });
+
+  return { ok: true };
+}
+
 /** Récupère TOUTES les commandes (usage admin). */
 export async function getAllCommandes(): Promise<Commande[]> {
   const boutiqueId = await boutiqueActuelle();

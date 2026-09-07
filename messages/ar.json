@@ -173,7 +173,15 @@
         "json_invalide": "بيانات غير صالحة.",
         "erreur_serveur": "حدث خطأ، حاول مجدّدًا.",
         "stock_insuffisant_reactivation": "الكمية غير كافية لإعادة تفعيل هذا الطلب. أعد تعبئة مخزون المنتج قبل تغيير حالته."
-      }
+      },
+      "supprimer": "حذف",
+      "supprimerAria": "حذف هذا الطلب",
+      "supprimerTitre": "حذف هذا الطلب؟",
+      "supprimerTexteActive": "سيُحذف نهائيًا. تعود المنتجات إلى المخزون، ويختفي مبلغه من إحصائياتك. لا يمكن التراجع عن هذا الإجراء.",
+      "supprimerTexteAnnulee": "سيُحذف نهائيًا، ويختفي مبلغه من إحصائياتك. المنتجات عادت إلى المخزون عند الإلغاء. لا يمكن التراجع عن هذا الإجراء.",
+      "supprimerAnnuler": "إلغاء",
+      "supprimerEnCours": "جارٍ الحذف…",
+      "supprimerErreur": "لم يتم الحذف. أعد المحاولة بعد قليل."
     },
     "formulaireProduit": {
       "titreCreation": "منتج جديد",

@@ -14,6 +14,7 @@ import type {
 import FormulaireNouvelleCommande from "./FormulaireNouvelleCommande";
 import type { Locale } from "@/i18n/routing";
 import PastilleStatut from "./PastilleStatut";
+import BoutonSupprimerCommandeAdmin from "./BoutonSupprimerCommandeAdmin";
 import IconeEtatAppel from "./IconeEtatAppel";
 
 type FiltreStatut = StatutCommande | "tout";
@@ -157,12 +158,15 @@ export default function ListeCommandesAdmin({
             return (
               <li
                 key={c.id}
-                className="rounded-2xl border border-gray-200 bg-white transition hover:border-gray-400 hover:shadow-sm"
+                className="flex items-stretch rounded-2xl border border-gray-200 bg-white transition hover:border-gray-400 hover:shadow-sm"
               >
+                {/* ⚠️ Le lien et le bouton sont FRERES, jamais imbriqués : un
+                    <button> dans un <a> est invalide, et le clic sur l'un
+                    déclencherait l'autre. */}
                 <Link
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   href={`/admin/commandes/${c.id}` as any}
-                  className="block p-4 sm:flex sm:items-center sm:gap-4"
+                  className="block min-w-0 flex-1 p-4 sm:flex sm:items-center sm:gap-4"
                 >
                   {/* ─── Zone info client (mobile : haut / desktop : gauche) ── */}
                   <div className="min-w-0 flex-1">
@@ -225,6 +229,16 @@ export default function ListeCommandesAdmin({
                     </div>
                   </div>
                 </Link>
+
+                {/* La suppression vient en dernier et sans fond : c'est
+                    l'action la moins fréquente et la seule irréversible, elle
+                    ne doit pas se trouver sur le chemin du regard. */}
+                <div className="flex items-center pe-3">
+                  <BoutonSupprimerCommandeAdmin
+                    commandeId={c.id}
+                    statut={c.statut}
+                  />
+                </div>
               </li>
             );
           })}
