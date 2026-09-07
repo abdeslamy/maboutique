@@ -477,7 +477,14 @@
     "mesCommandes": "Mes commandes",
     "aucuneCommande": "Vous n'avez encore passé aucune commande.",
     "articles": "article(s)",
-    "voirDetail": "Voir détail"
+    "voirDetail": "Voir détail",
+    "retirer": "Retirer",
+    "retirerAria": "Retirer cette commande de mon historique",
+    "retirerTitre": "Retirer cette commande ?",
+    "retirerTexte": "Elle disparaîtra définitivement de votre historique, et cette action est irréversible. Le vendeur en conserve la trace pour sa comptabilité.",
+    "retirerAnnuler": "Annuler",
+    "retirerEnCours": "Retrait…",
+    "retirerErreur": "Le retrait n'a pas abouti. Réessayez dans un instant."
   },
   "commande": {
     "titre": "Finaliser ma commande",

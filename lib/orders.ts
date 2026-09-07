@@ -98,6 +98,48 @@ export async function getCommandesParUtilisateurId(
   return rows.map(dbToCommande);
 }
 
+/**
+ * Retire une commande de l'historique d'un CLIENT.
+ *
+ * ⚠️ Ce n'est pas une suppression, et c'est délibéré. Une commande n'appartient
+ * pas qu'à l'acheteur : c'est la pièce comptable du vendeur, et le stock
+ * qu'elle a décrémenté. La détruire en base ferait deux dégâts irréparables —
+ * la vente disparaîtrait des livres du marchand, et le stock resterait amputé
+ * pour toujours, puisque seul un passage en « annulee » le rend
+ * (voir mettreAJourCommandeAdmin).
+ *
+ * On DÉTACHE donc la commande de son compte plutôt que de l'effacer. Le
+ * schéma prévoit exactement ce cas : `utilisateurId` est nullable, avec
+ * onDelete: SetNull, « si un utilisateur est supprimé, ses commandes ne sont
+ * PAS supprimées (comptabilité !). Juste dé-rattachées. »
+ *
+ * Pour le client, l'effet est celui d'une suppression définitive : la commande
+ * ne réapparaîtra jamais dans son historique, et rien ne permet de la lui
+ * réassocier. Pour le vendeur, rien ne change — nomClient, telephone, adresse,
+ * wilaya, total et lignes sont stockés SUR la commande, pas sur le compte.
+ *
+ * Le `where` porte les trois filtres : l'identifiant, le propriétaire et la
+ * boutique. Sans le propriétaire, n'importe quel client connecté pourrait
+ * retirer la commande d'un autre en devinant un identifiant.
+ */
+export async function retirerCommandeDeLHistorique(
+  commandeId: string,
+  utilisateurId: string
+): Promise<{ ok: boolean }> {
+  const boutiqueId = await boutiqueActuelle();
+
+  const resultat = await prisma.commande.updateMany({
+    where: { id: commandeId, utilisateurId, boutiqueId },
+    data: { utilisateurId: null },
+  });
+
+  // 0 ligne touchée : la commande n'existe pas, appartient à quelqu'un
+  // d'autre, ou relève d'une autre boutique. On ne distingue pas les trois —
+  // le dire renseignerait sur l'existence de commandes qui ne regardent pas
+  // l'appelant.
+  return { ok: resultat.count === 1 };
+}
+
 /** Récupère TOUTES les commandes (usage admin). */
 export async function getAllCommandes(): Promise<Commande[]> {
   const boutiqueId = await boutiqueActuelle();

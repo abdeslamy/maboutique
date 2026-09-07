@@ -6,6 +6,7 @@ import { getCommandesParUtilisateurId } from "@/lib/orders";
 import { formatPrix } from "@/lib/format";
 import type { Locale } from "@/i18n/routing";
 import TimelineCommande from "@/components/TimelineCommande";
+import BoutonRetirerCommande from "@/components/BoutonRetirerCommande";
 
 /**
  * Page /compte — protégée.
@@ -101,6 +102,12 @@ export default async function PageCompte({
                       >
                         {t("voirDetail")}
                       </Link>
+
+                      {/* Le retrait vient EN DERNIER et sans fond : c'est
+                          l'action la moins fréquente et la seule irréversible,
+                          elle ne doit pas se trouver sur le chemin du regard
+                          qui cherche « voir le détail ». */}
+                      <BoutonRetirerCommande commandeId={c.id} />
                     </div>
                   </div>
                   {/* Timeline compacte (synchronisée avec l'admin) */}

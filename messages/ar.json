@@ -477,7 +477,14 @@
     "mesCommandes": "طلباتي",
     "aucuneCommande": "لم تقم بأي طلب بعد.",
     "articles": "مادة/مواد",
-    "voirDetail": "عرض التفاصيل"
+    "voirDetail": "عرض التفاصيل",
+    "retirer": "إزالة",
+    "retirerAria": "إزالة هذا الطلب من سجلي",
+    "retirerTitre": "إزالة هذا الطلب؟",
+    "retirerTexte": "سيختفي نهائيًا من سجلك، ولا يمكن التراجع عن هذا الإجراء. يحتفظ البائع بنسخة منه لمحاسبته.",
+    "retirerAnnuler": "إلغاء",
+    "retirerEnCours": "جارٍ الإزالة…",
+    "retirerErreur": "لم تتم الإزالة. أعد المحاولة بعد قليل."
   },
   "commande": {
     "titre": "إتمام الطلب",
