@@ -27,6 +27,7 @@ export {
   MODES_LIVRAISON,
   estModeValide,
   calculerLivraison,
+  panierEnLivraisonOfferte,
   modeDisponible,
   grouperTarifs,
   aplatirGroupes,

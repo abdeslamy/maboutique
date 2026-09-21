@@ -19,6 +19,7 @@ import {
   getParametresLivraison,
   calculerLivraison,
   modeDisponible,
+  panierEnLivraisonOfferte,
   estModeValide,
   type ModeLivraison,
 } from "./livraison";
@@ -739,10 +740,23 @@ export async function creerCommande(input: {
   if (!modeDisponible(tarifWilaya, mode)) {
     return { ok: false, erreur: "mode_livraison_indisponible" };
   }
+  // La gratuite par produit se recalcule ICI, depuis la base, comme les prix :
+  // un client qui bidouillerait la requete ne peut pas s offrir la livraison
+  // en pretendant que ses articles y donnent droit.
+  const offertParLePanier = panierEnLivraisonOfferte(
+    lignesCreation.map((l) => ({
+      livraisonGratuite: parId.get(l.produitId)?.livraisonGratuite ?? false,
+    }))
+  );
   // null = frais inconnus. Le total est alors HORS livraison, et c est ce
   // qu on enregistre : mieux vaut un total incomplet et signale qu un total
-  // complet et faux.
-  const livraison = calculerLivraison(tarifWilaya, mode, parametres);
+  // complet et faux. Une livraison offerte, elle, vaut 0 : total complet.
+  const livraison = calculerLivraison(
+    tarifWilaya,
+    mode,
+    parametres,
+    offertParLePanier
+  );
   const total = sousTotal + (livraison ?? 0);
 
   // ── Création + décrément du stock, en TRANSACTION ────────────────

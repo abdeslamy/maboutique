@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { useCart } from "@/context/CartContext";
 import QuantitySelector from "./QuantitySelector";
 import { formatPrix } from "@/lib/format";
+import { panierEnLivraisonOfferte } from "@/lib/livraison-calcul";
 import type { Locale } from "@/i18n/routing";
 
 /**
@@ -19,6 +20,7 @@ export default function PanierClient() {
   const locale = useLocale() as Locale;
   const t = useTranslations("panier");
   const tProduit = useTranslations("produit");
+  const tCommande = useTranslations("commande");
 
   // Le panier ne connaît PAS le prix de livraison : il dépend de la wilaya,
   // du mode, et peut n'être fixé qu'à l'appel. Tout se joue à l'étape
@@ -31,6 +33,14 @@ export default function PanierClient() {
     sousTotal,
     estCharge,
   } = useCart();
+
+  // Seule exception à ce qui précède : si TOUS les articles portent la
+  // livraison offerte, le montant vaut 0 quelle que soit la destination.
+  const livraisonOfferte = panierEnLivraisonOfferte(
+    articlesEnrichis.map((a) => ({
+      livraisonGratuite: a.produit.livraisonGratuite,
+    }))
+  );
 
   // Pendant le chargement initial depuis localStorage, on évite tout flash.
   if (!estCharge) {
@@ -150,11 +160,25 @@ export default function PanierClient() {
         <Ligne libelle={t("sousTotal")} montant={formatPrix(sousTotal, locale)} />
         {/* Le prix de livraison dépend de la wilaya et du mode : il n'est
             connu qu'à l'étape suivante. On l'annonce au lieu d'afficher un
-            montant qui changerait ensuite. */}
-        <Ligne libelle={t("livraison")} montant={t("livraisonEtapeSuivante")} />
-        <hr className="my-2 border-gray-200" />
+            montant qui changerait ensuite.
+
+            SAUF quand tous les articles portent la livraison offerte : là, le
+            montant est connu (0) quelle que soit la destination. Le dire dès
+            le panier, c'est enlever un doute avant de demander une adresse. */}
         <Ligne
-          libelle={t("sousTotal")}
+          libelle={t("livraison")}
+          montant={
+            livraisonOfferte ? tCommande("livraisonGratuite") : t("livraisonEtapeSuivante")
+          }
+        />
+        <hr className="my-2 border-gray-200" />
+        {/* La ligne en gras s'appelle « Sous-total » tant que la livraison
+            reste à chiffrer : l'annoncer comme un total serait un engagement
+            qu'on ne peut pas tenir. Mais quand elle est offerte, ce montant
+            EST le total final — le répéter sous le même nom ne ferait que
+            brouiller la lecture. */}
+        <Ligne
+          libelle={livraisonOfferte ? t("total") : t("sousTotal")}
           montant={formatPrix(sousTotal, locale)}
           enGras
         />

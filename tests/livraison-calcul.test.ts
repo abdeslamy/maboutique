@@ -5,12 +5,13 @@ import {
   modeDisponible,
   grouperTarifs,
   aplatirGroupes,
+  panierEnLivraisonOfferte,
   type TarifWilaya,
   type ParametresLivraison,
 } from "@/lib/livraison-calcul";
 
 /**
- * Les trois règles de la livraison, verrouillées par des tests.
+ * Les quatre règles de la livraison, verrouillées par des tests.
  *
  * Pourquoi celles-ci : `calculerLivraison` est appelée aux DEUX bouts — le
  * navigateur affiche son résultat au client, le serveur facture le sien. Un
@@ -54,14 +55,51 @@ test("règle 1 : livraison offerte = 0 DA, même sans aucun tarif", () => {
   assert.equal(calculerLivraison(undefined, "stopdesk", OFFERTE), 0);
 });
 
-// ── Règle 2 — le tarif de la wilaya s'applique ──────────────────────────
+// ── Règle 2 — la livraison offerte portée par les produits ──────────────
 
-test("règle 2 : chaque mode facture son propre prix", () => {
+const OFFERT = { livraisonGratuite: true };
+const PAYANT = { livraisonGratuite: false };
+
+test("règle 2 : panier entièrement offert = livraison offerte", () => {
+  assert.equal(panierEnLivraisonOfferte([OFFERT, OFFERT]), true);
+});
+
+test("règle 2 : UN SEUL article payant fait perdre la gratuité", () => {
+  // La livraison est un seul colis : on ne peut pas l'offrir à moitié.
+  // C'est aussi ce qui empêche d'ajouter un petit article « offert » pour
+  // ne rien payer sur une grosse commande.
+  assert.equal(panierEnLivraisonOfferte([OFFERT, PAYANT]), false);
+  assert.equal(panierEnLivraisonOfferte([PAYANT, OFFERT, OFFERT]), false);
+});
+
+test("règle 2 : un panier vide ne donne droit à rien", () => {
+  // `every` renvoie true sur une liste vide : sans le test de longueur, un
+  // panier vide serait « entièrement offert ».
+  assert.equal(panierEnLivraisonOfferte([]), false);
+});
+
+test("règle 2 : offerte par les produits = 0 DA, même sans tarif de wilaya", () => {
+  // Le cas qui compte pour l'affichage : le montant est FERME (0), donc le
+  // total est complet — surtout pas « hors livraison ».
+  assert.equal(calculerLivraison(undefined, "domicile", PAYANTE, true), 0);
+  assert.equal(calculerLivraison(ALGER, "domicile", PAYANTE, true), 0);
+});
+
+test("règle 2 : sans gratuité du panier, le tarif de la wilaya reprend", () => {
+  assert.equal(calculerLivraison(ALGER, "domicile", PAYANTE, false), 400);
+  // Paramètre omis = pas de gratuité : les appels existants ne changent pas
+  // de comportement.
+  assert.equal(calculerLivraison(ALGER, "domicile", PAYANTE), 400);
+});
+
+// ── Règle 3 — le tarif de la wilaya s'applique ──────────────────────────
+
+test("règle 3 : chaque mode facture son propre prix", () => {
   assert.equal(calculerLivraison(ALGER, "domicile", PAYANTE), 400);
   assert.equal(calculerLivraison(ALGER, "stopdesk", PAYANTE), 250);
 });
 
-test("règle 2 : un tarif à 0 DA reste 0 DA, et non « inconnu »", () => {
+test("règle 3 : un tarif à 0 DA reste 0 DA, et non « inconnu »", () => {
   const offertParLeVendeur: TarifWilaya = {
     wilaya: "16",
     prixDomicile: 0,
@@ -72,14 +110,14 @@ test("règle 2 : un tarif à 0 DA reste 0 DA, et non « inconnu »", () => {
   assert.equal(calculerLivraison(offertParLeVendeur, "domicile", PAYANTE), 0);
 });
 
-// ── Règle 3 — pas de tarif : montant inconnu, jamais de blocage ─────────
+// ── Règle 4 — pas de tarif : montant inconnu, jamais de blocage ─────────
 
-test("règle 3 : wilaya sans tarif = null, pas un prix inventé", () => {
+test("règle 4 : wilaya sans tarif = null, pas un prix inventé", () => {
   assert.equal(calculerLivraison(undefined, "domicile", PAYANTE), null);
   assert.equal(calculerLivraison(undefined, "stopdesk", PAYANTE), null);
 });
 
-test("règle 3 : les deux modes restent ouverts sur une wilaya sans tarif", () => {
+test("règle 4 : les deux modes restent ouverts sur une wilaya sans tarif", () => {
   // Ne rien savoir d'une destination n'est pas une raison de refuser la
   // commande. C'est toute la différence avec l'ancien comportement, qui
   // renvoyait false et fermait la wilaya.

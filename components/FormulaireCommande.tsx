@@ -12,6 +12,7 @@ import { formatPrix } from "@/lib/format";
 import {
   calculerLivraison,
   modeDisponible,
+  panierEnLivraisonOfferte,
   type TarifWilaya,
   type ParametresLivraison,
   type ModeLivraison,
@@ -55,6 +56,23 @@ export default function FormulaireCommande({
   // n'est pas encore connu, et cela ne doit jamais empêcher de commander.
   const wilayasDisponibles = WILAYAS;
 
+  // ── Livraison offerte portée par les produits ─────────────────────
+  // Elle ne dépend NI de la wilaya NI du mode : on peut donc l'annoncer
+  // avant même que le client ait choisi sa destination.
+  const offertParLePanier = panierEnLivraisonOfferte(
+    articlesEnrichis.map((a) => ({
+      livraisonGratuite: a.produit.livraisonGratuite,
+    }))
+  );
+  // Articles qui font perdre la gratuité au reste du panier. On les nomme :
+  // « la livraison n'est plus offerte » sans dire pourquoi ressemble à une
+  // promesse reprise en douce.
+  const sansGratuite = articlesEnrichis.filter(
+    (a) => !a.produit.livraisonGratuite
+  );
+  const gratuitePerdue =
+    sansGratuite.length > 0 && sansGratuite.length < articlesEnrichis.length;
+
   const tarifChoisi = tarifs.find((tr) => tr.wilaya === wilaya);
   // Ce groupe de wilayas n a pas de prix a domicile : seul le retrait au
   // bureau est possible. On bascule le choix sans attendre une action.
@@ -65,9 +83,13 @@ export default function FormulaireCommande({
     : modeLivraison;
   // Même fonction que le serveur → aucun écart possible entre le prix
   // affiché et le prix facturé.
-  const livraison = wilaya
-    ? calculerLivraison(tarifChoisi, modeEffectif, parametres)
-    : null;
+  // Offerte par les produits : le montant est connu (0) SANS attendre la
+  // wilaya. C'est tout l'intérêt — le client voit son total définitif tout
+  // de suite, au lieu d'un « choisissez une wilaya ».
+  const livraison =
+    offertParLePanier || wilaya
+      ? calculerLivraison(tarifChoisi, modeEffectif, parametres, offertParLePanier)
+      : null;
   // Trois situations à ne pas confondre dans l'affichage :
   //   pas encore de wilaya → on invite à en choisir une ;
   //   wilaya sans tarif    → frais annoncés à l'appel, total HORS livraison ;
@@ -289,7 +311,9 @@ export default function FormulaireCommande({
                             mode réellement tarifé à 0 — pas parce que l'autre
                             mode, lui, se trouve être gratuit. */}
                         {!indisponible &&
-                          (parametres.livraisonGratuite || prix === 0 ? (
+                          (parametres.livraisonGratuite ||
+                          offertParLePanier ||
+                          prix === 0 ? (
                             <span className="shrink-0 text-sm font-semibold text-gray-900">
                               {t("livraisonGratuite")}
                             </span>
@@ -380,14 +404,16 @@ export default function FormulaireCommande({
           <Ligne
             libelle={tPanier("livraison")}
             montant={
-              // Tant qu'aucune wilaya n'est choisie, le prix est inconnu :
-              // on le dit plutôt que d'afficher un montant faux.
-              !wilaya
+              // « Offerte » se teste EN PREMIER : quand la gratuité vient des
+              // produits, le montant est connu avant même le choix de la
+              // wilaya. L'annoncer après aurait affiché « choisissez une
+              // wilaya » pour un prix qu'on connaît déjà.
+              livraison === 0
+                ? t("livraisonGratuite")
+                : !wilaya
                 ? t("livraisonSelonWilaya")
                 : fraisAConfirmer
                 ? t("fraisAlAppel")
-                : livraison === 0
-                ? t("livraisonGratuite")
                 : formatPrix(livraison as number, locale)
             }
           />
@@ -404,6 +430,20 @@ export default function FormulaireCommande({
           {fraisAConfirmer && (
             <p className="mt-2 text-xs leading-relaxed text-gray-500">
               {t("fraisAlAppelAide")}
+            </p>
+          )}
+
+          {/* Panier mixte : le client a vu « Livraison gratuite » sur une
+              fiche produit, et la livraison lui est pourtant facturée. Sans
+              explication, cela ressemble à une promesse reprise en douce —
+              on nomme donc les articles qui n'y donnent pas droit. */}
+          {gratuitePerdue && (
+            <p className="mt-2 text-xs leading-relaxed text-gray-500">
+              {t("gratuitePerdue", {
+                produits: sansGratuite
+                  .map((a) => a.produit.nom[locale])
+                  .join(", "),
+              })}
             </p>
           )}
         </aside>

@@ -97,19 +97,42 @@ export type ParametresLivraison = {
 };
 
 /**
+ * Le panier donne-t-il droit à la livraison offerte ?
+ *
+ * Il faut que TOUS les articles portent l'option. La livraison est un seul
+ * colis : on ne peut pas l'offrir à moitié. Un seul produit sans l'option, et
+ * les frais s'appliquent à toute la commande — sans quoi il suffirait
+ * d'ajouter un petit article « livraison offerte » pour ne rien payer sur une
+ * grosse commande.
+ *
+ * Un panier vide ne donne droit à rien : `every` renvoie true sur une liste
+ * vide, d'où le test de longueur.
+ */
+export function panierEnLivraisonOfferte(
+  articles: { livraisonGratuite: boolean }[]
+): boolean {
+  return articles.length > 0 && articles.every((a) => a.livraisonGratuite);
+}
+
+/**
  * Prix de livraison à facturer, ou `null` quand il n'est PAS connu.
  *
- * Les trois règles, dans cet ordre de priorité :
+ * Les règles, dans cet ordre de priorité :
  *
  *  1. La boutique offre la livraison  → 0 DA, partout. Prime sur tout.
- *  2. La wilaya a un tarif            → ce tarif.
- *  3. La wilaya n'a pas de tarif      → `null` : montant inconnu.
+ *  2. Le panier y donne droit         → 0 DA (voir panierEnLivraisonOfferte).
+ *  3. La wilaya a un tarif            → ce tarif.
+ *  4. La wilaya n'a pas de tarif      → `null` : montant inconnu.
  *
- * Le cas 3 couvre indifféremment « le vendeur n'a encore rien renseigné » et
+ * Le cas 4 couvre indifféremment « le vendeur n'a encore rien renseigné » et
  * « le vendeur a renseigné d'autres wilayas mais pas celle-ci ». Dans les deux
  * cas la commande passe quand même : les frais seront annoncés au client lors
  * de l'appel de confirmation. C'est ce que `null` veut dire ici — à ne pas
  * confondre avec 0, qui veut dire « offerte ».
+ *
+ * ⚠️ Une livraison offerte n'est JAMAIS « à confirmer » : 0 est un montant
+ * ferme, donc le total affiché est complet. C'est pour cela que les deux
+ * gratuités passent avant le cas de la wilaya sans tarif.
  *
  * Utilisé aux DEUX bouts : par le formulaire client pour afficher le prix en
  * direct, et par le serveur pour calculer le montant réellement facturé.
@@ -118,16 +141,19 @@ export type ParametresLivraison = {
 export function calculerLivraison(
   tarif: TarifWilaya | undefined,
   mode: ModeLivraison,
-  parametres: ParametresLivraison
+  parametres: ParametresLivraison,
+  /** Le panier donne droit à la gratuité — voir panierEnLivraisonOfferte. */
+  offertParLePanier = false
 ): number | null {
-  // Règle 1 — la gratuité l'emporte sur tout le reste, y compris sur une
-  // wilaya sans tarif : offerte, c'est 0 DA, il n'y a plus rien à confirmer.
-  if (parametres.livraisonGratuite) return 0;
+  // Règles 1 et 2 — la gratuité l'emporte sur tout le reste, y compris sur
+  // une wilaya sans tarif : offerte, c'est 0 DA, il n'y a plus rien à
+  // confirmer et le total affiché est donc complet.
+  if (parametres.livraisonGratuite || offertParLePanier) return 0;
 
-  // Règle 3 — pas de tarif pour cette wilaya : montant inconnu, pas refus.
+  // Règle 4 — pas de tarif pour cette wilaya : montant inconnu, pas refus.
   if (!tarif) return null;
 
-  // Règle 2 — le tarif de la wilaya s'applique.
+  // Règle 3 — le tarif de la wilaya s'applique.
   if (mode === "stopdesk") return tarif.prixStopdesk;
   // Domicile non assuré pour ce groupe : l'appelant aurait dû l'écarter via
   // modeDisponible(). On renvoie « inconnu » plutôt que de facturer le prix

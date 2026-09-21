@@ -89,9 +89,15 @@ export default function FormulaireNouvelleCommande({
     const p = parId.get(l.produitId);
     return s + (p ? p.prix * l.quantite : 0);
   }, 0);
-  const livraison = wilaya
-    ? calculerLivraison(tarifChoisi, modeEffectif, parametres)
-    : null;
+  // Même règle que côté client : offerte seulement si TOUS les articles y
+  // donnent droit. Une ligne sans produit choisi ne compte pas encore.
+  const offertParLePanier =
+    lignes.length > 0 &&
+    lignes.every((l) => parId.get(l.produitId)?.livraisonGratuite === true);
+  const livraison =
+    offertParLePanier || wilaya
+      ? calculerLivraison(tarifChoisi, modeEffectif, parametres, offertParLePanier)
+      : null;
   // Wilaya choisie mais sans tarif : montant à fixer pendant l'appel.
   const fraisAConfirmer = wilaya !== "" && livraison === null;
   const total = sousTotal + (livraison ?? 0);
@@ -356,7 +362,9 @@ export default function FormulaireNouvelleCommande({
                   </span>
                   {/* Chaque mode annonce SON prix — voir FormulaireCommande. */}
                   {!indispo &&
-                    (parametres.livraisonGratuite || prix === 0 ? (
+                    (parametres.livraisonGratuite ||
+                    offertParLePanier ||
+                    prix === 0 ? (
                       <span className="shrink-0 text-sm font-semibold text-gray-900">
                         {tCmd("livraisonGratuite")}
                       </span>
@@ -384,12 +392,14 @@ export default function FormulaireNouvelleCommande({
           <Ligne
             libelle={tPanier("livraison")}
             valeur={
-              !wilaya
+              // « Offerte » en premier : la gratuité portée par les produits
+              // est connue avant le choix de la wilaya.
+              livraison === 0
+                ? tCmd("livraisonGratuite")
+                : !wilaya
                 ? tCmd("livraisonSelonWilaya")
                 : fraisAConfirmer
                 ? tCmd("aConfirmer")
-                : livraison === 0
-                ? tCmd("livraisonGratuite")
                 : formatPrix(livraison as number, locale)
             }
           />

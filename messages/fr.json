@@ -235,7 +235,7 @@
       "delaiLivraison": "Délai de livraison",
       "delaiLivraisonAide": "Affiché au client sur la fiche produit.",
       "livraisonGratuite": "Livraison gratuite",
-      "livraisonGratuiteAide": "La livraison est offerte sur ce produit, quelle que soit la wilaya."
+      "livraisonGratuiteAide": "La livraison est offerte quand le panier ne contient QUE des produits portant cette option. Un seul article sans elle, et les frais s'appliquent à toute la commande."
     },
     "livraison": {
       "titre": "Livraison",
@@ -538,7 +538,8 @@
     "aConfirmer": "À confirmer",
     "fraisAlAppel": "Communiqués lors de l'appel",
     "fraisAlAppelAide": "Les frais de livraison vous seront communiqués lors de l'appel de confirmation.",
-    "totalHorsLivraison": "Total hors livraison"
+    "totalHorsLivraison": "Total hors livraison",
+    "gratuitePerdue": "Livraison offerte non applicable — votre panier contient des produits qui n'y donnent pas droit : {produits}. Les frais portent sur toute la commande."
   },
   "confirmation": {
     "titre": "Commande confirmée !",
