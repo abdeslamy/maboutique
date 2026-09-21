@@ -89,7 +89,9 @@ export default function ConfigurationLivraison({
     () => new Set(groupes.flatMap((g) => g.wilayas)),
     [groupes]
   );
-  const nonLivrees = WILAYAS.filter((w) => !wilayasCouvertes.has(w.code));
+  // Wilayas sans prix connu. Elles restent commandables : leurs frais seront
+  // annoncés à l'appel de confirmation.
+  const sansTarif = WILAYAS.filter((w) => !wilayasCouvertes.has(w.code));
 
   // Un tarif jamais enregistre est une creation en cours : on bloque
   // l ouverture d un autre tant qu il n est pas enregistre.
@@ -104,8 +106,7 @@ export default function ConfigurationLivraison({
     );
   const groupesModifies = contenu(groupes) !== contenu(groupesInitiaux);
   const parametresModifies =
-    parametres.seuilLivraisonGratuite !==
-    parametresInitiaux.seuilLivraisonGratuite;
+    parametres.livraisonGratuite !== parametresInitiaux.livraisonGratuite;
 
   function majGroupe(i: number, champ: keyof GroupeBrouillon, valeur: unknown) {
     setGroupes((prev) =>
@@ -212,36 +213,44 @@ export default function ConfigurationLivraison({
     <div className="pb-8">
       {/* ═══ Livraison gratuite — section autonome ══════════════════
           Elle a son PROPRE bouton : l'admin enregistre ce réglage sans
-          emporter des tarifs encore en cours d'édition plus bas. */}
+          emporter des tarifs encore en cours d'édition plus bas.
+
+          C'est un interrupteur, plus un seuil en dinars : « offerte à partir
+          de 4000 DA » obligeait le client à remplir son panier pour savoir
+          s'il y avait droit. Ici, c'est oui ou non, visible des deux côtés. */}
       <section className="mb-6 rounded-3xl bg-stone-50 p-6 sm:p-8">
         <div className="flex items-center gap-2.5">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
             <Gift className="h-4 w-4 text-gray-700" strokeWidth={1.75} />
           </span>
           <span className="text-[15px] font-medium text-gray-900">
-            {t("seuilGratuite")}
+            {t("gratuite")}
           </span>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              min={0}
-              step={1}
-              inputMode="numeric"
-              value={parametres.seuilLivraisonGratuite ?? ""}
-              onChange={(e) => {
-                setParametres({
-                  seuilLivraisonGratuite:
-                    e.target.value === "" ? null : Number(e.target.value),
-                });
+          <label className="flex cursor-pointer items-center gap-3">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={parametres.livraisonGratuite}
+              onClick={() => {
+                setParametres((p) => ({ livraisonGratuite: !p.livraisonGratuite }));
                 setMessageParams(null);
               }}
-              placeholder="—"
-              className="w-44 rounded-xl bg-white px-4 py-2.5 text-lg font-semibold tabular-nums text-gray-900 outline-none transition focus:ring-2 focus:ring-gray-900"
-            />
-            <span className="text-sm font-medium text-gray-500">DA</span>
-          </div>
+              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+                parametres.livraisonGratuite ? "bg-gray-900" : "bg-gray-300"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${
+                  parametres.livraisonGratuite ? "start-[22px]" : "start-0.5"
+                }`}
+              />
+            </button>
+            <span className="text-sm font-medium text-gray-900">
+              {parametres.livraisonGratuite ? t("gratuiteActive") : t("gratuiteInactive")}
+            </span>
+          </label>
 
           <button
             type="button"
@@ -266,7 +275,7 @@ export default function ConfigurationLivraison({
             </span>
           )}
         </div>
-        <p className="mt-2 text-xs text-gray-500">{t("seuilGratuiteAide")}</p>
+        <p className="mt-2 text-xs text-gray-500">{t("gratuiteAide")}</p>
       </section>
 
       {/* ═══ Tarifs (groupes) ═══════════════════════════════════════ */}
@@ -277,6 +286,17 @@ export default function ConfigurationLivraison({
           </h2>
           <p className="text-sm text-gray-500">{t("groupesAide")}</p>
         </div>
+
+        {/* La gratuité passe AVANT les tarifs : tant qu'elle est active, tout
+            ce qui suit est sans effet. On le dit plutôt que de laisser le
+            marchand régler des prix qui ne s'appliqueront jamais. On ne
+            désactive pas la section pour autant — il doit pouvoir préparer
+            sa grille avant de couper la gratuité. */}
+        {parametres.livraisonGratuite && (
+          <p className="mt-4 rounded-2xl bg-white px-4 py-3 text-sm text-gray-600">
+            {t("tarifsIgnores")}
+          </p>
+        )}
 
         {groupes.length === 0 ? (
           <p className="mt-6 rounded-2xl bg-white px-6 py-12 text-center text-sm text-gray-500">
@@ -437,18 +457,20 @@ export default function ConfigurationLivraison({
           </div>
         </div>
 
-        {/* Rappel des wilayas non couvertes — information, pas alerte.
-            On ne liste PLUS les noms : à 55 wilayas, le pavé écrasait le reste
-            de la page pour une information qu'on retrouve dans le sélecteur. */}
+        {/* Rappel des wilayas sans tarif — information, pas alerte : leurs
+            clients peuvent commander, le montant leur sera simplement annoncé
+            au téléphone. On ne liste PLUS les noms : à 55 wilayas, le pavé
+            écrasait le reste de la page pour une information qu'on retrouve
+            dans le sélecteur. */}
         <p className="mt-4 text-xs text-gray-500">
-          {nonLivrees.length === 0 ? (
-            t("toutesLivrees")
+          {sansTarif.length === 0 ? (
+            t("toutesTarifees")
           ) : (
             <>
               <span className="font-medium text-gray-700">
-                {t("nonLivrees", { n: nonLivrees.length })}
+                {t("sansTarif", { n: sansTarif.length })}
               </span>{" "}
-              {t("nonLivreesAide")}
+              {t("sansTarifAide")}
             </>
           )}
         </p>

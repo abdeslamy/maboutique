@@ -89,6 +89,13 @@ function contientEtiquette(valeur: unknown, profondeur = 0): boolean {
   }
   if (Array.isArray(valeur)) {
     // createMany : chaque ligne doit porter l'étiquette, pas seulement une.
+    //
+    // Un tableau VIDE est refusé, volontairement. Il n'écrirait rien, donc
+    // il ne peut rien faire fuiter — mais l'accepter obligerait ce garde-fou
+    // à raisonner sur l'intention de l'appelant, et c'est exactement ce qu'il
+    // ne doit pas faire. La règle reste mécanique : pas d'étiquette, pas de
+    // passage. C'est à l'appelant de ne pas émettre une insertion vide (voir
+    // enregistrerGroupes dans lib/livraison.ts, qui l'omet purement).
     return valeur.length > 0 && valeur.every((v) => contientEtiquette(v, profondeur + 1));
   }
   const obj = valeur as Record<string, unknown>;

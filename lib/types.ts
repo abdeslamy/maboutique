@@ -146,7 +146,14 @@ export type Commande = {
   utilisateurId?: string;
   articles: LigneCommande[];
   sousTotal: number;
-  livraison: number;
+  /**
+   * Frais de livraison figés à la commande.
+   *  - un montant : le tarif de la wilaya, ou 0 si la boutique offre la livraison ;
+   *  - `null`     : aucun tarif n'existait pour cette wilaya, le montant sera
+   *                 annoncé lors de l'appel de confirmation.
+   */
+  livraison: number | null;
+  /** sousTotal + livraison. HORS livraison quand `livraison` vaut null. */
   total: number;
   /** "domicile" ou "stopdesk", figé au moment de la commande. */
   modeLivraison: string;

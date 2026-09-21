@@ -172,7 +172,8 @@
         "etat_appel_invalide": "حالة الاتصال غير صالحة.",
         "json_invalide": "بيانات غير صالحة.",
         "erreur_serveur": "حدث خطأ، حاول مجدّدًا.",
-        "stock_insuffisant_reactivation": "الكمية غير كافية لإعادة تفعيل هذا الطلب. أعد تعبئة مخزون المنتج قبل تغيير حالته."
+        "stock_insuffisant_reactivation": "الكمية غير كافية لإعادة تفعيل هذا الطلب. أعد تعبئة مخزون المنتج قبل تغيير حالته.",
+        "livraison_invalide": "يجب أن تكون الرسوم عدداً صحيحاً موجباً."
       },
       "supprimer": "حذف",
       "supprimerAria": "حذف هذا الطلب",
@@ -181,7 +182,11 @@
       "supprimerTexteAnnulee": "سيُحذف نهائيًا، ويختفي مبلغه من إحصائياتك. المنتجات عادت إلى المخزون عند الإلغاء. لا يمكن التراجع عن هذا الإجراء.",
       "supprimerAnnuler": "إلغاء",
       "supprimerEnCours": "جارٍ الحذف…",
-      "supprimerErreur": "لم يتم الحذف. أعد المحاولة بعد قليل."
+      "supprimerErreur": "لم يتم الحذف. أعد المحاولة بعد قليل.",
+      "livraisonAConfirmer": "يُحدَّد أثناء المكالمة",
+      "total_hors_livraison": "المجموع دون التوصيل",
+      "fraisLivraison": "رسوم التوصيل",
+      "fraisLivraisonAide": "اتركه فارغاً ما دام المبلغ غير محدَّد. مجموع الطلب يتبع تلقائياً."
     },
     "formulaireProduit": {
       "titreCreation": "منتج جديد",
@@ -236,7 +241,7 @@
       "titre": "التوصيل",
       "sousTitre": "كم يكلّف التوصيل، حسب الوجهة.",
       "groupes": "أسعار التوصيل",
-      "groupesAide": "اجمع الولايات التي لها نفس السعر. الولاية غير المدرجة لن يتمّ التوصيل إليها.",
+      "groupesAide": "اجمع الولايات التي لها نفس السعر. الولاية بدون سعر يمكن للزبون أن يطلب منها: تُبلَّغ رسوم التوصيل أثناء مكالمة التأكيد.",
       "ajouter": "إضافة سعر",
       "nouveauGroupe": "سعر جديد",
       "prixDomicile": "السعر إلى المنزل",
@@ -247,34 +252,28 @@
       "choisirWilayas": "ولايات هذا السعر",
       "modifierWilayas": "تعديل الولايات",
       "supprimerGroupe": "حذف هذا السعر",
-      "confirmSupprimer": "حذف هذا السعر؟ لن يتمّ التوصيل إلى الولايات المعنية.",
+      "confirmSupprimer": "حذف هذا السعر؟ ستُبلَّغ رسوم هذه الولايات أثناء مكالمة التأكيد.",
       "toutSelectionner": "تحديد الكل",
       "toutDeselectionner": "إلغاء تحديد الكل",
       "valider": "تأكيد",
       "annuler": "إلغاء",
       "rechercher": "ابحث عن ولاية…",
-      "aucunGroupe": "لا يوجد سعر بعد. أضف ولاياتك للبدء.",
-      "nonLivrees": "{n} ولاية لا يتمّ التوصيل إليها بعد.",
-      "toutesLivrees": "يتمّ التوصيل إلى جميع الولايات",
-      "voirNonLivrees": "عرضها",
-      "seuilGratuite": "توصيل مجاني ابتداءً من",
-      "seuilGratuiteAide": "اتركه فارغًا إن كنت لا تقدّم التوصيل المجاني أبدًا.",
+      "aucunGroupe": "لا يوجد أي سعر حالياً. يمكن لزبائنك الطلب — وتُبلَّغ الرسوم أثناء المكالمة.",
       "enregistrer": "حفظ",
       "enregistrement": "جارٍ الحفظ…",
       "enregistre": "تمّ الحفظ.",
       "modifsEnCours": "تعديلات غير محفوظة",
       "erreurs": {
         "prix_invalide": "يجب أن تكون الأسعار أعدادًا صحيحة موجبة.",
-        "seuil_invalide": "يجب أن يكون المبلغ عددًا صحيحًا موجبًا.",
         "wilaya_invalide": "ولاية غير معروفة.",
         "wilaya_en_double": "لا يمكن أن تكون الولاية في سعرين.",
         "groupe_vide": "يجب أن يحتوي كل سعر على ولاية واحدة على الأقل.",
         "erreur_serveur": "حدث خطأ، حاول مجدّدًا.",
         "json_invalide": "بيانات غير صالحة.",
         "non_connecte": "يجب تسجيل الدخول.",
-        "acces_refuse": "الوصول مرفوض."
+        "acces_refuse": "الوصول مرفوض.",
+        "gratuite_invalide": "إعداد غير صالح."
       },
-      "nonLivreesAide": "أضفها إلى سعر ليتمكّن زبائنها من الطلب.",
       "enregistrerSection": "حفظ",
       "selecteurAide": "حدّد الولايات التي تأخذ هذا السعر، وأزل التحديد عن التي تريد استبعادها.",
       "dejaDansTarif": "حاليًا {stopdesk} دج إلى المكتب، {domicile} دج إلى المنزل",
@@ -286,7 +285,15 @@
       "prixDomicileVide": "فارغ = لا يوجد توصيل إلى المنزل",
       "erreurStopdesk": "يرجى إدخال سعر التوصيل إلى المكتب",
       "erreurWilayas": "يرجى اختيار ولايات هذا السعر",
-      "nonRenseigne": "--"
+      "nonRenseigne": "--",
+      "gratuite": "التوصيل مجاني",
+      "gratuiteActive": "مُفعَّل — التوصيل مجاني في كل الولايات",
+      "gratuiteInactive": "غير مُفعَّل — تُطبَّق الأسعار أدناه",
+      "gratuiteAide": "عند التفعيل، يكون التوصيل بـ 0 دج في كل الولايات مهما كان مبلغ السلة. هذا الإعداد له الأولوية على أسعارك.",
+      "tarifsIgnores": "التوصيل المجاني مُفعَّل: هذه الأسعار لا تُطبَّق ما دام مُفعَّلاً. يمكنك مع ذلك تحضيرها.",
+      "sansTarif": "{n} ولاية بدون سعر.",
+      "sansTarifAide": "يمكن لزبائنها الطلب؛ وتُبلَّغ الرسوم أثناء مكالمة التأكيد.",
+      "toutesTarifees": "كل الولايات الـ58 لها سعر."
     },
     "nouvelleCommande": {
       "nouvelle": "طلب جديد",
@@ -309,7 +316,6 @@
         "telephone_format_dz": "رقم جزائري غير صالح (10 أرقام تبدأ بـ 0).",
         "adresse_courte": "يجب أن يحتوي العنوان على 5 أحرف على الأقل.",
         "wilaya_invalide": "اختر ولاية.",
-        "wilaya_non_desservie": "لا يتمّ التوصيل إلى هذه الولاية.",
         "mode_livraison_indisponible": "طريقة التوصيل هذه غير متوفّرة لهذه الولاية.",
         "quantite_invalide": "كمية غير صالحة.",
         "produit_introuvable": "المنتج غير موجود.",
@@ -519,7 +525,6 @@
       "json_invalide": "بيانات غير صالحة.",
       "stock_insuffisant": "الكمية المتوفّرة من « {produit} » لم تعد كافية. عدّل سلّتك.",
       "rupture_stock": "« {produit} » نفدت كميته. أزِله من السلّة للمتابعة.",
-      "wilaya_non_desservie": "لا نقوم بالتوصيل إلى هذه الولاية بعد.",
       "mode_livraison_indisponible": "طريقة التوصيل هذه غير متوفّرة لهذه الولاية."
     },
     "modeLivraison": "طريقة التوصيل",
@@ -529,9 +534,11 @@
     "stopdeskAide": "تستلم الطرد من مكتب شركة التوصيل",
     "livraisonGratuite": "مجاني",
     "livraisonSelonWilaya": "اختر ولاية",
-    "aucuneWilayaLivree": "لا يتمّ التوصيل إلى أيّ ولاية حاليًا.",
-    "aucuneWilayaLivreeAide": "أضف ولايات وأسعارها ليتمكّن زبائنك من الطلب.",
-    "modeIndisponible": "غير متوفّر لهذه الولاية"
+    "modeIndisponible": "غير متوفّر لهذه الولاية",
+    "aConfirmer": "يُحدَّد لاحقاً",
+    "fraisAlAppel": "تُبلَّغ أثناء المكالمة",
+    "fraisAlAppelAide": "لا نوصّل بعد بانتظام إلى هذه الولاية: ستُبلَّغ رسوم التوصيل أثناء مكالمة التأكيد.",
+    "totalHorsLivraison": "المجموع دون التوصيل"
   },
   "confirmation": {
     "titre": "تمّ تأكيد طلبك!",

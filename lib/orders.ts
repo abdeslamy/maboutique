@@ -448,6 +448,15 @@ export async function mettreAJourCommandeAdmin(
     statut?: StatutCommande;
     etatAppel?: EtatAppel;
     notes?: string;
+    /**
+     * Frais de livraison fixés APRÈS COUP, typiquement pendant l'appel de
+     * confirmation d'une commande partie sans tarif connu.
+     *   undefined → on n'y touche pas ;
+     *   un entier  → montant facturé (0 = offerte) ;
+     *   null       → retour à « montant à confirmer ».
+     * Le total de la commande est recalculé en conséquence.
+     */
+    livraison?: number | null;
   }
 ): Promise<
   { ok: true; commande: Commande } | { ok: false; erreur: string }
@@ -459,6 +468,13 @@ export async function mettreAJourCommandeAdmin(
   }
   if (modifs.etatAppel && !ETATS_APPEL_VALIDES.includes(modifs.etatAppel)) {
     return { ok: false, erreur: "etat_appel_invalide" };
+  }
+  if (
+    modifs.livraison !== undefined &&
+    modifs.livraison !== null &&
+    (!Number.isInteger(modifs.livraison) || modifs.livraison < 0)
+  ) {
+    return { ok: false, erreur: "livraison_invalide" };
   }
 
   // Si on change le statut, on lit la commande actuelle pour ne remplir
@@ -477,11 +493,19 @@ export async function mettreAJourCommandeAdmin(
   let mouvementStock: "rendre" | "reprendre" | null = null;
   let lignes: { produitId: string | null; quantite: number }[] = [];
 
-  if (modifs.statut) {
+  // Nouveau total, uniquement quand les frais de livraison changent.
+  // undefined = on ne touche pas au total existant.
+  let totalRecalcule: number | undefined;
+
+  // On relit la commande dès que le STATUT ou les FRAIS changent : le premier
+  // a besoin de l'état précédent (horodatage déjà posé, stock à bouger), le
+  // second du sous-total pour recalculer le total.
+  if (modifs.statut || modifs.livraison !== undefined) {
     const existante = await prisma.commande.findFirst({
       where: { id, boutiqueId },
       select: {
         statut: true,
+        sousTotal: true,
         confirmedAt: true,
         enLivraisonAt: true,
         livreeAt: true,
@@ -492,25 +516,40 @@ export async function mettreAJourCommandeAdmin(
     if (!existante) {
       return { ok: false, erreur: "commande_introuvable" };
     }
-    const now = new Date();
-    if (modifs.statut === "confirmee" && !existante.confirmedAt) {
-      horodatages.confirmedAt = now;
-    } else if (modifs.statut === "en_livraison" && !existante.enLivraisonAt) {
-      horodatages.enLivraisonAt = now;
-    } else if (modifs.statut === "livree" && !existante.livreeAt) {
-      horodatages.livreeAt = now;
-    } else if (modifs.statut === "annulee" && !existante.annuleeAt) {
-      horodatages.annuleeAt = now;
+
+    // Le total suit toujours les frais : sans ce recalcul, la commande
+    // afficherait un montant de livraison et un total qui ne se répondent
+    // plus — et le chiffre d'affaires s'en trouverait faussé.
+    if (modifs.livraison !== undefined) {
+      totalRecalcule = existante.sousTotal + (modifs.livraison ?? 0);
     }
 
-    // On compare l'ANCIEN et le NOUVEAU statut, jamais l'horodatage : c'est
-    // ce qui garantit qu'un aller-retour "annulée → confirmée → annulée" ne
-    // remet pas deux fois les mêmes articles en stock.
-    lignes = existante.lignes;
-    const etaitAnnulee = existante.statut === "annulee";
-    const devientAnnulee = modifs.statut === "annulee";
-    if (!etaitAnnulee && devientAnnulee) mouvementStock = "rendre";
-    else if (etaitAnnulee && !devientAnnulee) mouvementStock = "reprendre";
+    // ⚠️ Tout ce qui suit ne concerne QUE le changement de statut, et doit
+    // rester derrière cette garde. Sans elle, corriger les seuls frais de
+    // livraison d'une commande annulée la ferait ressortir du stock : plus
+    // bas, `devientAnnulee` vaudrait false faute de statut transmis, et le
+    // code y lirait un retour à la vie.
+    if (modifs.statut) {
+      const now = new Date();
+      if (modifs.statut === "confirmee" && !existante.confirmedAt) {
+        horodatages.confirmedAt = now;
+      } else if (modifs.statut === "en_livraison" && !existante.enLivraisonAt) {
+        horodatages.enLivraisonAt = now;
+      } else if (modifs.statut === "livree" && !existante.livreeAt) {
+        horodatages.livreeAt = now;
+      } else if (modifs.statut === "annulee" && !existante.annuleeAt) {
+        horodatages.annuleeAt = now;
+      }
+
+      // On compare l'ANCIEN et le NOUVEAU statut, jamais l'horodatage : c'est
+      // ce qui garantit qu'un aller-retour "annulée → confirmée → annulée" ne
+      // remet pas deux fois les mêmes articles en stock.
+      lignes = existante.lignes;
+      const etaitAnnulee = existante.statut === "annulee";
+      const devientAnnulee = modifs.statut === "annulee";
+      if (!etaitAnnulee && devientAnnulee) mouvementStock = "rendre";
+      else if (etaitAnnulee && !devientAnnulee) mouvementStock = "reprendre";
+    }
   }
 
   // Lignes rattachées à un produit encore existant (produitId passe à NULL
@@ -555,6 +594,9 @@ export async function mettreAJourCommandeAdmin(
               : modifs.notes.trim() === ""
               ? null
               : modifs.notes.trim(),
+          // undefined laisse le champ tel quel, null y remet « à confirmer ».
+          livraison: modifs.livraison,
+          total: totalRecalcule,
           ...horodatages,
         },
         include: { lignes: true },
@@ -686,23 +728,22 @@ export async function creerCommande(input: {
     getTarifsLivraison(),
     getParametresLivraison(),
   ]);
-  // Pas de tarif pour cette wilaya = elle n est pas desservie.
+  // Pas de tarif pour cette wilaya : la commande passe QUAND MEME. Le prix
+  // sera annonce au client lors de l appel de confirmation. Refuser ici
+  // reviendrait a perdre une vente pour une ligne de configuration absente.
   const tarifWilaya = tarifs.find((t) => t.wilaya === wilaya);
-  if (!tarifWilaya) {
-    return { ok: false, erreur: "wilaya_non_desservie" };
-  }
-  // Domicile non propose pour cette wilaya : on refuse plutot que de
-  // facturer un mode que la boutique n assure pas.
+  // Domicile non propose pour une wilaya TARIFEE : on refuse plutot que de
+  // facturer un mode que la boutique n assure pas. Sur une wilaya sans tarif,
+  // modeDisponible laisse passer les deux modes — rien n est connu, donc
+  // rien n est exclu.
   if (!modeDisponible(tarifWilaya, mode)) {
     return { ok: false, erreur: "mode_livraison_indisponible" };
   }
-  const livraison = calculerLivraison(
-    tarifWilaya,
-    mode,
-    sousTotal,
-    parametres
-  );
-  const total = sousTotal + livraison;
+  // null = frais inconnus. Le total est alors HORS livraison, et c est ce
+  // qu on enregistre : mieux vaut un total incomplet et signale qu un total
+  // complet et faux.
+  const livraison = calculerLivraison(tarifWilaya, mode, parametres);
+  const total = sousTotal + (livraison ?? 0);
 
   // ── Création + décrément du stock, en TRANSACTION ────────────────
   //

@@ -20,8 +20,9 @@ export default function PanierClient() {
   const t = useTranslations("panier");
   const tProduit = useTranslations("produit");
 
-  // livraison/total du contexte ne sont plus utilisés ici : le prix de
-  // livraison dépend de la wilaya, il est calculé à l'étape commande.
+  // Le panier ne connaît PAS le prix de livraison : il dépend de la wilaya,
+  // du mode, et peut n'être fixé qu'à l'appel. Tout se joue à l'étape
+  // commande, une fois la destination connue.
   const {
     articlesEnrichis,
     modifierQuantite,

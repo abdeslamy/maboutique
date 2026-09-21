@@ -24,7 +24,6 @@ import {
 // importable côté client). On les ré-exporte pour que le code serveur n'ait
 // qu'un seul point d'entrée.
 export {
-  TARIF_PAR_DEFAUT,
   MODES_LIVRAISON,
   estModeValide,
   calculerLivraison,
@@ -48,8 +47,11 @@ export type {
 // ──────────────────────────────────────────────────────────────────────
 
 /**
- * Wilayas DESSERVIES uniquement, triées par code.
- * Une wilaya absente du résultat n'est pas livrée.
+ * Wilayas TARIFÉES uniquement, triées par code.
+ *
+ * Une wilaya absente du résultat n'est pas « non livrée » : elle est livrée
+ * à un prix encore inconnu, annoncé au client lors de l'appel de
+ * confirmation. Aucune wilaya n'est donc fermée à la commande.
  */
 export async function getTarifsLivraison(): Promise<TarifWilaya[]> {
   const boutiqueId = await boutiqueActuelle();
@@ -74,7 +76,7 @@ export async function getParametresLivraison(): Promise<ParametresLivraison> {
   const p = await prisma.parametresBoutique.findUnique({
     where: { boutiqueId },
   });
-  return { seuilLivraisonGratuite: p?.seuilLivraisonGratuite ?? null };
+  return { livraisonGratuite: p?.livraisonGratuite ?? false };
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -85,9 +87,9 @@ export async function getParametresLivraison(): Promise<ParametresLivraison> {
  * Remplace l'INTÉGRALITÉ des groupes de tarifs.
  *
  * L'admin envoie la liste complète des groupes : les wilayas qui n'y figurent
- * plus voient leur ligne supprimée, donc ne sont plus desservies. C'est ce qui
- * permet de se passer d'un booléen « actif » — retirer une wilaya d'un groupe
- * suffit à cesser de la livrer.
+ * plus voient leur ligne supprimée, et repassent donc au prix inconnu annoncé
+ * à l'appel. C'est ce qui permet de se passer d'un booléen « actif » —
+ * retirer une wilaya d'un groupe suffit à en oublier le prix.
  *
  * Tout se fait dans UNE transaction : jamais d'état intermédiaire où la
  * boutique ne livrerait nulle part.
@@ -146,9 +148,22 @@ export async function enregistrerGroupes(
         // ⚠️ Filtre indispensable : sans lui, un marchand qui enregistre sa
         // grille effacerait celle de tous les autres marchands.
         prisma.tarifLivraison.deleteMany({ where: { boutiqueId } }),
-        prisma.tarifLivraison.createMany({
-          data: tarifs.map((t) => ({ ...t, boutiqueId })),
-        }),
+        // ⚠️ On n'émet PAS d'insertion quand il n'y a rien à insérer.
+        //
+        // Ce n'est pas qu'une optimisation. Le garde-fou multi-boutiques
+        // (lib/prisma-cloisonnement.ts) exige que CHAQUE ligne d'un
+        // createMany porte son boutiqueId ; un tableau vide n'en porte
+        // aucun, il est donc rejeté. Et comme le rejet survient dans la
+        // transaction, la suppression était annulée avec lui : le marchand
+        // qui effaçait son dernier tarif voyait « une erreur est survenue »
+        // et retrouvait sa grille intacte.
+        ...(tarifs.length > 0
+          ? [
+              prisma.tarifLivraison.createMany({
+                data: tarifs.map((t) => ({ ...t, boutiqueId })),
+              }),
+            ]
+          : []),
       ],
       // Marge confortable : la valeur par défaut (5 s) est juste quand la
       // latence vers Neon est élevée ou qu'une autre écriture tient un verrou.
@@ -171,16 +186,16 @@ export async function enregistrerGroupes(
 export async function enregistrerParametres(
   parametres: ParametresLivraison
 ): Promise<{ ok: true } | { ok: false; erreur: string }> {
-  const seuil = parametres.seuilLivraisonGratuite;
-  if (seuil !== null && (!Number.isInteger(seuil) || seuil < 0)) {
-    return { ok: false, erreur: "seuil_invalide" };
+  const gratuite = parametres.livraisonGratuite;
+  if (typeof gratuite !== "boolean") {
+    return { ok: false, erreur: "gratuite_invalide" };
   }
   try {
     const boutiqueId = await boutiqueActuelle();
     await prisma.parametresBoutique.upsert({
       where: { boutiqueId },
-      update: { seuilLivraisonGratuite: seuil },
-      create: { boutiqueId, seuilLivraisonGratuite: seuil },
+      update: { livraisonGratuite: gratuite },
+      create: { boutiqueId, livraisonGratuite: gratuite },
     });
     return { ok: true };
   } catch (e) {

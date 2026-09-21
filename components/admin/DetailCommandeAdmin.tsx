@@ -43,6 +43,12 @@ export default function DetailCommandeAdmin({
     commandeInitiale.etatAppel ?? "non_appele"
   );
   const [notes, setNotes] = useState(commandeInitiale.notes ?? "");
+  // Frais de livraison, saisis en texte pour distinguer « champ vide »
+  // (= à confirmer) de « 0 » (= offerte). Un état numérique confondrait les
+  // deux dès que le vendeur efface le champ.
+  const [livraison, setLivraison] = useState(
+    commandeInitiale.livraison === null ? "" : String(commandeInitiale.livraison)
+  );
 
   const [enregistrement, setEnregistrement] = useState(false);
   const [succes, setSucces] = useState(false);
@@ -50,11 +56,15 @@ export default function DetailCommandeAdmin({
 
   const wilaya = WILAYAS.find((w) => w.code === commande.client.wilaya);
 
+  const livraisonEnregistree =
+    commande.livraison === null ? "" : String(commande.livraison);
+
   // Y a-t-il des changements non enregistrés ?
   const modifie =
     statut !== commande.statut ||
     etatAppel !== (commande.etatAppel ?? "non_appele") ||
-    notes !== (commande.notes ?? "");
+    notes !== (commande.notes ?? "") ||
+    livraison.trim() !== livraisonEnregistree;
 
   async function enregistrer() {
     setEnregistrement(true);
@@ -64,7 +74,13 @@ export default function DetailCommandeAdmin({
       const res = await fetch(`/api/admin/commandes/${commande.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ statut, etatAppel, notes }),
+        // Champ vidé → null : la commande repasse « à confirmer ».
+        body: JSON.stringify({
+          statut,
+          etatAppel,
+          notes,
+          livraison: livraison.trim() === "" ? null : Number(livraison),
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -72,6 +88,12 @@ export default function DetailCommandeAdmin({
         return;
       }
       setCommande(data.commande);
+      // On resynchronise sur ce que le SERVEUR a retenu : s'il a normalisé
+      // la valeur, le champ doit le refléter, sinon « modifié » resterait
+      // allumé sur une différence qui n'existe plus.
+      setLivraison(
+        data.commande.livraison === null ? "" : String(data.commande.livraison)
+      );
       setSucces(true);
       router.refresh();
     } catch {
@@ -148,6 +170,34 @@ export default function DetailCommandeAdmin({
             </select>
           </label>
         </div>
+
+        {/* Frais de livraison — le point d'atterrissage de l'appel de
+            confirmation. Une commande passée vers une wilaya sans tarif
+            arrive ici à « à confirmer » : c'est le moment de la chiffrer,
+            une fois le montant annoncé au client. Le champ reste modifiable
+            même sur une commande déjà chiffrée : un transporteur peut
+            annoncer un supplément après coup. */}
+        <label className="mt-4 flex flex-col gap-1 text-sm sm:max-w-xs">
+          <span className="font-medium text-gray-700">
+            {t("fraisLivraison")}
+          </span>
+          <span className="flex items-center gap-2">
+            <input
+              type="number"
+              min={0}
+              step={1}
+              inputMode="numeric"
+              value={livraison}
+              onChange={(e) => setLivraison(e.target.value)}
+              placeholder={t("livraisonAConfirmer")}
+              className="w-40 rounded-lg border border-gray-300 bg-white px-3 py-2 tabular-nums focus:border-black focus:outline-none"
+            />
+            <span className="text-xs font-medium text-gray-500">DA</span>
+          </span>
+          <span className="text-xs text-gray-500">
+            {t("fraisLivraisonAide")}
+          </span>
+        </label>
 
         {/* Notes */}
         <label className="mt-4 flex flex-col gap-1 text-sm">
@@ -264,13 +314,24 @@ export default function DetailCommandeAdmin({
             libelle={t("sousTotal")}
             montant={formatPrix(commande.sousTotal, locale)}
           />
+          {/* null = pas de tarif pour cette wilaya à la commande. C'est au
+              vendeur d'annoncer le montant pendant l'appel de confirmation ;
+              le total ci-dessous ne le comprend pas. */}
           <Ligne
             libelle={t("livraison")}
-            montant={formatPrix(commande.livraison, locale)}
+            montant={
+              commande.livraison === null
+                ? t("livraisonAConfirmer")
+                : formatPrix(commande.livraison, locale)
+            }
           />
           <hr className="my-3 border-gray-200" />
           <Ligne
-            libelle={t("total_montant")}
+            libelle={
+              commande.livraison === null
+                ? t("total_hors_livraison")
+                : t("total_montant")
+            }
             montant={formatPrix(commande.total, locale)}
             enGras
           />

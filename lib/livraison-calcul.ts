@@ -10,8 +10,11 @@
 // n'a donc qu'un seul point d'import à connaître.
 // ============================================================================
 
-/** Tarif appliqué tant que l'admin n'a rien personnalisé. */
-export const TARIF_PAR_DEFAUT = 500;
+// Il n'y a PAS de tarif par défaut. Une boutique qui vient d'ouvrir ne
+// facture pas 500 DA « en attendant » : elle ne connaît simplement pas encore
+// ses frais, et le dit (voir calculerLivraison, qui renvoie alors null).
+// Inventer un montant, c'est annoncer au client un total qu'on devra corriger
+// au téléphone — le pire des deux mondes.
 
 export type ModeLivraison = "domicile" | "stopdesk";
 
@@ -89,13 +92,24 @@ export function aplatirGroupes(groupes: GroupeTarif[]): TarifWilaya[] {
 }
 
 export type ParametresLivraison = {
-  /** null = la livraison n'est jamais offerte. */
-  seuilLivraisonGratuite: number | null;
+  /** true = la livraison est offerte partout, quel que soit le panier. */
+  livraisonGratuite: boolean;
 };
 
 /**
- * Prix de livraison à facturer.
- * `sousTotal` sert uniquement à évaluer le seuil de gratuité.
+ * Prix de livraison à facturer, ou `null` quand il n'est PAS connu.
+ *
+ * Les trois règles, dans cet ordre de priorité :
+ *
+ *  1. La boutique offre la livraison  → 0 DA, partout. Prime sur tout.
+ *  2. La wilaya a un tarif            → ce tarif.
+ *  3. La wilaya n'a pas de tarif      → `null` : montant inconnu.
+ *
+ * Le cas 3 couvre indifféremment « le vendeur n'a encore rien renseigné » et
+ * « le vendeur a renseigné d'autres wilayas mais pas celle-ci ». Dans les deux
+ * cas la commande passe quand même : les frais seront annoncés au client lors
+ * de l'appel de confirmation. C'est ce que `null` veut dire ici — à ne pas
+ * confondre avec 0, qui veut dire « offerte ».
  *
  * Utilisé aux DEUX bouts : par le formulaire client pour afficher le prix en
  * direct, et par le serveur pour calculer le montant réellement facturé.
@@ -104,34 +118,37 @@ export type ParametresLivraison = {
 export function calculerLivraison(
   tarif: TarifWilaya | undefined,
   mode: ModeLivraison,
-  sousTotal: number,
   parametres: ParametresLivraison
-): number {
-  // La gratuité l'emporte sur tout le reste.
-  if (
-    parametres.seuilLivraisonGratuite !== null &&
-    sousTotal >= parametres.seuilLivraisonGratuite
-  ) {
-    return 0;
-  }
-  // Wilaya sans tarif = non desservie. L'appelant doit l'avoir écartée avant ;
-  // ce repli n'est qu'un garde-fou.
-  if (!tarif) return TARIF_PAR_DEFAUT;
+): number | null {
+  // Règle 1 — la gratuité l'emporte sur tout le reste, y compris sur une
+  // wilaya sans tarif : offerte, c'est 0 DA, il n'y a plus rien à confirmer.
+  if (parametres.livraisonGratuite) return 0;
+
+  // Règle 3 — pas de tarif pour cette wilaya : montant inconnu, pas refus.
+  if (!tarif) return null;
+
+  // Règle 2 — le tarif de la wilaya s'applique.
   if (mode === "stopdesk") return tarif.prixStopdesk;
-  // Domicile indisponible : l'appelant aurait dû l'écarter via
-  // modeDisponible(). Repli sur le stopdesk plutôt que sur un prix inventé.
-  return tarif.prixDomicile ?? tarif.prixStopdesk;
+  // Domicile non assuré pour ce groupe : l'appelant aurait dû l'écarter via
+  // modeDisponible(). On renvoie « inconnu » plutôt que de facturer le prix
+  // d'un autre mode que celui choisi.
+  return tarif.prixDomicile;
 }
 
 /**
  * Ce mode est-il proposé pour cette wilaya ?
- * Le stopdesk l'est toujours ; le domicile seulement si un prix est défini.
+ *
+ *  - Wilaya sans tarif : les DEUX modes restent proposés. On ne sait rien de
+ *    cette destination, or ne rien savoir n'est pas une raison de refuser une
+ *    commande — le montant se règle à l'appel, quel que soit le mode.
+ *  - Wilaya tarifée : le stopdesk est toujours possible ; le domicile
+ *    seulement si le vendeur lui a donné un prix.
  */
 export function modeDisponible(
   tarif: TarifWilaya | undefined,
   mode: ModeLivraison
 ): boolean {
-  if (!tarif) return false;
+  if (!tarif) return true;
   return mode === "stopdesk" ? true : tarif.prixDomicile !== null;
 }
 

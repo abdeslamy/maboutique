@@ -9,10 +9,14 @@ import type { EtatAppel, StatutCommande } from "@/lib/types";
 
 /**
  * PATCH /api/admin/commandes/[id]
- * Body : { statut?, etatAppel?, notes? }  (tous optionnels)
+ * Body : { statut?, etatAppel?, notes?, livraison? }  (tous optionnels)
  *
  * Met à jour la gestion d'une commande. Réservé aux admins.
  * Le statut est LIBRE (pas de contrainte de progression).
+ *
+ * `livraison` sert à chiffrer après coup une commande partie sans tarif
+ * connu : un entier fixe le montant, `null` (ou une chaîne vide) la remet
+ * à « à confirmer ». Le total est recalculé côté serveur.
  */
 export async function PATCH(
   req: NextRequest,
@@ -34,6 +38,7 @@ export async function PATCH(
     statut?: string;
     etatAppel?: string;
     notes?: string;
+    livraison?: unknown;
   };
   try {
     body = await req.json();
@@ -45,6 +50,15 @@ export async function PATCH(
     statut: body.statut as StatutCommande | undefined,
     etatAppel: body.etatAppel as EtatAppel | undefined,
     notes: body.notes,
+    // Absent → on n'y touche pas. Vide ou null → retour à « à confirmer ».
+    // Toute autre valeur est convertie puis VALIDÉE plus bas : un texte
+    // devient NaN, que mettreAJourCommandeAdmin refuse.
+    livraison:
+      body.livraison === undefined
+        ? undefined
+        : body.livraison === null || body.livraison === ""
+        ? null
+        : Number(body.livraison),
   });
 
   if (!resultat.ok) {

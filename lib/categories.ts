@@ -105,7 +105,14 @@ export async function enregistrerCategories(
         // ⚠️ Sans ce filtre, l'enregistrement des rayons d'un marchand
         // effacerait ceux de TOUS les autres.
         prisma.categorie.deleteMany({ where: { boutiqueId } }),
-        prisma.categorie.createMany({ data: lignes }),
+        // Même précaution que pour les tarifs de livraison : pas d'insertion
+        // vide. Le garde-fou multi-boutiques la refuse (aucune ligne ne peut
+        // porter de boutiqueId), et le refus annulerait la suppression — le
+        // marchand qui retire son dernier rayon verrait une erreur et le
+        // retrouverait en place. Voir enregistrerGroupes dans lib/livraison.ts.
+        ...(lignes.length > 0
+          ? [prisma.categorie.createMany({ data: lignes })]
+          : []),
       ],
       { timeout: 20_000 }
     );

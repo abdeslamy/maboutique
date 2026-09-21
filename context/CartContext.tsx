@@ -8,7 +8,6 @@ import {
   useMemo,
   type ReactNode,
 } from "react";
-import { FRAIS_LIVRAISON } from "@/lib/format";
 import type { ArticlePanier, ProduitResume } from "@/lib/types";
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -38,10 +37,6 @@ type CartContextType = {
   nombreArticles: number;
   /** Somme du prix × quantité de tous les articles, en DA. */
   sousTotal: number;
-  /** Frais de livraison (0 si panier vide, sinon FRAIS_LIVRAISON). */
-  livraison: number;
-  /** sousTotal + livraison, en DA. */
-  total: number;
   /** True quand le panier a fini d'être chargé depuis localStorage. */
   estCharge: boolean;
 };
@@ -188,9 +183,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [articles]
   );
 
-  const livraison = articlesEnrichis.length > 0 ? FRAIS_LIVRAISON : 0;
-  const total = sousTotal + livraison;
-
   return (
     <CartContext.Provider
       value={{
@@ -202,8 +194,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         vider,
         nombreArticles,
         sousTotal,
-        livraison,
-        total,
         estCharge,
       }}
     >

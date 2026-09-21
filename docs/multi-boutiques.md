@@ -238,10 +238,16 @@ les URLs ne bougent pas puisque les parenthèses n'apparaissent pas dedans. Le
 piège se reproduira à l'identique pour « mot de passe oublié » et pour toute
 page publique qu'on voudra loger sous `/admin`.
 
-**Le seuil de livraison gratuite est par marchand.** Sur un panier marketplace
-à trois marchands, trois seuils distincts sont évalués — le client peut n'en
-atteindre aucun alors que son total global les dépasse. À expliquer dans
-l'interface.
+**La livraison gratuite est par marchand.** C'est un interrupteur, plus un
+seuil en dinars. Sur un panier marketplace à trois marchands, un seul peut
+l'avoir activé : le client verra donc une livraison offerte sur une partie de
+sa commande et payante sur le reste. À expliquer dans l'interface.
+
+**Une wilaya sans tarif n'est pas une wilaya fermée.** Elle se commande comme
+les autres ; les frais sont simplement annoncés lors de l'appel de
+confirmation, et le total affiché porte la mention « hors livraison ». Sur un
+panier marketplace, deux marchands peuvent donc être dans deux situations
+différentes pour la même destination.
 
 ---
 

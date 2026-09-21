@@ -9,11 +9,11 @@ import {
 
 /**
  * PUT /api/admin/livraison
- * Remplace l'intégralité des groupes de tarifs + le seuil de gratuité.
+ * Remplace l'intégralité des groupes de tarifs + le réglage de gratuité.
  *
  * Body : {
  *   groupes: [{ wilayas: string[], prixDomicile: number, prixStopdesk: number }],
- *   parametres: { seuilLivraisonGratuite: number|null }
+ *   parametres: { livraisonGratuite: boolean }
  * }
  *
  * Garde admin explicite : les Route Handlers ne passent PAS par le layout
@@ -38,7 +38,7 @@ export async function PUT(request: Request) {
 
   const brut = body as {
     groupes?: unknown;
-    parametres?: { seuilLivraisonGratuite?: unknown };
+    parametres?: { livraisonGratuite?: unknown };
   };
 
   // Enregistrement PARTIEL : chaque section de la page a son propre bouton.
@@ -49,14 +49,11 @@ export async function PUT(request: Request) {
   }
 
   if (brut.parametres !== undefined) {
-    const seuilBrut = brut.parametres.seuilLivraisonGratuite;
+    // Tout ce qui n'est pas explicitement `true` vaut « pas de gratuité ».
+    // Un réglage aussi lourd de conséquences ne s'active pas par accident,
+    // au détour d'une chaîne ou d'un 1 envoyés par un client mal écrit.
     const r = await enregistrerParametres({
-      // Champ vidé → pas de gratuité (null), et non 0 qui signifierait
-      // « offerte dès le premier dinar ».
-      seuilLivraisonGratuite:
-        seuilBrut === null || seuilBrut === "" || seuilBrut === undefined
-          ? null
-          : Number(seuilBrut),
+      livraisonGratuite: brut.parametres.livraisonGratuite === true,
     });
     if (!r.ok) {
       return NextResponse.json({ erreur: r.erreur }, { status: 400 });

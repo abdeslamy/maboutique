@@ -139,16 +139,34 @@ export default async function PageConfirmation({
               libelle={tPanier("sousTotal")}
               montant={formatPrix(commande.sousTotal, localeTypee)}
             />
+            {/* livraison null = aucun tarif n'existait pour cette wilaya au
+                moment de la commande. Le montant sera donné au téléphone, et
+                le total affiché ne le comprend donc pas — on le dit. */}
             <Ligne
               libelle={tPanier("livraison")}
-              montant={formatPrix(commande.livraison, localeTypee)}
+              montant={
+                commande.livraison === null
+                  ? tCommande("fraisAlAppel")
+                  : commande.livraison === 0
+                  ? tCommande("livraisonGratuite")
+                  : formatPrix(commande.livraison, localeTypee)
+              }
             />
             <hr className="my-3 border-gray-100" />
             <Ligne
-              libelle={tPanier("total")}
+              libelle={
+                commande.livraison === null
+                  ? tCommande("totalHorsLivraison")
+                  : tPanier("total")
+              }
               montant={formatPrix(commande.total, localeTypee)}
               enGras
             />
+            {commande.livraison === null && (
+              <p className="mt-2 text-xs leading-relaxed text-gray-500">
+                {tCommande("fraisAlAppelAide")}
+              </p>
+            )}
           </div>
 
           {/* ─── Livraison ──────────────────────────────────────────── */}

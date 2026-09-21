@@ -1,11 +1,8 @@
 import type { Locale } from "@/i18n/routing";
 
-/**
- * Frais de livraison fixes, en DA.
- * Toujours utiliser cette constante — jamais "500" en dur dans le code.
- * Si on change le tarif, il suffit de modifier ici et tout le site s'aligne.
- */
-export const FRAIS_LIVRAISON = 500;
+// Il n'y a plus de frais de livraison fixes. Le prix dépend de la wilaya, du
+// mode, et du réglage « livraison offerte » de la boutique — et il peut très
+// bien n'être connu qu'au téléphone. Tout cela vit dans lib/livraison-calcul.
 
 /**
  * Formate un montant en DA selon la locale.

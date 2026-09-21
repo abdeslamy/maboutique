@@ -73,9 +73,9 @@ export default function FormulaireNouvelleCommande({
     };
   }, [onFermer]);
 
-  // Seules les wilayas desservies sont proposées.
-  const codesDesservis = new Set(tarifs.map((x) => x.wilaya));
-  const wilayasDisponibles = WILAYAS.filter((w) => codesDesservis.has(w.code));
+  // Les 58 wilayas sont proposées : une wilaya sans tarif se commande aussi,
+  // ses frais étant fixés au téléphone. Même règle que côté client.
+  const wilayasDisponibles = WILAYAS;
 
   const tarifChoisi = tarifs.find((x) => x.wilaya === wilaya);
   const domicileIndispo =
@@ -90,8 +90,10 @@ export default function FormulaireNouvelleCommande({
     return s + (p ? p.prix * l.quantite : 0);
   }, 0);
   const livraison = wilaya
-    ? calculerLivraison(tarifChoisi, modeEffectif, sousTotal, parametres)
+    ? calculerLivraison(tarifChoisi, modeEffectif, parametres)
     : null;
+  // Wilaya choisie mais sans tarif : montant à fixer pendant l'appel.
+  const fraisAConfirmer = wilaya !== "" && livraison === null;
   const total = sousTotal + (livraison ?? 0);
 
   function majLigne(i: number, champ: keyof LigneSaisie, valeur: unknown) {
@@ -352,11 +354,21 @@ export default function FormulaireNouvelleCommande({
                   <span className="min-w-0 flex-1 text-sm text-gray-900">
                     {tCmd(m)}
                   </span>
-                  {prix !== null && !indispo && (
-                    <span className="shrink-0 text-sm font-semibold tabular-nums text-gray-900">
-                      {formatPrix(prix, locale)}
-                    </span>
-                  )}
+                  {/* Chaque mode annonce SON prix — voir FormulaireCommande. */}
+                  {!indispo &&
+                    (parametres.livraisonGratuite || prix === 0 ? (
+                      <span className="shrink-0 text-sm font-semibold text-gray-900">
+                        {tCmd("livraisonGratuite")}
+                      </span>
+                    ) : fraisAConfirmer ? (
+                      <span className="shrink-0 text-sm font-medium text-gray-500">
+                        {tCmd("aConfirmer")}
+                      </span>
+                    ) : prix !== null ? (
+                      <span className="shrink-0 text-sm font-semibold tabular-nums text-gray-900">
+                        {formatPrix(prix, locale)}
+                      </span>
+                    ) : null)}
                 </label>
               );
             })}
@@ -372,16 +384,18 @@ export default function FormulaireNouvelleCommande({
           <Ligne
             libelle={tPanier("livraison")}
             valeur={
-              livraison === null
+              !wilaya
                 ? tCmd("livraisonSelonWilaya")
+                : fraisAConfirmer
+                ? tCmd("aConfirmer")
                 : livraison === 0
                 ? tCmd("livraisonGratuite")
-                : formatPrix(livraison, locale)
+                : formatPrix(livraison as number, locale)
             }
           />
           <div className="my-2 h-px bg-stone-200" />
           <Ligne
-            libelle={tPanier("total")}
+            libelle={fraisAConfirmer ? tCmd("totalHorsLivraison") : tPanier("total")}
             valeur={formatPrix(total, locale)}
             enGras
           />

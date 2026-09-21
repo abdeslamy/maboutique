@@ -50,10 +50,10 @@ export default function FormulaireCommande({
   const [wilaya, setWilaya] = useState("");
   const [modeLivraison, setModeLivraison] = useState<ModeLivraison>("domicile");
 
-  // Seules les wilayas desservies sont proposées. Règle : une wilaya présente
-  // dans les tarifs est livrée, une wilaya absente ne l  est pas.
-  const codesDesservis = new Set(tarifs.map((tr) => tr.wilaya));
-  const wilayasDisponibles = WILAYAS.filter((w) => codesDesservis.has(w.code));
+  // LES 58 WILAYAS sont proposées, y compris celles sans tarif. Une wilaya
+  // sans tarif n'est pas une wilaya fermée : c'est une wilaya dont le prix
+  // n'est pas encore connu, et cela ne doit jamais empêcher de commander.
+  const wilayasDisponibles = WILAYAS;
 
   const tarifChoisi = tarifs.find((tr) => tr.wilaya === wilaya);
   // Ce groupe de wilayas n a pas de prix a domicile : seul le retrait au
@@ -66,10 +66,14 @@ export default function FormulaireCommande({
   // Même fonction que le serveur → aucun écart possible entre le prix
   // affiché et le prix facturé.
   const livraison = wilaya
-    ? calculerLivraison(tarifChoisi, modeEffectif, sousTotal, parametres)
+    ? calculerLivraison(tarifChoisi, modeEffectif, parametres)
     : null;
+  // Trois situations à ne pas confondre dans l'affichage :
+  //   pas encore de wilaya → on invite à en choisir une ;
+  //   wilaya sans tarif    → frais annoncés à l'appel, total HORS livraison ;
+  //   wilaya tarifée       → montant ferme (0 si la boutique offre).
+  const fraisAConfirmer = wilaya !== "" && livraison === null;
   const total = sousTotal + (livraison ?? 0);
-  const livraisonOfferte = livraison === 0;
 
   const [cleErreur, setCleErreur] = useState<string | null>(null);
   const [erreurTelephone, setErreurTelephone] = useState<string | null>(null);
@@ -280,13 +284,27 @@ export default function FormulaireCommande({
                         >
                           {t(m)}
                         </span>
-                        {prix !== null && !indisponible && (
-                          <span className="shrink-0 text-sm font-semibold text-gray-900">
-                            {livraisonOfferte
-                              ? t("livraisonGratuite")
-                              : formatPrix(prix, locale)}
-                          </span>
-                        )}
+                        {/* Chaque mode annonce SON prix. « Offerte » ne vaut
+                            donc que pour la gratuité de boutique, ou pour un
+                            mode réellement tarifé à 0 — pas parce que l'autre
+                            mode, lui, se trouve être gratuit. */}
+                        {!indisponible &&
+                          (parametres.livraisonGratuite || prix === 0 ? (
+                            <span className="shrink-0 text-sm font-semibold text-gray-900">
+                              {t("livraisonGratuite")}
+                            </span>
+                          ) : fraisAConfirmer ? (
+                            // Wilaya sans tarif : aucun des deux modes n'a de
+                            // prix. On l'écrit, au lieu de laisser un blanc
+                            // qui se lit comme « gratuit ».
+                            <span className="shrink-0 text-sm font-medium text-gray-500">
+                              {t("aConfirmer")}
+                            </span>
+                          ) : prix !== null ? (
+                            <span className="shrink-0 text-sm font-semibold text-gray-900">
+                              {formatPrix(prix, locale)}
+                            </span>
+                          ) : null)}
                       </span>
                       <span className="mt-0.5 block text-xs text-gray-500">
                         {indisponible
@@ -364,15 +382,30 @@ export default function FormulaireCommande({
             montant={
               // Tant qu'aucune wilaya n'est choisie, le prix est inconnu :
               // on le dit plutôt que d'afficher un montant faux.
-              livraison === null
+              !wilaya
                 ? t("livraisonSelonWilaya")
+                : fraisAConfirmer
+                ? t("fraisAlAppel")
                 : livraison === 0
                 ? t("livraisonGratuite")
-                : formatPrix(livraison, locale)
+                : formatPrix(livraison as number, locale)
             }
           />
           <hr className="my-3 border-gray-200" />
-          <Ligne libelle={tPanier("total")} montant={formatPrix(total, locale)} enGras />
+          {/* Le libellé du total CHANGE quand la livraison reste à chiffrer.
+              Un « Total » suivi d'un montant incomplet est un engagement
+              qu'on ne tiendra pas : on dit explicitement ce qu'il ne
+              comprend pas. */}
+          <Ligne
+            libelle={fraisAConfirmer ? t("totalHorsLivraison") : tPanier("total")}
+            montant={formatPrix(total, locale)}
+            enGras
+          />
+          {fraisAConfirmer && (
+            <p className="mt-2 text-xs leading-relaxed text-gray-500">
+              {t("fraisAlAppelAide")}
+            </p>
+          )}
         </aside>
       </div>
     </section>

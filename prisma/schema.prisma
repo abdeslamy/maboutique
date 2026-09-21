@@ -172,7 +172,13 @@ model Commande {
   adresse       String
   wilaya        String
   sousTotal     Int
-  livraison     Int
+  // NULL = frais de livraison non connus à la commande : la boutique n'avait
+  // pas de tarif pour cette wilaya, ils seront annoncés au téléphone lors de
+  // l'appel de confirmation. À distinguer de 0, qui veut dire « offerte ».
+  livraison     Int?
+  // Somme réellement engagée à la commande. Quand `livraison` est NULL, c'est
+  // donc un total HORS livraison — l'affichage doit le dire, sans quoi le
+  // client croit connaître le montant final.
   total         Int
   // "domicile" ou "stopdesk" — figé au moment de la commande, car le tarif
   // de la wilaya peut changer plus tard sans devoir réécrire l'historique.
@@ -257,11 +263,18 @@ model ParametresBoutique {
   boutiqueId             String   @id
   boutique               Boutique @relation(fields: [boutiqueId], references: [id], onDelete: Cascade)
 
-  /// Montant à partir duquel la livraison est offerte. null = jamais.
-  /// ⚠️ Le seuil s'applique PAR MARCHAND. Sur un panier marketplace à trois
-  /// marchands, trois seuils distincts sont évalués — le client peut donc
-  /// n'en atteindre aucun alors que son total global les dépasse.
-  seuilLivraisonGratuite Int?
+  /// Interrupteur « la livraison est offerte ». true = 0 DA partout, quelle
+  /// que soit la wilaya et quel que soit le montant du panier.
+  /// C'est la règle la PLUS FORTE : elle passe avant les tarifs par wilaya.
+  ///
+  /// Remplace l'ancien seuil en dinars (« offerte à partir de X DA »), dont
+  /// le calcul était invisible pour le client tant qu'il n'avait pas rempli
+  /// son panier. Un interrupteur se comprend d'un coup d'œil, des deux côtés.
+  ///
+  /// ⚠️ Le réglage s'applique PAR MARCHAND. Sur un panier marketplace à trois
+  /// marchands, trois réglages distincts sont évalués — un seul peut offrir
+  /// la livraison.
+  livraisonGratuite Boolean @default(false)
 }
 
 model LigneCommande {
