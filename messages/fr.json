@@ -537,7 +537,7 @@
     "modeIndisponible": "Non disponible pour cette wilaya",
     "aConfirmer": "À confirmer",
     "fraisAlAppel": "Communiqués lors de l'appel",
-    "fraisAlAppelAide": "Nous ne livrons pas encore régulièrement dans cette wilaya : les frais de livraison vous seront communiqués lors de l'appel de confirmation.",
+    "fraisAlAppelAide": "Les frais de livraison vous seront communiqués lors de l'appel de confirmation.",
     "totalHorsLivraison": "Total hors livraison"
   },
   "confirmation": {
